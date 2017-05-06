@@ -1,0 +1,9 @@
+<template>
+    <div class="sidebar col-md-2 base-shadow">
+        <ul>
+            <li repeat.for="item of items" class="${item.isActive ? 'active' : ''}">
+                <a class="sidebar-item" route-href="route.bind: item.route">${item.value}</a>
+            </li>
+        </ul>
+    </div>
+</template>

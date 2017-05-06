@@ -1,0 +1,36 @@
+<template>
+    <div class="main-view base-shadow">
+        <h2 class="center">${title}</h2>
+        <form class="form-horizontal form-height center form-width">
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="email">E-mail</label>
+                <div class="col-sm-6">
+                    <input type="text" id="email" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="voornaam">Voornaam</label>
+                <div class="col-sm-6">
+                    <input type="text" id="voornaam" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="familienaam">Familienaam</label>
+                <div class="col-sm-6">
+                    <input type="text" id="familienaam" class="form-control" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="rol">Rol</label>
+                <div class="col-sm-6">
+                    <select id="rol">
+                        <option>-Selecteer een rol-</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Opslaan" />
+            </div>
+        </form>
+    </div>
+</template>
