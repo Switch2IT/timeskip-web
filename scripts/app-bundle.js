@@ -4,31 +4,16 @@ define('app',['exports'], function (exports) {
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var App = exports.App = function () {
-    function App() {
-      _classCallCheck(this, App);
-    }
-
-    App.prototype.configureRouter = function configureRouter(config, router) {
+  class App {
+    configureRouter(config, router) {
       this.router = router;
       config.title = '';
       config.map([{ route: '', moduleId: 'timesheet', title: 'Timesheet', name: 'timesheet', nav: true }, { route: 'rapporten', moduleId: 'rapporten', name: 'rapporten', nav: true }, { route: 'consultants', moduleId: 'consultants/lijst', name: 'consultants', nav: true }, { route: 'consultants/aanmaken', moduleId: 'consultants/aanmaak-detail', name: 'maakConsultant' }, { route: 'consultants/:id', moduleId: 'consultants/beheer-detail', name: 'consultantDetail' }, { route: 'projecten', moduleId: 'projecten/lijst', name: 'projecten', nav: true }, { route: 'projecten/aanmaken', moduleId: 'projecten/detail', name: 'maakProject' }, { route: 'projecten/:id', moduleId: 'projecten/detail', name: 'projectDetail' }, { route: 'activiteiten', moduleId: 'activiteiten/lijst', name: 'activiteiten', nav: true }, { route: 'activiteiten/aanmaken', moduleId: 'activiteiten/detail', name: 'maakActiviteit' }, { route: 'activiteiten/:id', moduleId: 'activiteiten/detail', name: 'activiteitDetail' }, { route: 'organisaties', moduleId: 'organisaties/lijst', name: 'organisaties', nav: true }, { route: 'organisaties/aanmaken', moduleId: 'organisaties/detail', name: 'maakOrganisatie' }, { route: 'organisaties/:id', moduleId: 'organisaties/detail', name: 'organisatieDetail' }]);
 
       config.mapUnknownRoutes('notfound');
-    };
-
-    return App;
-  }();
-});
-define('connect',[], function () {
-  "use strict";
+    }
+  }
+  exports.App = App;
 });
 define('environment',["exports"], function (exports) {
   "use strict";
@@ -40,6 +25,21 @@ define('environment',["exports"], function (exports) {
     debug: true,
     testing: true
   };
+});
+define('log',["exports"], function (exports) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    class Log {
+
+        constructor(minutes, logDate) {
+            this.minutes = minutes;
+            this.logDate = logDate;
+        }
+    }
+    exports.default = Log;
 });
 define('main',['exports', './environment'], function (exports, _environment) {
   'use strict';
@@ -57,6 +57,7 @@ define('main',['exports', './environment'], function (exports, _environment) {
     };
   }
 
+  //Configure Bluebird Promises.
   Promise.config({
     warnings: {
       wForgottenReturn: false
@@ -74,9 +75,7 @@ define('main',['exports', './environment'], function (exports, _environment) {
       aurelia.use.plugin('aurelia-testing');
     }
 
-    aurelia.start().then(function () {
-      return aurelia.setRoot();
-    });
+    aurelia.start().then(() => aurelia.setRoot());
   }
 });
 define('menuItem',["exports"], function (exports) {
@@ -85,20 +84,13 @@ define('menuItem',["exports"], function (exports) {
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
+    class MenuItem {
 
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
+        constructor(value, route) {
+            this.value = value;
+            this.route = route;
         }
     }
-
-    var MenuItem = function MenuItem(value, route) {
-        _classCallCheck(this, MenuItem);
-
-        this.value = value;
-        this.route = route;
-    };
-
     exports.default = MenuItem;
 });
 define('notfound',['exports'], function (exports) {
@@ -107,28 +99,18 @@ define('notfound',['exports'], function (exports) {
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var NotFound = exports.NotFound = function () {
-        function NotFound() {
-            _classCallCheck(this, NotFound);
-
+    class NotFound {
+        constructor() {
             this.title = 'Error';
             this.reportTypes;
         }
 
-        NotFound.prototype.activate = function activate(params, routeConfig) {
+        activate(params, routeConfig) {
             this.routeConfig = routeConfig;
             this.routeConfig.navModel.setTitle('Error');
-        };
-
-        return NotFound;
-    }();
+        }
+    }
+    exports.NotFound = NotFound;
 });
 define('rapporten',['exports'], function (exports) {
     'use strict';
@@ -136,29 +118,19 @@ define('rapporten',['exports'], function (exports) {
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var Report = exports.Report = function () {
-        function Report() {
-            _classCallCheck(this, Report);
-
+    class Report {
+        constructor() {
             this.title = 'Reports';
             this.reportTypes;
         }
 
-        Report.prototype.activate = function activate(params, routeConfig) {
+        activate(params, routeConfig) {
             this.routeConfig = routeConfig;
             this.routeConfig.navModel.setTitle('Reports');
             this.reportTypes = ['Report 1', 'Report 2', 'Report 3'];
-        };
-
-        return Report;
-    }();
+        }
+    }
+    exports.Report = Report;
 });
 define('sidebar',['exports', './menuItem'], function (exports, _menuItem) {
     'use strict';
@@ -176,110 +148,27 @@ define('sidebar',['exports', './menuItem'], function (exports, _menuItem) {
         };
     }
 
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
+    class Sidebar {
 
-    var Sidebar = exports.Sidebar = function () {
-        function Sidebar() {
-            _classCallCheck(this, Sidebar);
-
+        constructor() {
             this.items = [];
         }
 
-        Sidebar.prototype.created = function created() {
+        created() {
             this.items.push(new _menuItem2.default('Timesheet', 'timesheet'));
             this.items.push(new _menuItem2.default('Rapporten', 'rapporten'));
             this.items.push(new _menuItem2.default('Consultants', 'consultants'));
             this.items.push(new _menuItem2.default('Projecten', 'projecten'));
             this.items.push(new _menuItem2.default('Activiteiten', 'activiteiten'));
             this.items.push(new _menuItem2.default('Organisaties', 'organisaties'));
-        };
+        }
 
-        Sidebar.prototype.select = function select(item) {
+        select(item) {
             this.selectedId = item.id;
             return true;
-        };
-
-        return Sidebar;
-    }();
-});
-define('timesheet',['exports'], function (exports) {
-    'use strict';
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
         }
     }
-
-    var Home = exports.Home = function Home() {
-        _classCallCheck(this, Home);
-
-        this.title = 'Home';
-    };
-});
-define('aanmaken/activiteit',['exports'], function (exports) {
-    'use strict';
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var Activiteit = exports.Activiteit = function () {
-        function Activiteit() {
-            _classCallCheck(this, Activiteit);
-
-            this.title = 'Activiteit Aanmaken';
-        }
-
-        Activiteit.prototype.activate = function activate(params, routeConfig) {
-            this.routeConfig = routeConfig;
-            this.routeConfig.navModel.setTitle('Activiteit');
-        };
-
-        return Activiteit;
-    }();
-});
-define('aanmaken/project',['exports'], function (exports) {
-    'use strict';
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var Project = exports.Project = function () {
-        function Project() {
-            _classCallCheck(this, Project);
-
-            this.title = 'Project Aanmaken';
-        }
-
-        Project.prototype.activate = function activate(params, routeConfig) {
-            this.routeConfig = routeConfig;
-            this.routeConfig.navModel.setTitle('Project');
-        };
-
-        return Project;
-    }();
+    exports.Sidebar = Sidebar;
 });
 define('activiteiten/lijst',['exports'], function (exports) {
     'use strict';
@@ -287,55 +176,71 @@ define('activiteiten/lijst',['exports'], function (exports) {
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var Lijst = exports.Lijst = function () {
-        function Lijst() {
-            _classCallCheck(this, Lijst);
-
+    class Lijst {
+        constructor() {
             this.title = 'Activiteiten';
         }
 
-        Lijst.prototype.activate = function activate(params, routeConfig) {
+        activate(params, routeConfig) {
             this.routeConfig = routeConfig;
             this.routeConfig.navModel.setTitle('Activiteiten');
-        };
-
-        return Lijst;
-    }();
+        }
+    }
+    exports.Lijst = Lijst;
 });
-define('projecten/lijst',['exports'], function (exports) {
+define('consultants/aanmaak-detail',['exports'], function (exports) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
+    class AanmaakDetail {
+        constructor() {
+            this.title = 'Consultant Aanmaken';
+        }
 
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
+        activate(params, routeConfig) {
+            this.routeConfig = routeConfig;
+            this.routeConfig.navModel.setTitle('Consultant Aanmaken');
         }
     }
+    exports.AanmaakDetail = AanmaakDetail;
+});
+define('consultants/beheer-detail',['exports'], function (exports) {
+    'use strict';
 
-    var Lijst = exports.Lijst = function () {
-        function Lijst() {
-            _classCallCheck(this, Lijst);
-
-            this.title = 'Projecten';
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    class BeheerkDetail {
+        constructor() {
+            this.title = 'Consultant Beherem';
         }
 
-        Lijst.prototype.activate = function activate(params, routeConfig) {
+        activate(params, routeConfig) {
             this.routeConfig = routeConfig;
-            this.routeConfig.navModel.setTitle('Projecten');
-        };
+            this.routeConfig.navModel.setTitle('Consultant Beheren');
+        }
+    }
+    exports.BeheerkDetail = BeheerkDetail;
+});
+define('consultants/lijst',['exports'], function (exports) {
+    'use strict';
 
-        return Lijst;
-    }();
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    class Lijst {
+        constructor() {
+            this.title = 'Consultants';
+        }
+
+        activate(params, routeConfig) {
+            this.routeConfig = routeConfig;
+            this.routeConfig.navModel.setTitle('Consultants');
+        }
+    }
+    exports.Lijst = Lijst;
 });
 define('organisaties/lijst',['exports'], function (exports) {
     'use strict';
@@ -343,27 +248,35 @@ define('organisaties/lijst',['exports'], function (exports) {
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var Lijst = exports.Lijst = function () {
-        function Lijst() {
-            _classCallCheck(this, Lijst);
-
+    class Lijst {
+        constructor() {
             this.title = 'Organisaties';
         }
 
-        Lijst.prototype.activate = function activate(params, routeConfig) {
+        activate(params, routeConfig) {
             this.routeConfig = routeConfig;
             this.routeConfig.navModel.setTitle('Organisaties');
-        };
+        }
+    }
+    exports.Lijst = Lijst;
+});
+define('projecten/lijst',['exports'], function (exports) {
+    'use strict';
 
-        return Lijst;
-    }();
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    class Lijst {
+        constructor() {
+            this.title = 'Projecten';
+        }
+
+        activate(params, routeConfig) {
+            this.routeConfig = routeConfig;
+            this.routeConfig.navModel.setTitle('Projecten');
+        }
+    }
+    exports.Lijst = Lijst;
 });
 define('resources/index',["exports"], function (exports) {
   "use strict";
@@ -372,133 +285,57 @@ define('resources/index',["exports"], function (exports) {
     value: true
   });
   exports.configure = configure;
-  function configure(config) {}
+  function configure(config) {
+    //config.globalResources([]);
+  }
 });
-define('consultants/detail',['exports'], function (exports) {
+define('timesheet',['exports', './log'], function (exports, _log) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
+    exports.Home = undefined;
 
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
+    var _log2 = _interopRequireDefault(_log);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
     }
 
-    var Detail = exports.Detail = function () {
-        function Detail() {
-            _classCallCheck(this, Detail);
+    class Home {
 
-            this.title = 'Consultant';
+        constructor() {
+            this.title = 'Home';
+            this.minutes = 0;
+            this.hours = 0;
+            this.logDate = new Date().toISOString().slice(0, 10);
         }
-
-        Detail.prototype.activate = function activate(params, routeConfig) {
+        activate(params, routeConfig) {
             this.routeConfig = routeConfig;
-            this.routeConfig.navModel.setTitle('Consultant Detail');
-        };
-
-        return Detail;
-    }();
-});
-define('consultants/lijst',['exports'], function (exports) {
-    'use strict';
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
+            this.routeConfig.navModel.setTitle('Log tijden');
         }
+        addLog() {
+            if (this.hours > 0) {
+                var min = this.hours * 60 + this.minutes * 1;
+            }
+        }
+
     }
-
-    var Lijst = exports.Lijst = function () {
-        function Lijst() {
-            _classCallCheck(this, Lijst);
-
-            this.title = 'Consultants';
-        }
-
-        Lijst.prototype.activate = function activate(params, routeConfig) {
-            this.routeConfig = routeConfig;
-            this.routeConfig.navModel.setTitle('Consultants');
-        };
-
-        return Lijst;
-    }();
-});
-define('consultants/aanmaak-detail',['exports'], function (exports) {
-    'use strict';
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var AanmaakDetail = exports.AanmaakDetail = function () {
-        function AanmaakDetail() {
-            _classCallCheck(this, AanmaakDetail);
-
-            this.title = 'Consultant Aanmaken';
-        }
-
-        AanmaakDetail.prototype.activate = function activate(params, routeConfig) {
-            this.routeConfig = routeConfig;
-            this.routeConfig.navModel.setTitle('Consultant Aanmaken');
-        };
-
-        return AanmaakDetail;
-    }();
-});
-define('consultants/beheer-detail',['exports'], function (exports) {
-    'use strict';
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-
-    function _classCallCheck(instance, Constructor) {
-        if (!(instance instanceof Constructor)) {
-            throw new TypeError("Cannot call a class as a function");
-        }
-    }
-
-    var BeheerkDetail = exports.BeheerkDetail = function () {
-        function BeheerkDetail() {
-            _classCallCheck(this, BeheerkDetail);
-
-            this.title = 'Consultant Beherem';
-        }
-
-        BeheerkDetail.prototype.activate = function activate(params, routeConfig) {
-            this.routeConfig = routeConfig;
-            this.routeConfig.navModel.setTitle('Consultant Beheren');
-        };
-
-        return BeheerkDetail;
-    }();
+    exports.Home = Home;
 });
 define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"./styles.css\"></require><require from=\"./sidebar\"></require><nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\"><div class=\"navbar-header\"><a class=\"navbar-brand\" href=\"#\"><img class=\"header-logo\" src=\"src/logo/Canguru-Logo.png\" alt=\"logo\"> <i class=\"fa fa-user\"></i></a></div></nav><div><div class=\"row\"><sidebar class=\"col-md-2\"></sidebar><router-view class=\"col-md-8\"></router-view></div></div></template>"; });
-define('text!styles.css', ['module'], function(module) { module.exports = "body { \n    padding-top: 3.5%; \n    }\n\nsection {\n  margin: 0 20px;\n}\n\na:focus {\n  outline: none;\n}\n\n.navbar {\n    height: 4%;\n    position: fixed!important;\n}\n\n.navbar-brand{\n    padding:0;\n}\n\n.no-selection {\n  margin: 20px;\n}\n\n.contact-list {\n  overflow-y: auto;\n  border: 1px solid #ddd;\n  padding: 10px;\n}\n\n.panel {\n  margin: 20px;\n}\n\n.button-bar {\n  right: 0;\n  left: 0;\n  bottom: 0;\n  border-top: 1px solid #ddd;\n  background: white;\n}\n\n.button-bar > button {\n  float: right;\n  margin: 20px;\n}\n\nli.list-group-item {\n  list-style: none;\n}\n\nli.list-group-item > a {\n  text-decoration: none;\n}\n\nli.list-group-item.active > a {\n  color: white;\n}\n\n.main-view{\n    height:88%;\n    width: 80%;\n    margin-top: 1%;\n    padding: 10px;\n    position: fixed!important;\n    border: thin solid lightgrey;\n}\n\n.sidebar{\n    height: 100%;\n    z-index:1;\n    position: fixed!important;\n    padding-top: 3%;\n    overflow:auto;\n    border-right: thin solid lightgrey;\n    border-bottom: thin solid lightgrey;\n}\n\n.sidebar ul{\n  padding: 0;\n}\n\n.sidebar li{\n    list-style: none;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n.sidebar-item{\n    color: gray;\n    font-size: 1.5em;\n    font-style: bold;\n}\n\n.sidebar li ul li:first-child{\n    list-style: none;\n    border-top: thin solid lightgrey;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n.sidebar li ul li{\n    list-style: none;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n.sidebar li ul li:last-child{\n    list-style: none;\n    width: auto;\n}\n\n.sidebar-subItem{\n    padding-left: 10%;\n    color: gray;\n    font-size: 1em;\n    font-style: bold;\n}\n\n.col-md-2{\n    margin-right: 1%;\n}\n.base-shadow{\n    box-shadow: 0 3px 10px 2px lightgrey;\n}\n\n.center{\n    text-align: center;\n}\n\n.center-div{\n    margin: 0 auto;\n    float: none;\n}\n\n.header-logo{\n    height: 100%;\n    width: auto;\n    float: left;\n}\n\n.form-width{\n    width: 70%;\n    margin-left: 15%;\n    margin-right: 15%;\n}\n\n.form-height{\n    height: 80%;\n    margin-top: 10%;\n    margin-bottom: 10%;\n}"; });
+define('text!styles.css', ['module'], function(module) { module.exports = "body { \r\n    padding-top: 3.5%; \r\n    }\r\n\r\nsection {\r\n  margin: 0 20px;\r\n}\r\n\r\na:focus {\r\n  outline: none;\r\n}\r\n\r\n.navbar {\r\n    height: 4%;\r\n    position: fixed!important;\r\n}\r\n\r\n.navbar-brand{\r\n    padding:0;\r\n}\r\n\r\n.no-selection {\r\n  margin: 20px;\r\n}\r\n\r\n.contact-list {\r\n  overflow-y: auto;\r\n  border: 1px solid #ddd;\r\n  padding: 10px;\r\n}\r\n\r\n.panel {\r\n  margin: 20px;\r\n}\r\n\r\n.button-bar {\r\n  right: 0;\r\n  left: 0;\r\n  bottom: 0;\r\n  border-top: 1px solid #ddd;\r\n  background: white;\r\n}\r\n\r\n.button-bar > button {\r\n  float: right;\r\n  margin: 20px;\r\n}\r\n\r\nli.list-group-item {\r\n  list-style: none;\r\n}\r\n\r\nli.list-group-item > a {\r\n  text-decoration: none;\r\n}\r\n\r\nli.list-group-item.active > a {\r\n  color: white;\r\n}\r\n\r\n.main-view{\r\n    height:88%;\r\n    width: 80%;\r\n    margin-top: 1%;\r\n    padding: 10px;\r\n    position: fixed!important;\r\n    border: thin solid lightgrey;\r\n}\r\n\r\n.sidebar{\r\n    height: 100%;\r\n    z-index:1;\r\n    position: fixed!important;\r\n    padding-top: 3%;\r\n    overflow:auto;\r\n    border-right: thin solid lightgrey;\r\n    border-bottom: thin solid lightgrey;\r\n}\r\n\r\n.sidebar ul{\r\n  padding: 0;\r\n}\r\n\r\n.sidebar li{\r\n    list-style: none;\r\n    border-bottom: thin solid lightgrey;\r\n    width: auto;\r\n}\r\n\r\n.sidebar-item{\r\n    color: gray;\r\n    font-size: 1.5em;\r\n    font-style: bold;\r\n}\r\n\r\n.sidebar li ul li:first-child{\r\n    list-style: none;\r\n    border-top: thin solid lightgrey;\r\n    border-bottom: thin solid lightgrey;\r\n    width: auto;\r\n}\r\n\r\n.sidebar li ul li{\r\n    list-style: none;\r\n    border-bottom: thin solid lightgrey;\r\n    width: auto;\r\n}\r\n\r\n.sidebar li ul li:last-child{\r\n    list-style: none;\r\n    width: auto;\r\n}\r\n\r\n.sidebar-subItem{\r\n    padding-left: 10%;\r\n    color: gray;\r\n    font-size: 1em;\r\n    font-style: bold;\r\n}\r\n\r\n.col-md-2{\r\n    margin-right: 1%;\r\n}\r\n.base-shadow{\r\n    box-shadow: 0 3px 10px 2px lightgrey;\r\n}\r\n\r\n.center{\r\n    text-align: center;\r\n}\r\n\r\n.center-div{\r\n    margin: 0 auto;\r\n    float: none;\r\n}\r\n\r\n.header-logo{\r\n    height: 100%;\r\n    width: auto;\r\n    float: left;\r\n}\r\n\r\n.form-width{\r\n    width: 70%;\r\n    margin-left: 15%;\r\n    margin-right: 15%;\r\n}\r\n\r\n.form-height{\r\n    height: 80%;\r\n    margin-top: 10%;\r\n    margin-bottom: 10%;\r\n}"; });
 define('text!notfound.html', ['module'], function(module) { module.exports = "<template><h1>404 suck it</h1></template>"; });
-define('text!rapporten.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"rapporten\">Rapport</label><div class=\"col-sm-10\"><select id=\"rapporten\" class=\"form-control\"><option repeat.for=\"type of reportTypes\" value.bind=\"type\">${type}</option></select></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"begin\">Begin Datum</label><div class=\"col-sm-10\"><input type=\"date\" id=\"eind\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"eind\">Eind Datum</label><div class=\"col-sm-10\"><input type=\"date\" id=\"eind\" class=\"form-control\"></div></div><input type=\"submit\" value=\"Download\"></form></div></template>"; });
+define('text!rapporten.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"rapporten\">Rapport</label><div class=\"col-sm-10\"><select id=\"rapporten\" class=\"form-control\"><option repeat.for=\"type of reportTypes\" value.bind=\"type\">${type}</option></select></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"begin\">Begin Datum</label><div class=\"col-sm-10\"><input type=\"date\" id=\"begin\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"eind\">Eind Datum</label><div class=\"col-sm-10\"><input type=\"date\" id=\"eind\" class=\"form-control\"></div></div><input type=\"submit\" value=\"Download\"></form></div></template>"; });
 define('text!sidebar.html', ['module'], function(module) { module.exports = "<template><div class=\"sidebar col-md-2 base-shadow\"><ul><li repeat.for=\"item of items\" class=\"${item.isActive ? 'active' : ''}\"><a class=\"sidebar-item\" route-href=\"route.bind: item.route\">${item.value}</a></li></ul></div></template>"; });
-define('text!timesheet.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
-define('text!aanmaken/activiteit.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
-define('text!aanmaken/project.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
+define('text!timesheet.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form form class=\"form-horizontal form-height center form-width\" submit.trigger=\"addLog()\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"hours\">Uren</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"hours\"></div><label class=\"col-sm-offset-0 col-sm-2 control-label\" for=\"minutes\">Minuten</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"minutes\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"datum\">Datum</label><div class=\"col-sm-6\"><input type=\"date\" id=\"datum\" class=\"form-control\" value.two-way=\"logDate\"></div></div><div class=\"form-group\"><div class=\"col-sm-offset-4 col-sm-8\"><button type=\"submit\" class=\"col-sm-4\">Add Log</button></div></div></form></div></template>"; });
 define('text!activiteiten/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
-define('text!consultants/detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
+define('text!consultants/aanmaak-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
+define('text!consultants/beheer-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
 define('text!consultants/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form><a route-href=\"route: maakConsultant\">consultant</a></form></div></template>"; });
 define('text!organisaties/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
 define('text!projecten/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
-define('text!consultants/aanmaak-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
-define('text!consultants/beheer-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map
