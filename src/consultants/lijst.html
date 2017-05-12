@@ -2,7 +2,21 @@
     <div class="main-view base-shadow">
         <h2 class="center">${title}</h2>
         <form>
-            <a route-href="route: maakConsultant"> consultant</a>
+            <button>Niewe Consultant</button>
         </form>
+        <div>
+            <table>
+                <tr>
+                    <th>voornaam</th>
+                    <th>familienaam</th>
+                    <th>e-mail</th>
+                </tr>
+                <tr repeat.for="consultant of consultants">
+                    <td>${consultant.firstName}</td>
+                    <td>${consultant.lastName}</td>
+                    <td>${consultant.email}</td>
+                </tr>
+            </table>
+        </div>
     </div>
 </template>

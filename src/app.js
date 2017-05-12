@@ -1,4 +1,13 @@
+import KeycloakService from './keycloak-service';
+
 export class App {
+  activate(){
+  }
+
+  logout(){
+    KeycloakService.logout();
+  }
+
   configureRouter(config, router){
     this.router = router;
     config.title = '';

@@ -13423,6 +13423,849 @@ define('aurelia-history-browser',['exports', 'aurelia-pal', 'aurelia-history'], 
     return protocol + '//' + hostname + (port ? ':' + port : '');
   }
 });
+define('aurelia-http-client',['exports', 'aurelia-path', 'aurelia-pal'], function (exports, _aureliaPath, _aureliaPal) {
+  'use strict';
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.HttpClient = exports.RequestBuilder = exports.HttpRequestMessage = exports.JSONPRequestMessage = exports.RequestMessageProcessor = exports.mimeTypes = exports.HttpResponseMessage = exports.RequestMessage = exports.Headers = undefined;
+  exports.timeoutTransformer = timeoutTransformer;
+  exports.callbackParameterNameTransformer = callbackParameterNameTransformer;
+  exports.credentialsTransformer = credentialsTransformer;
+  exports.progressTransformer = progressTransformer;
+  exports.downloadProgressTransformer = downloadProgressTransformer;
+  exports.responseTypeTransformer = responseTypeTransformer;
+  exports.headerTransformer = headerTransformer;
+  exports.contentTransformer = contentTransformer;
+  exports.createJSONPRequestMessageProcessor = createJSONPRequestMessageProcessor;
+  exports.createHttpRequestMessageProcessor = createHttpRequestMessageProcessor;
+
+  function _possibleConstructorReturn(self, call) {
+    if (!self) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return call && (typeof call === "object" || typeof call === "function") ? call : self;
+  }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+  }
+
+  var _createClass = function () {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];
+        descriptor.enumerable = descriptor.enumerable || false;
+        descriptor.configurable = true;
+        if ("value" in descriptor) descriptor.writable = true;
+        Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }
+
+    return function (Constructor, protoProps, staticProps) {
+      if (protoProps) defineProperties(Constructor.prototype, protoProps);
+      if (staticProps) defineProperties(Constructor, staticProps);
+      return Constructor;
+    };
+  }();
+
+  
+
+  var Headers = exports.Headers = function () {
+    function Headers() {
+      var headers = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+      
+
+      this.headers = {};
+
+      for (var _key in headers) {
+        this.headers[_key.toLowerCase()] = { key: _key, value: headers[_key] };
+      }
+    }
+
+    Headers.prototype.add = function add(key, value) {
+      this.headers[key.toLowerCase()] = { key: key, value: value };
+    };
+
+    Headers.prototype.get = function get(key) {
+      var header = this.headers[key.toLowerCase()];
+      return header ? header.value : undefined;
+    };
+
+    Headers.prototype.clear = function clear() {
+      this.headers = {};
+    };
+
+    Headers.prototype.has = function has(header) {
+      return this.headers.hasOwnProperty(header.toLowerCase());
+    };
+
+    Headers.prototype.configureXHR = function configureXHR(xhr) {
+      for (var name in this.headers) {
+        if (this.headers.hasOwnProperty(name)) {
+          xhr.setRequestHeader(this.headers[name].key, this.headers[name].value);
+        }
+      }
+    };
+
+    Headers.parse = function parse(headerStr) {
+      var headers = new Headers();
+      if (!headerStr) {
+        return headers;
+      }
+
+      var headerPairs = headerStr.split('\r\n');
+      for (var i = 0; i < headerPairs.length; i++) {
+        var headerPair = headerPairs[i];
+
+        var index = headerPair.indexOf(': ');
+        if (index > 0) {
+          var _key2 = headerPair.substring(0, index);
+          var val = headerPair.substring(index + 2);
+          headers.add(_key2, val);
+        }
+      }
+
+      return headers;
+    };
+
+    return Headers;
+  }();
+
+  var RequestMessage = exports.RequestMessage = function () {
+    function RequestMessage(method, url, content, headers) {
+      
+
+      this.method = method;
+      this.url = url;
+      this.content = content;
+      this.headers = headers || new Headers();
+      this.baseUrl = '';
+    }
+
+    RequestMessage.prototype.buildFullUrl = function buildFullUrl() {
+      var absoluteUrl = /^([a-z][a-z0-9+\-.]*:)?\/\//i;
+      var url = absoluteUrl.test(this.url) ? this.url : (0, _aureliaPath.join)(this.baseUrl, this.url);
+
+      if (this.params) {
+        var qs = (0, _aureliaPath.buildQueryString)(this.params);
+        url = qs ? url + (this.url.indexOf('?') < 0 ? '?' : '&') + qs : url;
+      }
+
+      return url;
+    };
+
+    return RequestMessage;
+  }();
+
+  var HttpResponseMessage = exports.HttpResponseMessage = function () {
+    function HttpResponseMessage(requestMessage, xhr, responseType, reviver) {
+      
+
+      this.requestMessage = requestMessage;
+      this.statusCode = xhr.status;
+      this.response = xhr.response || xhr.responseText;
+      this.isSuccess = xhr.status >= 200 && xhr.status < 400;
+      this.statusText = xhr.statusText;
+      this.reviver = reviver;
+      this.mimeType = null;
+
+      if (xhr.getAllResponseHeaders) {
+        try {
+          this.headers = Headers.parse(xhr.getAllResponseHeaders());
+        } catch (err) {
+          if (xhr.requestHeaders) this.headers = new Headers(xhr.requestHeaders);
+        }
+      } else {
+        this.headers = new Headers();
+      }
+
+      var contentType = void 0;
+
+      if (this.headers && this.headers.headers) {
+        contentType = this.headers.get('Content-Type');
+      }
+
+      if (contentType) {
+        this.mimeType = responseType = contentType.split(';')[0].trim();
+        if (mimeTypes.hasOwnProperty(this.mimeType)) responseType = mimeTypes[this.mimeType];
+      }
+
+      this.responseType = responseType;
+    }
+
+    _createClass(HttpResponseMessage, [{
+      key: 'content',
+      get: function get() {
+        try {
+          if (this._content !== undefined) {
+            return this._content;
+          }
+
+          if (this.response === undefined || this.response === null || this.response === '') {
+            this._content = this.response;
+            return this._content;
+          }
+
+          if (this.responseType === 'json') {
+            this._content = JSON.parse(this.response, this.reviver);
+            return this._content;
+          }
+
+          if (this.reviver) {
+            this._content = this.reviver(this.response);
+            return this._content;
+          }
+
+          this._content = this.response;
+          return this._content;
+        } catch (e) {
+          if (this.isSuccess) {
+            throw e;
+          }
+
+          this._content = null;
+          return this._content;
+        }
+      }
+    }]);
+
+    return HttpResponseMessage;
+  }();
+
+  var mimeTypes = exports.mimeTypes = {
+    'text/html': 'html',
+    'text/javascript': 'js',
+    'application/javascript': 'js',
+    'text/json': 'json',
+    'application/json': 'json',
+    'application/rss+xml': 'rss',
+    'application/atom+xml': 'atom',
+    'application/xhtml+xml': 'xhtml',
+    'text/markdown': 'md',
+    'text/xml': 'xml',
+    'text/mathml': 'mml',
+    'application/xml': 'xml',
+    'text/yml': 'yml',
+    'text/csv': 'csv',
+    'text/css': 'css',
+    'text/less': 'less',
+    'text/stylus': 'styl',
+    'text/scss': 'scss',
+    'text/sass': 'sass',
+    'text/plain': 'txt'
+  };
+
+  function applyXhrTransformers(xhrTransformers, client, processor, message, xhr) {
+    var i = void 0;
+    var ii = void 0;
+
+    for (i = 0, ii = xhrTransformers.length; i < ii; ++i) {
+      xhrTransformers[i](client, processor, message, xhr);
+    }
+  }
+
+  var RequestMessageProcessor = exports.RequestMessageProcessor = function () {
+    function RequestMessageProcessor(xhrType, xhrTransformers) {
+      
+
+      this.XHRType = xhrType;
+      this.xhrTransformers = xhrTransformers;
+      this.isAborted = false;
+    }
+
+    RequestMessageProcessor.prototype.abort = function abort() {
+      if (this.xhr && this.xhr.readyState !== _aureliaPal.PLATFORM.XMLHttpRequest.UNSENT) {
+        this.xhr.abort();
+      }
+
+      this.isAborted = true;
+    };
+
+    RequestMessageProcessor.prototype.process = function process(client, requestMessage) {
+      var _this = this;
+
+      var promise = new Promise(function (resolve, reject) {
+        var xhr = _this.xhr = new _this.XHRType();
+
+        xhr.onload = function (e) {
+          var response = new HttpResponseMessage(requestMessage, xhr, requestMessage.responseType, requestMessage.reviver);
+          if (response.isSuccess) {
+            resolve(response);
+          } else {
+            reject(response);
+          }
+        };
+
+        xhr.ontimeout = function (e) {
+          reject(new HttpResponseMessage(requestMessage, {
+            response: e,
+            status: xhr.status,
+            statusText: xhr.statusText
+          }, 'timeout'));
+        };
+
+        xhr.onerror = function (e) {
+          reject(new HttpResponseMessage(requestMessage, {
+            response: e,
+            status: xhr.status,
+            statusText: xhr.statusText
+          }, 'error'));
+        };
+
+        xhr.onabort = function (e) {
+          reject(new HttpResponseMessage(requestMessage, {
+            response: e,
+            status: xhr.status,
+            statusText: xhr.statusText
+          }, 'abort'));
+        };
+      });
+
+      return Promise.resolve(requestMessage).then(function (message) {
+        var processRequest = function processRequest() {
+          if (_this.isAborted) {
+            _this.xhr.abort();
+          } else {
+            _this.xhr.open(message.method, message.buildFullUrl(), true, message.user, message.password);
+            applyXhrTransformers(_this.xhrTransformers, client, _this, message, _this.xhr);
+            if (typeof message.content === 'undefined') {
+              _this.xhr.send();
+            } else {
+              _this.xhr.send(message.content);
+            }
+          }
+
+          return promise;
+        };
+
+        var chain = [[processRequest, undefined]];
+
+        var interceptors = message.interceptors || [];
+        interceptors.forEach(function (interceptor) {
+          if (interceptor.request || interceptor.requestError) {
+            chain.unshift([interceptor.request ? interceptor.request.bind(interceptor) : undefined, interceptor.requestError ? interceptor.requestError.bind(interceptor) : undefined]);
+          }
+
+          if (interceptor.response || interceptor.responseError) {
+            chain.push([interceptor.response ? interceptor.response.bind(interceptor) : undefined, interceptor.responseError ? interceptor.responseError.bind(interceptor) : undefined]);
+          }
+        });
+
+        var interceptorsPromise = Promise.resolve(message);
+
+        while (chain.length) {
+          var _interceptorsPromise;
+
+          interceptorsPromise = (_interceptorsPromise = interceptorsPromise).then.apply(_interceptorsPromise, chain.shift());
+        }
+
+        return interceptorsPromise;
+      });
+    };
+
+    return RequestMessageProcessor;
+  }();
+
+  function timeoutTransformer(client, processor, message, xhr) {
+    if (message.timeout !== undefined) {
+      xhr.timeout = message.timeout;
+    }
+  }
+
+  function callbackParameterNameTransformer(client, processor, message, xhr) {
+    if (message.callbackParameterName !== undefined) {
+      xhr.callbackParameterName = message.callbackParameterName;
+    }
+  }
+
+  function credentialsTransformer(client, processor, message, xhr) {
+    if (message.withCredentials !== undefined) {
+      xhr.withCredentials = message.withCredentials;
+    }
+  }
+
+  function progressTransformer(client, processor, message, xhr) {
+    if (message.progressCallback) {
+      xhr.upload.onprogress = message.progressCallback;
+    }
+  }
+
+  function downloadProgressTransformer(client, processor, message, xhr) {
+    if (message.downloadProgressCallback) {
+      xhr.onprogress = message.downloadProgressCallback;
+    }
+  }
+
+  function responseTypeTransformer(client, processor, message, xhr) {
+    var responseType = message.responseType;
+
+    if (responseType === 'json') {
+      responseType = 'text';
+    }
+
+    xhr.responseType = responseType;
+  }
+
+  function headerTransformer(client, processor, message, xhr) {
+    message.headers.configureXHR(xhr);
+  }
+
+  function contentTransformer(client, processor, message, xhr) {
+    if (message.skipContentProcessing) {
+      return;
+    }
+
+    if (_aureliaPal.PLATFORM.global.FormData && message.content instanceof FormData) {
+      return;
+    }
+
+    if (_aureliaPal.PLATFORM.global.Blob && message.content instanceof Blob) {
+      return;
+    }
+
+    if (_aureliaPal.PLATFORM.global.ArrayBuffer && message.content instanceof ArrayBuffer) {
+      return;
+    }
+
+    if (message.content instanceof Document) {
+      return;
+    }
+
+    if (typeof message.content === 'string') {
+      return;
+    }
+
+    if (message.content === null || message.content === undefined) {
+      return;
+    }
+
+    message.content = JSON.stringify(message.content, message.replacer);
+
+    if (!message.headers.has('Content-Type')) {
+      message.headers.add('Content-Type', 'application/json');
+    }
+  }
+
+  var JSONPRequestMessage = exports.JSONPRequestMessage = function (_RequestMessage) {
+    _inherits(JSONPRequestMessage, _RequestMessage);
+
+    function JSONPRequestMessage(url, callbackParameterName) {
+      
+
+      var _this2 = _possibleConstructorReturn(this, _RequestMessage.call(this, 'JSONP', url));
+
+      _this2.responseType = 'jsonp';
+      _this2.callbackParameterName = callbackParameterName;
+      return _this2;
+    }
+
+    return JSONPRequestMessage;
+  }(RequestMessage);
+
+  var JSONPXHR = function () {
+    function JSONPXHR() {
+      
+    }
+
+    JSONPXHR.prototype.open = function open(method, url) {
+      this.method = method;
+      this.url = url;
+      this.callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+    };
+
+    JSONPXHR.prototype.send = function send() {
+      var _this3 = this;
+
+      var url = this.url + (this.url.indexOf('?') >= 0 ? '&' : '?') + encodeURIComponent(this.callbackParameterName) + '=' + this.callbackName;
+      var script = _aureliaPal.DOM.createElement('script');
+
+      script.src = url;
+      script.onerror = function (e) {
+        cleanUp();
+
+        _this3.status = 0;
+        _this3.onerror(new Error('error'));
+      };
+
+      var cleanUp = function cleanUp() {
+        delete _aureliaPal.PLATFORM.global[_this3.callbackName];
+        _aureliaPal.DOM.removeNode(script);
+      };
+
+      _aureliaPal.PLATFORM.global[this.callbackName] = function (data) {
+        cleanUp();
+
+        if (_this3.status === undefined) {
+          _this3.status = 200;
+          _this3.statusText = 'OK';
+          _this3.response = data;
+          _this3.onload(_this3);
+        }
+      };
+
+      _aureliaPal.DOM.appendNode(script);
+
+      if (this.timeout !== undefined) {
+        setTimeout(function () {
+          if (_this3.status === undefined) {
+            _this3.status = 0;
+            _this3.ontimeout(new Error('timeout'));
+          }
+        }, this.timeout);
+      }
+    };
+
+    JSONPXHR.prototype.abort = function abort() {
+      if (this.status === undefined) {
+        this.status = 0;
+        this.onabort(new Error('abort'));
+      }
+    };
+
+    JSONPXHR.prototype.setRequestHeader = function setRequestHeader() {};
+
+    return JSONPXHR;
+  }();
+
+  function createJSONPRequestMessageProcessor() {
+    return new RequestMessageProcessor(JSONPXHR, [timeoutTransformer, callbackParameterNameTransformer]);
+  }
+
+  var HttpRequestMessage = exports.HttpRequestMessage = function (_RequestMessage2) {
+    _inherits(HttpRequestMessage, _RequestMessage2);
+
+    function HttpRequestMessage(method, url, content, headers) {
+      
+
+      var _this4 = _possibleConstructorReturn(this, _RequestMessage2.call(this, method, url, content, headers));
+
+      _this4.responseType = 'json';return _this4;
+    }
+
+    return HttpRequestMessage;
+  }(RequestMessage);
+
+  function createHttpRequestMessageProcessor() {
+    return new RequestMessageProcessor(_aureliaPal.PLATFORM.XMLHttpRequest, [timeoutTransformer, credentialsTransformer, progressTransformer, downloadProgressTransformer, responseTypeTransformer, contentTransformer, headerTransformer]);
+  }
+
+  var RequestBuilder = exports.RequestBuilder = function () {
+    function RequestBuilder(client) {
+      
+
+      this.client = client;
+      this.transformers = client.requestTransformers.slice(0);
+      this.useJsonp = false;
+    }
+
+    RequestBuilder.prototype.asDelete = function asDelete() {
+      return this._addTransformer(function (client, processor, message) {
+        message.method = 'DELETE';
+      });
+    };
+
+    RequestBuilder.prototype.asGet = function asGet() {
+      return this._addTransformer(function (client, processor, message) {
+        message.method = 'GET';
+      });
+    };
+
+    RequestBuilder.prototype.asHead = function asHead() {
+      return this._addTransformer(function (client, processor, message) {
+        message.method = 'HEAD';
+      });
+    };
+
+    RequestBuilder.prototype.asOptions = function asOptions() {
+      return this._addTransformer(function (client, processor, message) {
+        message.method = 'OPTIONS';
+      });
+    };
+
+    RequestBuilder.prototype.asPatch = function asPatch() {
+      return this._addTransformer(function (client, processor, message) {
+        message.method = 'PATCH';
+      });
+    };
+
+    RequestBuilder.prototype.asPost = function asPost() {
+      return this._addTransformer(function (client, processor, message) {
+        message.method = 'POST';
+      });
+    };
+
+    RequestBuilder.prototype.asPut = function asPut() {
+      return this._addTransformer(function (client, processor, message) {
+        message.method = 'PUT';
+      });
+    };
+
+    RequestBuilder.prototype.asJsonp = function asJsonp(callbackParameterName) {
+      this.useJsonp = true;
+      return this._addTransformer(function (client, processor, message) {
+        message.callbackParameterName = callbackParameterName;
+      });
+    };
+
+    RequestBuilder.prototype.withUrl = function withUrl(url) {
+      return this._addTransformer(function (client, processor, message) {
+        message.url = url;
+      });
+    };
+
+    RequestBuilder.prototype.withContent = function withContent(content) {
+      return this._addTransformer(function (client, processor, message) {
+        message.content = content;
+      });
+    };
+
+    RequestBuilder.prototype.withBaseUrl = function withBaseUrl(baseUrl) {
+      return this._addTransformer(function (client, processor, message) {
+        message.baseUrl = baseUrl;
+      });
+    };
+
+    RequestBuilder.prototype.withParams = function withParams(params) {
+      return this._addTransformer(function (client, processor, message) {
+        message.params = params;
+      });
+    };
+
+    RequestBuilder.prototype.withResponseType = function withResponseType(responseType) {
+      return this._addTransformer(function (client, processor, message) {
+        message.responseType = responseType;
+      });
+    };
+
+    RequestBuilder.prototype.withTimeout = function withTimeout(timeout) {
+      return this._addTransformer(function (client, processor, message) {
+        message.timeout = timeout;
+      });
+    };
+
+    RequestBuilder.prototype.withHeader = function withHeader(key, value) {
+      return this._addTransformer(function (client, processor, message) {
+        message.headers.add(key, value);
+      });
+    };
+
+    RequestBuilder.prototype.withCredentials = function withCredentials(value) {
+      return this._addTransformer(function (client, processor, message) {
+        message.withCredentials = value;
+      });
+    };
+
+    RequestBuilder.prototype.withLogin = function withLogin(user, password) {
+      return this._addTransformer(function (client, processor, message) {
+        message.user = user;message.password = password;
+      });
+    };
+
+    RequestBuilder.prototype.withReviver = function withReviver(reviver) {
+      return this._addTransformer(function (client, processor, message) {
+        message.reviver = reviver;
+      });
+    };
+
+    RequestBuilder.prototype.withReplacer = function withReplacer(replacer) {
+      return this._addTransformer(function (client, processor, message) {
+        message.replacer = replacer;
+      });
+    };
+
+    RequestBuilder.prototype.withProgressCallback = function withProgressCallback(progressCallback) {
+      return this._addTransformer(function (client, processor, message) {
+        message.progressCallback = progressCallback;
+      });
+    };
+
+    RequestBuilder.prototype.withDownloadProgressCallback = function withDownloadProgressCallback(downloadProgressCallback) {
+      return this._addTransformer(function (client, processor, message) {
+        message.downloadProgressCallback = downloadProgressCallback;
+      });
+    };
+
+    RequestBuilder.prototype.withCallbackParameterName = function withCallbackParameterName(callbackParameterName) {
+      return this._addTransformer(function (client, processor, message) {
+        message.callbackParameterName = callbackParameterName;
+      });
+    };
+
+    RequestBuilder.prototype.withInterceptor = function withInterceptor(interceptor) {
+      return this._addTransformer(function (client, processor, message) {
+        message.interceptors = message.interceptors || [];
+        message.interceptors.unshift(interceptor);
+      });
+    };
+
+    RequestBuilder.prototype.skipContentProcessing = function skipContentProcessing() {
+      return this._addTransformer(function (client, processor, message) {
+        message.skipContentProcessing = true;
+      });
+    };
+
+    RequestBuilder.prototype._addTransformer = function _addTransformer(fn) {
+      this.transformers.push(fn);
+      return this;
+    };
+
+    RequestBuilder.addHelper = function addHelper(name, fn) {
+      RequestBuilder.prototype[name] = function () {
+        return this._addTransformer(fn.apply(this, arguments));
+      };
+    };
+
+    RequestBuilder.prototype.send = function send() {
+      var message = this.useJsonp ? new JSONPRequestMessage() : new HttpRequestMessage();
+      return this.client.send(message, this.transformers);
+    };
+
+    return RequestBuilder;
+  }();
+
+  function trackRequestStart(client, processor) {
+    client.pendingRequests.push(processor);
+    client.isRequesting = true;
+  }
+
+  function trackRequestEnd(client, processor) {
+    var index = client.pendingRequests.indexOf(processor);
+
+    client.pendingRequests.splice(index, 1);
+    client.isRequesting = client.pendingRequests.length > 0;
+
+    if (!client.isRequesting) {
+      (function () {
+        var evt = _aureliaPal.DOM.createCustomEvent('aurelia-http-client-requests-drained', { bubbles: true, cancelable: true });
+        setTimeout(function () {
+          return _aureliaPal.DOM.dispatchEvent(evt);
+        }, 1);
+      })();
+    }
+  }
+
+  var HttpClient = exports.HttpClient = function () {
+    function HttpClient() {
+      
+
+      this.isRequesting = false;
+
+      this.requestTransformers = [];
+      this.requestProcessorFactories = new Map();
+      this.requestProcessorFactories.set(HttpRequestMessage, createHttpRequestMessageProcessor);
+      this.requestProcessorFactories.set(JSONPRequestMessage, createJSONPRequestMessageProcessor);
+      this.pendingRequests = [];
+    }
+
+    HttpClient.prototype.configure = function configure(fn) {
+      var builder = new RequestBuilder(this);
+      fn(builder);
+      this.requestTransformers = builder.transformers;
+      return this;
+    };
+
+    HttpClient.prototype.createRequest = function createRequest(url) {
+      var builder = new RequestBuilder(this);
+
+      if (url) {
+        builder.withUrl(url);
+      }
+
+      return builder;
+    };
+
+    HttpClient.prototype.send = function send(requestMessage, transformers) {
+      var _this5 = this;
+
+      var createProcessor = this.requestProcessorFactories.get(requestMessage.constructor);
+      var processor = void 0;
+      var promise = void 0;
+      var i = void 0;
+      var ii = void 0;
+
+      if (!createProcessor) {
+        throw new Error('No request message processor factory for ' + requestMessage.constructor + '.');
+      }
+
+      processor = createProcessor();
+      trackRequestStart(this, processor);
+
+      transformers = transformers || this.requestTransformers;
+
+      promise = Promise.resolve(requestMessage).then(function (message) {
+        for (i = 0, ii = transformers.length; i < ii; ++i) {
+          transformers[i](_this5, processor, message);
+        }
+
+        return processor.process(_this5, message).then(function (response) {
+          trackRequestEnd(_this5, processor);
+          return response;
+        }).catch(function (response) {
+          trackRequestEnd(_this5, processor);
+          throw response;
+        });
+      });
+
+      promise.abort = promise.cancel = function () {
+        processor.abort();
+      };
+
+      return promise;
+    };
+
+    HttpClient.prototype.delete = function _delete(url) {
+      return this.createRequest(url).asDelete().send();
+    };
+
+    HttpClient.prototype.get = function get(url) {
+      return this.createRequest(url).asGet().send();
+    };
+
+    HttpClient.prototype.head = function head(url) {
+      return this.createRequest(url).asHead().send();
+    };
+
+    HttpClient.prototype.jsonp = function jsonp(url) {
+      var callbackParameterName = arguments.length <= 1 || arguments[1] === undefined ? 'jsoncallback' : arguments[1];
+
+      return this.createRequest(url).asJsonp(callbackParameterName).send();
+    };
+
+    HttpClient.prototype.options = function options(url) {
+      return this.createRequest(url).asOptions().send();
+    };
+
+    HttpClient.prototype.put = function put(url, content) {
+      return this.createRequest(url).asPut().withContent(content).send();
+    };
+
+    HttpClient.prototype.patch = function patch(url, content) {
+      return this.createRequest(url).asPatch().withContent(content).send();
+    };
+
+    HttpClient.prototype.post = function post(url, content) {
+      return this.createRequest(url).asPost().withContent(content).send();
+    };
+
+    return HttpClient;
+  }();
+});
 define('aurelia-loader',['exports', 'aurelia-path', 'aurelia-metadata'], function (exports, _aureliaPath, _aureliaMetadata) {
   'use strict';
 
@@ -33920,6 +34763,1272 @@ if ( !noGlobal ) {
 return jQuery;
 }));
 
+/*
+ * Copyright 2016 Red Hat, Inc. and/or its affiliates
+ * and other contributors as indicated by the @author tags.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+(function( window, undefined ) {
+
+    var Keycloak = function (config) {
+        if (!(this instanceof Keycloak)) {
+            return new Keycloak(config);
+        }
+
+        var kc = this;
+        var adapter;
+        var refreshQueue = [];
+        var callbackStorage;
+
+        var loginIframe = {
+            enable: true,
+            callbackList: [],
+            interval: 5
+        };
+
+        kc.init = function (initOptions) {
+            kc.authenticated = false;
+
+            callbackStorage = createCallbackStorage();
+
+            if (initOptions && initOptions.adapter === 'cordova') {
+                adapter = loadAdapter('cordova');
+            } else if (initOptions && initOptions.adapter === 'default') {
+                adapter = loadAdapter();
+            } else {
+                if (window.Cordova) {
+                    adapter = loadAdapter('cordova');
+                } else {
+                    adapter = loadAdapter();
+                }
+            }
+
+            if (initOptions) {
+                if (typeof initOptions.checkLoginIframe !== 'undefined') {
+                    loginIframe.enable = initOptions.checkLoginIframe;
+                }
+
+                if (initOptions.checkLoginIframeInterval) {
+                    loginIframe.interval = initOptions.checkLoginIframeInterval;
+                }
+
+                if (initOptions.onLoad === 'login-required') {
+                    kc.loginRequired = true;
+                }
+
+                if (initOptions.responseMode) {
+                    if (initOptions.responseMode === 'query' || initOptions.responseMode === 'fragment') {
+                        kc.responseMode = initOptions.responseMode;
+                    } else {
+                        throw 'Invalid value for responseMode';
+                    }
+                }
+
+                if (initOptions.flow) {
+                    switch (initOptions.flow) {
+                        case 'standard':
+                            kc.responseType = 'code';
+                            break;
+                        case 'implicit':
+                            kc.responseType = 'id_token token';
+                            break;
+                        case 'hybrid':
+                            kc.responseType = 'code id_token token';
+                            break;
+                        default:
+                            throw 'Invalid value for flow';
+                    }
+                    kc.flow = initOptions.flow;
+                }
+            }
+
+            if (!kc.responseMode) {
+                kc.responseMode = 'fragment';
+            }
+            if (!kc.responseType) {
+                kc.responseType = 'code';
+                kc.flow = 'standard';
+            }
+
+            var promise = createPromise();
+
+            var initPromise = createPromise();
+            initPromise.promise.success(function() {
+                kc.onReady && kc.onReady(kc.authenticated);
+                promise.setSuccess(kc.authenticated);
+            }).error(function(errorData) {
+                promise.setError(errorData);
+            });
+
+            var configPromise = loadConfig(config);
+
+            function onLoad() {
+                var doLogin = function(prompt) {
+                    if (!prompt) {
+                        options.prompt = 'none';
+                    }
+                    kc.login(options).success(function () {
+                        initPromise.setSuccess();
+                    }).error(function () {
+                        initPromise.setError();
+                    });
+                }
+
+                var options = {};
+                switch (initOptions.onLoad) {
+                    case 'check-sso':
+                        if (loginIframe.enable) {
+                            setupCheckLoginIframe().success(function() {
+                                checkLoginIframe().success(function () {
+                                    doLogin(false);
+                                }).error(function () {
+                                    initPromise.setSuccess();
+                                });
+                            });
+                        } else {
+                            doLogin(false);
+                        }
+                        break;
+                    case 'login-required':
+                        doLogin(true);
+                        break;
+                    default:
+                        throw 'Invalid value for onLoad';
+                }
+            }
+
+            function processInit() {
+                var callback = parseCallback(window.location.href);
+
+                if (callback) {
+                    setupCheckLoginIframe();
+                    window.history.replaceState({}, null, callback.newUrl);
+                    processCallback(callback, initPromise);
+                    return;
+                } else if (initOptions) {
+                    if (initOptions.token || initOptions.refreshToken) {
+                        setToken(initOptions.token, initOptions.refreshToken, initOptions.idToken);
+
+                        if (loginIframe.enable) {
+                            setupCheckLoginIframe().success(function() {
+                                checkLoginIframe().success(function () {
+                                    kc.onAuthSuccess && kc.onAuthSuccess();
+                                    initPromise.setSuccess();
+                                }).error(function () {
+                                    kc.onAuthError && kc.onAuthError();
+                                    if (initOptions.onLoad) {
+                                        onLoad();
+                                    } else {
+                                        initPromise.setError();
+                                    }
+                                });
+                            });
+                        } else {
+                            kc.updateToken(-1).success(function() {
+                                kc.onAuthSuccess && kc.onAuthSuccess();
+                                initPromise.setSuccess();
+                            }).error(function() {
+                                kc.onAuthError && kc.onAuthError();
+                                if (initOptions.onLoad) {
+                                    onLoad();
+                                } else {
+                                    initPromise.setError();
+                                }
+                            });
+                        }
+                    } else if (initOptions.onLoad) {
+                        onLoad();
+                    } else {
+                        initPromise.setSuccess();
+                    }
+                } else {
+                    initPromise.setSuccess();
+                }
+            }
+
+            configPromise.success(processInit);
+            configPromise.error(function() {
+                promise.setError();
+            });
+
+            return promise.promise;
+        }
+
+        kc.login = function (options) {
+            return adapter.login(options);
+        }
+
+        kc.createLoginUrl = function(options) {
+            var state = createUUID();
+            var nonce = createUUID();
+
+            var redirectUri = adapter.redirectUri(options);
+
+            var callbackState = {
+                state: state,
+                nonce: nonce,
+                redirectUri: encodeURIComponent(redirectUri),
+            }
+
+            if (options && options.prompt) {
+                callbackState.prompt = options.prompt;
+            }
+
+            callbackStorage.add(callbackState);
+
+            var action = 'auth';
+            if (options && options.action == 'register') {
+                action = 'registrations';
+            }
+
+            var scope = (options && options.scope) ? "openid " + options.scope : "openid";
+
+            var url = getRealmUrl()
+                + '/protocol/openid-connect/' + action
+                + '?client_id=' + encodeURIComponent(kc.clientId)
+                + '&redirect_uri=' + encodeURIComponent(redirectUri)
+                + '&state=' + encodeURIComponent(state)
+                + '&nonce=' + encodeURIComponent(nonce)
+                + '&response_mode=' + encodeURIComponent(kc.responseMode)
+                + '&response_type=' + encodeURIComponent(kc.responseType)
+                + '&scope=' + encodeURIComponent(scope);
+
+            if (options && options.prompt) {
+                url += '&prompt=' + encodeURIComponent(options.prompt);
+            }
+
+            if (options && options.maxAge) {
+                url += '&max_age=' + encodeURIComponent(options.maxAge);
+            }
+
+            if (options && options.loginHint) {
+                url += '&login_hint=' + encodeURIComponent(options.loginHint);
+            }
+
+            if (options && options.idpHint) {
+                url += '&kc_idp_hint=' + encodeURIComponent(options.idpHint);
+            }
+
+            if (options && options.locale) {
+                url += '&ui_locales=' + encodeURIComponent(options.locale);
+            }
+
+            return url;
+        }
+
+        kc.logout = function(options) {
+            return adapter.logout(options);
+        }
+
+        kc.createLogoutUrl = function(options) {
+            var url = getRealmUrl()
+                + '/protocol/openid-connect/logout'
+                + '?redirect_uri=' + encodeURIComponent(adapter.redirectUri(options, false));
+
+            return url;
+        }
+
+        kc.register = function (options) {
+            return adapter.register(options);
+        }
+
+        kc.createRegisterUrl = function(options) {
+            if (!options) {
+                options = {};
+            }
+            options.action = 'register';
+            return kc.createLoginUrl(options);
+        }
+
+        kc.createAccountUrl = function(options) {
+            var url = getRealmUrl()
+                + '/account'
+                + '?referrer=' + encodeURIComponent(kc.clientId)
+                + '&referrer_uri=' + encodeURIComponent(adapter.redirectUri(options));
+
+            return url;
+        }
+
+        kc.accountManagement = function() {
+            return adapter.accountManagement();
+        }
+
+        kc.hasRealmRole = function (role) {
+            var access = kc.realmAccess;
+            return !!access && access.roles.indexOf(role) >= 0;
+        }
+
+        kc.hasResourceRole = function(role, resource) {
+            if (!kc.resourceAccess) {
+                return false;
+            }
+
+            var access = kc.resourceAccess[resource || kc.clientId];
+            return !!access && access.roles.indexOf(role) >= 0;
+        }
+
+        kc.loadUserProfile = function() {
+            var url = getRealmUrl() + '/account';
+            var req = new XMLHttpRequest();
+            req.open('GET', url, true);
+            req.setRequestHeader('Accept', 'application/json');
+            req.setRequestHeader('Authorization', 'bearer ' + kc.token);
+
+            var promise = createPromise();
+
+            req.onreadystatechange = function () {
+                if (req.readyState == 4) {
+                    if (req.status == 200) {
+                        kc.profile = JSON.parse(req.responseText);
+                        promise.setSuccess(kc.profile);
+                    } else {
+                        promise.setError();
+                    }
+                }
+            }
+
+            req.send();
+
+            return promise.promise;
+        }
+
+        kc.loadUserInfo = function() {
+            var url = getRealmUrl() + '/protocol/openid-connect/userinfo';
+            var req = new XMLHttpRequest();
+            req.open('GET', url, true);
+            req.setRequestHeader('Accept', 'application/json');
+            req.setRequestHeader('Authorization', 'bearer ' + kc.token);
+
+            var promise = createPromise();
+
+            req.onreadystatechange = function () {
+                if (req.readyState == 4) {
+                    if (req.status == 200) {
+                        kc.userInfo = JSON.parse(req.responseText);
+                        promise.setSuccess(kc.userInfo);
+                    } else {
+                        promise.setError();
+                    }
+                }
+            }
+
+            req.send();
+
+            return promise.promise;
+        }
+
+        kc.isTokenExpired = function(minValidity) {
+            if (!kc.tokenParsed || (!kc.refreshToken && kc.flow != 'implicit' )) {
+                throw 'Not authenticated';
+            }
+
+            var expiresIn = kc.tokenParsed['exp'] - Math.ceil(new Date().getTime() / 1000) + kc.timeSkew;
+            if (minValidity) {
+                expiresIn -= minValidity;
+            }
+            return expiresIn < 0;
+        }
+
+        kc.updateToken = function(minValidity) {
+            var promise = createPromise();
+
+            if (!kc.tokenParsed || !kc.refreshToken) {
+                promise.setError();
+                return promise.promise;
+            }
+
+            minValidity = minValidity || 5;
+
+            var exec = function() {
+                var refreshToken = false;
+                if (kc.timeSkew == -1) {
+                    console.info('Skew ' + kc.timeSkew);
+                    refreshToken = true;
+                    console.info('[KEYCLOAK] Refreshing token: time skew not set');
+                } else if (minValidity == -1) {
+                    refreshToken = true;
+                    console.info('[KEYCLOAK] Refreshing token: forced refresh');
+                } else if (kc.isTokenExpired(minValidity)) {
+                    refreshToken = true;
+                    console.info('[KEYCLOAK] Refreshing token: token expired');
+                }
+
+                if (!refreshToken) {
+                    promise.setSuccess(false);
+                } else {
+                    var params = 'grant_type=refresh_token&' + 'refresh_token=' + kc.refreshToken;
+                    var url = getRealmUrl() + '/protocol/openid-connect/token';
+
+                    refreshQueue.push(promise);
+
+                    if (refreshQueue.length == 1) {
+                        var req = new XMLHttpRequest();
+                        req.open('POST', url, true);
+                        req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                        req.withCredentials = true;
+
+                        if (kc.clientId && kc.clientSecret) {
+                            req.setRequestHeader('Authorization', 'Basic ' + btoa(kc.clientId + ':' + kc.clientSecret));
+                        } else {
+                            params += '&client_id=' + encodeURIComponent(kc.clientId);
+                        }
+
+                        var timeLocal = new Date().getTime();
+
+                        req.onreadystatechange = function () {
+                            if (req.readyState == 4) {
+                                if (req.status == 200) {
+                                    console.info('[KEYCLOAK] Token refreshed');
+
+                                    timeLocal = (timeLocal + new Date().getTime()) / 2;
+
+                                    var tokenResponse = JSON.parse(req.responseText);
+
+                                    setToken(tokenResponse['access_token'], tokenResponse['refresh_token'], tokenResponse['id_token'], timeLocal);
+
+                                    kc.onAuthRefreshSuccess && kc.onAuthRefreshSuccess();
+                                    for (var p = refreshQueue.pop(); p != null; p = refreshQueue.pop()) {
+                                        p.setSuccess(true);
+                                    }
+                                } else {
+                                    console.warn('[KEYCLOAK] Failed to refresh token');
+
+                                    kc.onAuthRefreshError && kc.onAuthRefreshError();
+                                    for (var p = refreshQueue.pop(); p != null; p = refreshQueue.pop()) {
+                                        p.setError(true);
+                                    }
+                                }
+                            }
+                        };
+
+                        req.send(params);
+                    }
+                }
+            }
+
+            if (loginIframe.enable) {
+                var iframePromise = checkLoginIframe();
+                iframePromise.success(function() {
+                    exec();
+                }).error(function() {
+                    promise.setError();
+                });
+            } else {
+                exec();
+            }
+
+            return promise.promise;
+        }
+
+        kc.clearToken = function() {
+            if (kc.token) {
+                setToken(null, null, null);
+                kc.onAuthLogout && kc.onAuthLogout();
+                if (kc.loginRequired) {
+                    kc.login();
+                }
+            }
+        }
+
+        function getRealmUrl() {
+            if (kc.authServerUrl.charAt(kc.authServerUrl.length - 1) == '/') {
+                return kc.authServerUrl + 'realms/' + encodeURIComponent(kc.realm);
+            } else {
+                return kc.authServerUrl + '/realms/' + encodeURIComponent(kc.realm);
+            }
+        }
+
+        function getOrigin() {
+            if (!window.location.origin) {
+                return window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+            } else {
+                return window.location.origin;
+            }
+        }
+
+        function processCallback(oauth, promise) {
+            var code = oauth.code;
+            var error = oauth.error;
+            var prompt = oauth.prompt;
+
+            var timeLocal = new Date().getTime();
+
+            if (error) {
+                if (prompt != 'none') {
+                    var errorData = { error: error, error_description: oauth.error_description };
+                    kc.onAuthError && kc.onAuthError(errorData);
+                    promise && promise.setError(errorData);
+                } else {
+                    promise && promise.setSuccess();
+                }
+                return;
+            } else if ((kc.flow != 'standard') && (oauth.access_token || oauth.id_token)) {
+                authSuccess(oauth.access_token, null, oauth.id_token, true);
+            }
+
+            if ((kc.flow != 'implicit') && code) {
+                var params = 'code=' + code + '&grant_type=authorization_code';
+                var url = getRealmUrl() + '/protocol/openid-connect/token';
+
+                var req = new XMLHttpRequest();
+                req.open('POST', url, true);
+                req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+                if (kc.clientId && kc.clientSecret) {
+                    req.setRequestHeader('Authorization', 'Basic ' + btoa(kc.clientId + ':' + kc.clientSecret));
+                } else {
+                    params += '&client_id=' + encodeURIComponent(kc.clientId);
+                }
+
+                params += '&redirect_uri=' + oauth.redirectUri;
+
+                req.withCredentials = true;
+
+                req.onreadystatechange = function() {
+                    if (req.readyState == 4) {
+                        if (req.status == 200) {
+
+                            var tokenResponse = JSON.parse(req.responseText);
+                            authSuccess(tokenResponse['access_token'], tokenResponse['refresh_token'], tokenResponse['id_token'], kc.flow === 'standard');
+                        } else {
+                            kc.onAuthError && kc.onAuthError();
+                            promise && promise.setError();
+                        }
+                    }
+                };
+
+                req.send(params);
+            }
+
+            function authSuccess(accessToken, refreshToken, idToken, fulfillPromise) {
+                timeLocal = (timeLocal + new Date().getTime()) / 2;
+
+                setToken(accessToken, refreshToken, idToken, timeLocal);
+
+                if ((kc.tokenParsed && kc.tokenParsed.nonce != oauth.storedNonce) ||
+                    (kc.refreshTokenParsed && kc.refreshTokenParsed.nonce != oauth.storedNonce) ||
+                    (kc.idTokenParsed && kc.idTokenParsed.nonce != oauth.storedNonce)) {
+
+                    console.info('[KEYCLOAK] Invalid nonce, clearing token');
+                    kc.clearToken();
+                    promise && promise.setError();
+                } else {
+                    if (fulfillPromise) {
+                        kc.onAuthSuccess && kc.onAuthSuccess();
+                        promise && promise.setSuccess();
+                    }
+                }
+            }
+
+        }
+
+        function loadConfig(url) {
+            var promise = createPromise();
+            var configUrl;
+
+            if (!config) {
+                configUrl = 'keycloak.json';
+            } else if (typeof config === 'string') {
+                configUrl = config;
+            }
+
+            if (configUrl) {
+                var req = new XMLHttpRequest();
+                req.open('GET', configUrl, true);
+                req.setRequestHeader('Accept', 'application/json');
+
+                req.onreadystatechange = function () {
+                    if (req.readyState == 4) {
+                        if (req.status == 200) {
+                            var config = JSON.parse(req.responseText);
+
+                            kc.authServerUrl = config['auth-server-url'];
+                            kc.realm = config['realm'];
+                            kc.clientId = config['resource'];
+                            kc.clientSecret = (config['credentials'] || {})['secret'];
+
+                            promise.setSuccess();
+                        } else {
+                            promise.setError();
+                        }
+                    }
+                };
+
+                req.send();
+            } else {
+                if (!config['url']) {
+                    var scripts = document.getElementsByTagName('script');
+                    for (var i = 0; i < scripts.length; i++) {
+                        if (scripts[i].src.match(/.*keycloak\.js/)) {
+                            config.url = scripts[i].src.substr(0, scripts[i].src.indexOf('/js/keycloak.js'));
+                            break;
+                        }
+                    }
+                }
+
+                if (!config.realm) {
+                    throw 'realm missing';
+                }
+
+                if (!config.clientId) {
+                    throw 'clientId missing';
+                }
+
+                kc.authServerUrl = config.url;
+                kc.realm = config.realm;
+                kc.clientId = config.clientId;
+                kc.clientSecret = (config.credentials || {}).secret;
+
+                promise.setSuccess();
+            }
+
+            return promise.promise;
+        }
+
+        function setToken(token, refreshToken, idToken, timeLocal) {
+            if (kc.tokenTimeoutHandle) {
+                clearTimeout(kc.tokenTimeoutHandle);
+                kc.tokenTimeoutHandle = null;
+            }
+
+            if (token) {
+                kc.token = token;
+                kc.tokenParsed = decodeToken(token);
+                var sessionId = kc.realm + '/' + kc.tokenParsed.sub;
+                if (kc.tokenParsed.session_state) {
+                    sessionId = sessionId + '/' + kc.tokenParsed.session_state;
+                }
+                kc.sessionId = sessionId;
+                kc.authenticated = true;
+                kc.subject = kc.tokenParsed.sub;
+                kc.realmAccess = kc.tokenParsed.realm_access;
+                kc.resourceAccess = kc.tokenParsed.resource_access;
+
+                if (timeLocal) {
+                    kc.timeSkew = Math.floor(timeLocal / 1000) - kc.tokenParsed.iat;
+                    console.info('[KEYCLOAK] Estimated time difference between browser and server is ' + kc.timeSkew + ' seconds');
+                } else {
+                    kc.timeSkew = -1;
+                }
+
+                if (kc.onTokenExpired) {
+                    if (kc.timeSkew == -1) {
+                        kc.onTokenExpired();
+                    } else {
+                        var expiresIn = (kc.tokenParsed['exp'] - (new Date().getTime() / 1000) + kc.timeSkew) * 1000;
+                        if (expiresIn <= 0) {
+                            kc.onTokenExpired();
+                        } else {
+                            kc.tokenTimeoutHandle = setTimeout(kc.onTokenExpired, expiresIn);
+                        }
+                    }
+                }
+
+            } else {
+                delete kc.token;
+                delete kc.tokenParsed;
+                delete kc.subject;
+                delete kc.realmAccess;
+                delete kc.resourceAccess;
+
+                kc.authenticated = false;
+            }
+
+            if (refreshToken) {
+                kc.refreshToken = refreshToken;
+                kc.refreshTokenParsed = decodeToken(refreshToken);
+            } else {
+                delete kc.refreshToken;
+                delete kc.refreshTokenParsed;
+            }
+
+            if (idToken) {
+                kc.idToken = idToken;
+                kc.idTokenParsed = decodeToken(idToken);
+            } else {
+                delete kc.idToken;
+                delete kc.idTokenParsed;
+            }
+        }
+
+        function decodeToken(str) {
+            str = str.split('.')[1];
+
+            str = str.replace('/-/g', '+');
+            str = str.replace('/_/g', '/');
+            switch (str.length % 4)
+            {
+                case 0:
+                    break;
+                case 2:
+                    str += '==';
+                    break;
+                case 3:
+                    str += '=';
+                    break;
+                default:
+                    throw 'Invalid token';
+            }
+
+            str = (str + '===').slice(0, str.length + (str.length % 4));
+            str = str.replace(/-/g, '+').replace(/_/g, '/');
+
+            str = decodeURIComponent(escape(atob(str)));
+
+            str = JSON.parse(str);
+            return str;
+        }
+
+        function createUUID() {
+            var s = [];
+            var hexDigits = '0123456789abcdef';
+            for (var i = 0; i < 36; i++) {
+                s[i] = hexDigits.substr(Math.floor(Math.random() * 0x10), 1);
+            }
+            s[14] = '4';
+            s[19] = hexDigits.substr((s[19] & 0x3) | 0x8, 1);
+            s[8] = s[13] = s[18] = s[23] = '-';
+            var uuid = s.join('');
+            return uuid;
+        }
+
+        kc.callback_id = 0;
+
+        function createCallbackId() {
+            var id = '<id: ' + (kc.callback_id++) + (Math.random()) + '>';
+            return id;
+
+        }
+
+        function parseCallback(url) {
+            var oauth = new CallbackParser(url, kc.responseMode).parseUri();
+            var oauthState = callbackStorage.get(oauth.state);
+
+            if (oauthState && (oauth.code || oauth.error || oauth.access_token || oauth.id_token)) {
+                oauth.redirectUri = oauthState.redirectUri;
+                oauth.storedNonce = oauthState.nonce;
+                oauth.prompt = oauthState.prompt;
+
+                if (oauth.fragment) {
+                    oauth.newUrl += '#' + oauth.fragment;
+                }
+
+                return oauth;
+            }
+        }
+
+        function createPromise() {
+            var p = {
+                setSuccess: function(result) {
+                    p.success = true;
+                    p.result = result;
+                    if (p.successCallback) {
+                        p.successCallback(result);
+                    }
+                },
+
+                setError: function(result) {
+                    p.error = true;
+                    p.result = result;
+                    if (p.errorCallback) {
+                        p.errorCallback(result);
+                    }
+                },
+
+                promise: {
+                    success: function(callback) {
+                        if (p.success) {
+                            callback(p.result);
+                        } else if (!p.error) {
+                            p.successCallback = callback;
+                        }
+                        return p.promise;
+                    },
+                    error: function(callback) {
+                        if (p.error) {
+                            callback(p.result);
+                        } else if (!p.success) {
+                            p.errorCallback = callback;
+                        }
+                        return p.promise;
+                    }
+                }
+            }
+            return p;
+        }
+
+        function setupCheckLoginIframe() {
+            var promise = createPromise();
+
+            if (!loginIframe.enable) {
+                promise.setSuccess();
+                return promise.promise;
+            }
+
+            if (loginIframe.iframe) {
+                promise.setSuccess();
+                return promise.promise;
+            }
+
+            var iframe = document.createElement('iframe');
+            loginIframe.iframe = iframe;
+
+            iframe.onload = function() {
+                var realmUrl = getRealmUrl();
+                if (realmUrl.charAt(0) === '/') {
+                    loginIframe.iframeOrigin = getOrigin();
+                } else {
+                    loginIframe.iframeOrigin = realmUrl.substring(0, realmUrl.indexOf('/', 8));
+                }
+                promise.setSuccess();
+
+                setTimeout(check, loginIframe.interval * 1000);
+            }
+
+            var src = getRealmUrl() + '/protocol/openid-connect/login-status-iframe.html';
+            iframe.setAttribute('src', src );
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+
+            var messageCallback = function(event) {
+                if (event.origin !== loginIframe.iframeOrigin) {
+                    return;
+                }
+
+                if (event.data != "unchanged") {
+                    kc.clearToken();
+                }
+
+                var callbacks = loginIframe.callbackList.splice(0, loginIframe.callbackList.length);
+
+                for (var i = callbacks.length - 1; i >= 0; --i) {
+                    var promise = callbacks[i];
+                    if (event.data == "unchanged") {
+                        promise.setSuccess();
+                    } else {
+                        promise.setError();
+                    }
+                }
+            };
+
+            window.addEventListener('message', messageCallback, false);
+
+            var check = function() {
+                checkLoginIframe();
+                if (kc.token) {
+                    setTimeout(check, loginIframe.interval * 1000);
+                }
+            };
+
+            return promise.promise;
+        }
+
+        function checkLoginIframe() {
+            var promise = createPromise();
+
+            if (loginIframe.iframe && loginIframe.iframeOrigin ) {
+                var msg = kc.clientId + ' ' + kc.sessionId;
+                loginIframe.callbackList.push(promise);
+                var origin = loginIframe.iframeOrigin;
+                if (loginIframe.callbackList.length == 1) {
+                    loginIframe.iframe.contentWindow.postMessage(msg, origin);
+                }
+            } else {
+                promise.setSuccess();
+            }
+
+            return promise.promise;
+        }
+
+        function loadAdapter(type) {
+            if (!type || type == 'default') {
+                return {
+                    login: function(options) {
+                        window.location.href = kc.createLoginUrl(options);
+                        return createPromise().promise;
+                    },
+
+                    logout: function(options) {
+                        window.location.href = kc.createLogoutUrl(options);
+                        return createPromise().promise;
+                    },
+
+                    register: function(options) {
+                        window.location.href = kc.createRegisterUrl(options);
+                        return createPromise().promise;
+                    },
+
+                    accountManagement : function() {
+                        window.location.href = kc.createAccountUrl();
+                        return createPromise().promise;
+                    },
+
+                    redirectUri: function(options, encodeHash) {
+                        if (arguments.length == 1) {
+                            encodeHash = true;
+                        }
+
+                        if (options && options.redirectUri) {
+                            return options.redirectUri;
+                        } else if (kc.redirectUri) {
+                            return kc.redirectUri;
+                        } else {
+                            var redirectUri = location.href;
+                            if (location.hash && encodeHash) {
+                                redirectUri = redirectUri.substring(0, location.href.indexOf('#'));
+                                redirectUri += (redirectUri.indexOf('?') == -1 ? '?' : '&') + 'redirect_fragment=' + encodeURIComponent(location.hash.substring(1));
+                            }
+                            return redirectUri;
+                        }
+                    }
+                };
+            }
+
+            if (type == 'cordova') {
+                loginIframe.enable = false;
+
+                return {
+                    login: function(options) {
+                        var promise = createPromise();
+
+                        var o = 'location=no';
+                        if (options && options.prompt == 'none') {
+                            o += ',hidden=yes';
+                        }
+
+                        var loginUrl = kc.createLoginUrl(options);
+                        var ref = window.open(loginUrl, '_blank', o);
+
+                        var completed = false;
+
+                        ref.addEventListener('loadstart', function(event) {
+                            if (event.url.indexOf('http://localhost') == 0) {
+                                var callback = parseCallback(event.url);
+                                processCallback(callback, promise);
+                                ref.close();
+                                completed = true;
+                            }
+                        });
+
+                        ref.addEventListener('loaderror', function(event) {
+                            if (!completed) {
+                                if (event.url.indexOf('http://localhost') == 0) {
+                                    var callback = parseCallback(event.url);
+                                    processCallback(callback, promise);
+                                    ref.close();
+                                    completed = true;
+                                } else {
+                                    promise.setError();
+                                    ref.close();
+                                }
+                            }
+                        });
+
+                        return promise.promise;
+                    },
+
+                    logout: function(options) {
+                        var promise = createPromise();
+
+                        var logoutUrl = kc.createLogoutUrl(options);
+                        var ref = window.open(logoutUrl, '_blank', 'location=no,hidden=yes');
+
+                        var error;
+
+                        ref.addEventListener('loadstart', function(event) {
+                            if (event.url.indexOf('http://localhost') == 0) {
+                                ref.close();
+                            }
+                        });
+
+                        ref.addEventListener('loaderror', function(event) {
+                            if (event.url.indexOf('http://localhost') == 0) {
+                                ref.close();
+                            } else {
+                                error = true;
+                                ref.close();
+                            }
+                        });
+
+                        ref.addEventListener('exit', function(event) {
+                            if (error) {
+                                promise.setError();
+                            } else {
+                                kc.clearToken();
+                                promise.setSuccess();
+                            }
+                        });
+
+                        return promise.promise;
+                    },
+
+                    register : function() {
+                        var registerUrl = kc.createRegisterUrl();
+                        var ref = window.open(registerUrl, '_blank', 'location=no');
+                        ref.addEventListener('loadstart', function(event) {
+                            if (event.url.indexOf('http://localhost') == 0) {
+                                ref.close();
+                            }
+                        });
+                    },
+
+                    accountManagement : function() {
+                        var accountUrl = kc.createAccountUrl();
+                        var ref = window.open(accountUrl, '_blank', 'location=no');
+                        ref.addEventListener('loadstart', function(event) {
+                            if (event.url.indexOf('http://localhost') == 0) {
+                                ref.close();
+                            }
+                        });
+                    },
+
+                    redirectUri: function(options) {
+                        return 'http://localhost';
+                    }
+                }
+            }
+
+            throw 'invalid adapter type: ' + type;
+        }
+
+        var LocalStorage = function() {
+            if (!(this instanceof LocalStorage)) {
+                return new LocalStorage();
+            }
+
+            localStorage.setItem('kc-test', 'test');
+            localStorage.removeItem('kc-test');
+
+            var cs = this;
+
+            function clearExpired() {
+                var time = new Date().getTime();
+                for (var i = 0; i < localStorage.length; i++)  {
+                    var key = localStorage.key(i);
+                    if (key && key.indexOf('kc-callback-') == 0) {
+                        var value = localStorage.getItem(key);
+                        if (value) {
+                            try {
+                                var expires = JSON.parse(value).expires;
+                                if (!expires || expires < time) {
+                                    localStorage.removeItem(key);
+                                }
+                            } catch (err) {
+                                localStorage.removeItem(key);
+                            }
+                        }
+                    }
+                }
+            }
+
+            cs.get = function(state) {
+                if (!state) {
+                    return;
+                }
+
+                var key = 'kc-callback-' + state;
+                var value = localStorage.getItem(key);
+                if (value) {
+                    localStorage.removeItem(key);
+                    value = JSON.parse(value);
+                }
+
+                clearExpired();
+                return value;
+            };
+
+            cs.add = function(state) {
+                clearExpired();
+
+                var key = 'kc-callback-' + state.state;
+                state.expires = new Date().getTime() + (60 * 60 * 1000);
+                localStorage.setItem(key, JSON.stringify(state));
+            };
+        };
+
+        var CookieStorage = function() {
+            if (!(this instanceof CookieStorage)) {
+                return new CookieStorage();
+            }
+
+            var cs = this;
+
+            cs.get = function(state) {
+                if (!state) {
+                    return;
+                }
+
+                var value = getCookie('kc-callback-' + state);
+                setCookie('kc-callback-' + state, '', cookieExpiration(-100));
+                if (value) {
+                    return JSON.parse(value);
+                }
+            };
+
+            cs.add = function(state) {
+                setCookie('kc-callback-' + state.state, JSON.stringify(state), cookieExpiration(60));
+            };
+
+            cs.removeItem = function(key) {
+                setCookie(key, '', cookieExpiration(-100));
+            };
+
+            var cookieExpiration = function (minutes) {
+                var exp = new Date();
+                exp.setTime(exp.getTime() + (minutes*60*1000));
+                return exp;
+            };
+
+            var getCookie = function (key) {
+                var name = key + '=';
+                var ca = document.cookie.split(';');
+                for (var i = 0; i < ca.length; i++) {
+                    var c = ca[i];
+                    while (c.charAt(0) == ' ') {
+                        c = c.substring(1);
+                    }
+                    if (c.indexOf(name) == 0) {
+                        return c.substring(name.length, c.length);
+                    }
+                }
+                return '';
+            };
+
+            var setCookie = function (key, value, expirationDate) {
+                var cookie = key + '=' + value + '; '
+                    + 'expires=' + expirationDate.toUTCString() + '; ';
+                document.cookie = cookie;
+            }
+        };
+
+        function createCallbackStorage() {
+            try {
+                return new LocalStorage();
+            } catch (err) {
+            }
+
+            return new CookieStorage();
+        }
+
+        var CallbackParser = function(uriToParse, responseMode) {
+            if (!(this instanceof CallbackParser)) {
+                return new CallbackParser(uriToParse, responseMode);
+            }
+            var parser = this;
+
+            var initialParse = function() {
+                var baseUri = null;
+                var queryString = null;
+                var fragmentString = null;
+
+                var questionMarkIndex = uriToParse.indexOf("?");
+                var fragmentIndex = uriToParse.indexOf("#", questionMarkIndex + 1);
+                if (questionMarkIndex == -1 && fragmentIndex == -1) {
+                    baseUri = uriToParse;
+                } else if (questionMarkIndex != -1) {
+                    baseUri = uriToParse.substring(0, questionMarkIndex);
+                    queryString = uriToParse.substring(questionMarkIndex + 1);
+                    if (fragmentIndex != -1) {
+                        fragmentIndex = queryString.indexOf("#");
+                        fragmentString = queryString.substring(fragmentIndex + 1);
+                        queryString = queryString.substring(0, fragmentIndex);
+                    }
+                } else {
+                    baseUri = uriToParse.substring(0, fragmentIndex);
+                    fragmentString = uriToParse.substring(fragmentIndex + 1);
+                }
+
+                return { baseUri: baseUri, queryString: queryString, fragmentString: fragmentString };
+            }
+
+            var parseParams = function(paramString) {
+                var result = {};
+                var params = paramString.split('&');
+                for (var i = 0; i < params.length; i++) {
+                    var p = params[i].split('=');
+                    var paramName = decodeURIComponent(p[0]);
+                    var paramValue = decodeURIComponent(p[1]);
+                    result[paramName] = paramValue;
+                }
+                return result;
+            }
+
+            var handleQueryParam = function(paramName, paramValue, oauth) {
+                var supportedOAuthParams = [ 'code', 'state', 'error', 'error_description' ];
+
+                for (var i = 0 ; i< supportedOAuthParams.length ; i++) {
+                    if (paramName === supportedOAuthParams[i]) {
+                        oauth[paramName] = paramValue;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+
+            parser.parseUri = function() {
+                var parsedUri = initialParse();
+
+                var queryParams = {};
+                if (parsedUri.queryString) {
+                    queryParams = parseParams(parsedUri.queryString);
+                }
+
+                var oauth = { newUrl: parsedUri.baseUri };
+                for (var param in queryParams) {
+                    switch (param) {
+                        case 'redirect_fragment':
+                            oauth.fragment = queryParams[param];
+                            break;
+                        default:
+                            if (responseMode != 'query' || !handleQueryParam(param, queryParams[param], oauth)) {
+                                oauth.newUrl += (oauth.newUrl.indexOf('?') == -1 ? '?' : '&') + param + '=' + queryParams[param];
+                            }
+                            break;
+                    }
+                }
+
+                if (responseMode === 'fragment') {
+                    var fragmentParams = {};
+                    if (parsedUri.fragmentString) {
+                        fragmentParams = parseParams(parsedUri.fragmentString);
+                    }
+                    for (var param in fragmentParams) {
+                        oauth[param] = fragmentParams[param];
+                    }
+                }
+
+                return oauth;
+            }
+        }
+
+    }
+
+    if ( typeof module === "object" && module && typeof module.exports === "object" ) {
+        module.exports = Keycloak;
+    } else {
+        window.Keycloak = Keycloak;
+
+        if ( typeof define === "function" && define.amd ) {
+            define( "keycloak", [], function () { return Keycloak; } );
+        }
+    }
+})( window );
+
+define("keycloak-js", [],function(){});
+
 /*!
  * Bootstrap v3.3.7 (http://getbootstrap.com)
  * Copyright 2011-2016 Twitter, Inc.
@@ -37148,4 +39257,4 @@ define('aurelia-testing/wait',['exports'], function (exports) {
     }, options);
   }
 });
-function _aureliaConfigureModuleLoader(){requirejs.config({"baseUrl":"src/","paths":{"aurelia-binding":"../node_modules/aurelia-binding/dist/amd/aurelia-binding","aurelia-bootstrapper":"../node_modules/aurelia-bootstrapper/dist/amd/aurelia-bootstrapper","aurelia-dependency-injection":"../node_modules/aurelia-dependency-injection/dist/amd/aurelia-dependency-injection","aurelia-framework":"../node_modules/aurelia-framework/dist/amd/aurelia-framework","aurelia-event-aggregator":"../node_modules/aurelia-event-aggregator/dist/amd/aurelia-event-aggregator","aurelia-history-browser":"../node_modules/aurelia-history-browser/dist/amd/aurelia-history-browser","aurelia-history":"../node_modules/aurelia-history/dist/amd/aurelia-history","aurelia-loader":"../node_modules/aurelia-loader/dist/amd/aurelia-loader","aurelia-loader-default":"../node_modules/aurelia-loader-default/dist/amd/aurelia-loader-default","aurelia-logging-console":"../node_modules/aurelia-logging-console/dist/amd/aurelia-logging-console","aurelia-logging":"../node_modules/aurelia-logging/dist/amd/aurelia-logging","aurelia-pal":"../node_modules/aurelia-pal/dist/amd/aurelia-pal","aurelia-metadata":"../node_modules/aurelia-metadata/dist/amd/aurelia-metadata","aurelia-pal-browser":"../node_modules/aurelia-pal-browser/dist/amd/aurelia-pal-browser","aurelia-path":"../node_modules/aurelia-path/dist/amd/aurelia-path","aurelia-route-recognizer":"../node_modules/aurelia-route-recognizer/dist/amd/aurelia-route-recognizer","aurelia-polyfills":"../node_modules/aurelia-polyfills/dist/amd/aurelia-polyfills","aurelia-task-queue":"../node_modules/aurelia-task-queue/dist/amd/aurelia-task-queue","aurelia-router":"../node_modules/aurelia-router/dist/amd/aurelia-router","aurelia-templating":"../node_modules/aurelia-templating/dist/amd/aurelia-templating","aurelia-templating-binding":"../node_modules/aurelia-templating-binding/dist/amd/aurelia-templating-binding","jquery":"../node_modules/jquery/dist/jquery","text":"../node_modules/text/text","app-bundle":"../scripts/app-bundle"},"packages":[{"name":"bootstrap","location":"../node_modules/bootstrap/dist","main":"js/bootstrap.min"},{"name":"aurelia-templating-resources","location":"../node_modules/aurelia-templating-resources/dist/amd","main":"aurelia-templating-resources"},{"name":"aurelia-templating-router","location":"../node_modules/aurelia-templating-router/dist/amd","main":"aurelia-templating-router"},{"name":"aurelia-testing","location":"../node_modules/aurelia-testing/dist/amd","main":"aurelia-testing"}],"stubModules":["text"],"shim":{"bootstrap":{"deps":["jquery"],"exports":"$"}},"bundles":{"app-bundle":["app","connect","environment","main","menuItem","notfound","rapporten","sidebar","timesheet","aanmaken/activiteit","aanmaken/project","activiteiten/lijst","projecten/lijst","organisaties/lijst","resources/index","consultants/detail","consultants/lijst","styles"]}})}
+function _aureliaConfigureModuleLoader(){requirejs.config({"baseUrl":"src/","paths":{"aurelia-binding":"../node_modules/aurelia-binding/dist/amd/aurelia-binding","aurelia-bootstrapper":"../node_modules/aurelia-bootstrapper/dist/amd/aurelia-bootstrapper","aurelia-dependency-injection":"../node_modules/aurelia-dependency-injection/dist/amd/aurelia-dependency-injection","aurelia-event-aggregator":"../node_modules/aurelia-event-aggregator/dist/amd/aurelia-event-aggregator","aurelia-framework":"../node_modules/aurelia-framework/dist/amd/aurelia-framework","aurelia-history":"../node_modules/aurelia-history/dist/amd/aurelia-history","aurelia-history-browser":"../node_modules/aurelia-history-browser/dist/amd/aurelia-history-browser","aurelia-http-client":"../node_modules/aurelia-http-client/dist/amd/aurelia-http-client","aurelia-loader":"../node_modules/aurelia-loader/dist/amd/aurelia-loader","aurelia-logging":"../node_modules/aurelia-logging/dist/amd/aurelia-logging","aurelia-loader-default":"../node_modules/aurelia-loader-default/dist/amd/aurelia-loader-default","aurelia-logging-console":"../node_modules/aurelia-logging-console/dist/amd/aurelia-logging-console","aurelia-metadata":"../node_modules/aurelia-metadata/dist/amd/aurelia-metadata","aurelia-pal-browser":"../node_modules/aurelia-pal-browser/dist/amd/aurelia-pal-browser","aurelia-pal":"../node_modules/aurelia-pal/dist/amd/aurelia-pal","aurelia-polyfills":"../node_modules/aurelia-polyfills/dist/amd/aurelia-polyfills","aurelia-path":"../node_modules/aurelia-path/dist/amd/aurelia-path","aurelia-router":"../node_modules/aurelia-router/dist/amd/aurelia-router","aurelia-route-recognizer":"../node_modules/aurelia-route-recognizer/dist/amd/aurelia-route-recognizer","aurelia-task-queue":"../node_modules/aurelia-task-queue/dist/amd/aurelia-task-queue","aurelia-templating":"../node_modules/aurelia-templating/dist/amd/aurelia-templating","aurelia-templating-binding":"../node_modules/aurelia-templating-binding/dist/amd/aurelia-templating-binding","jquery":"../node_modules/jquery/dist/jquery","keycloak-js":"../node_modules/keycloak-js/dist/keycloak","text":"../node_modules/text/text","app-bundle":"../scripts/app-bundle"},"packages":[{"name":"bootstrap","location":"../node_modules/bootstrap/dist","main":"js/bootstrap.min"},{"name":"aurelia-templating-resources","location":"../node_modules/aurelia-templating-resources/dist/amd","main":"aurelia-templating-resources"},{"name":"aurelia-templating-router","location":"../node_modules/aurelia-templating-router/dist/amd","main":"aurelia-templating-router"},{"name":"aurelia-testing","location":"../node_modules/aurelia-testing/dist/amd","main":"aurelia-testing"}],"stubModules":["text"],"shim":{"bootstrap":{"deps":["jquery"],"exports":"$"}},"bundles":{"app-bundle":["app","environment","goToRoute","keycloak-service","main","menuItem","notfound","rapporten","rest-api","sidebar","timesheet","activiteiten/lijst","consultants/aanmaak-detail","consultants/beheer-detail","consultants/consultant","consultants/lijst","organisaties/lijst","projecten/lijst","resources/index","styles"]}})}
