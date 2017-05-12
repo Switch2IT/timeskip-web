@@ -194,19 +194,69 @@ define('timesheet',['exports', './log', 'bootstrap'], function (exports, _log) {
             this.hours = 0;
             this.logDate = new Date().toISOString().slice(0, 10);
             this.Logs = [];
+            this.Update = false;
         }
         activate(params, routeConfig) {
             this.routeConfig = routeConfig;
             this.routeConfig.navModel.setTitle('Log tijden');
         }
         addLog() {
-            if (this.hours > 0) {
-                var min = this.hours * 60 + this.minutes * 1;
-                this.Logs.push(new _log2.default(this.logDate, min));
-                this.minutes = 0;
-                this.hours = 0;
-                this.logDate = new Date().toISOString().slice(0, 10);
+            var min = 0;
+            if (this.hours > 0 || this.minutes > 0) {
+                min = this.hours * 60 + parseInt(this.minutes);
+            } else {
+                alert("Gelieve uren en/of minuten in te vullen.");
             }
+            if (min > 0) {
+                var log = new _log2.default(min, this.logDate.toString());
+                if (this.Update) {
+                    this.Logs.forEach(function (item, index, Logs) {
+                        if (item.logDate == log.logDate) {
+                            Logs.splice(index, 1);
+                            Logs.push(log);
+                        }
+                    });
+                    this.Update = false;
+                } else {
+                    this.Logs.push(log);
+                }
+                this.Logs.sort(function (a, b) {
+                    var firstDate = new Date(a.logDate);
+                    var secondDate = new Date(b.logDate);
+                    return firstDate.getDate() - secondDate.getDate();
+                });
+                this.clearForm();
+            }
+        }
+
+        editLog(index) {
+            var current = this.Logs[index];
+            this.minutes = parseInt(current.minutes) % 60;
+            this.hours = (parseInt(current.minutes) - this.minutes) / 60;
+            this.logDate = new Date(current.logDate).toISOString().slice(0, 10);
+            this.Update = true;
+            document.getElementById("submitBtn").textContent = "Updaten";
+            document.getElementById("datum").disabled = true;
+        }
+        deleteLog(index) {
+            this.Logs.splice(index, 1);
+        }
+        clearForm() {
+            this.minutes = 0;
+            this.hours = 0;
+            this.logDate = new Date().toISOString().slice(0, 10);
+            document.getElementById("submitBtn").textContent = "Opslaan";
+            document.getElementById("datum").disabled = false;
+        }
+        minuteString(index) {
+            var log = this.Logs[index];
+            var time = parseInt(log.minutes);
+            var mins = time % 60;
+            return this.pad2((time - mins) / 60) + ":" + this.pad2(mins);
+        }
+        pad2(num) {
+            var str = "00" + num;
+            return str.slice(-2);
         }
     }
     exports.Home = Home;
@@ -335,11 +385,11 @@ define('text!styles.css', ['module'], function(module) { module.exports = "body 
 define('text!notfound.html', ['module'], function(module) { module.exports = "<template><h1>404 suck it</h1></template>"; });
 define('text!rapporten.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"rapporten\">Rapport</label><div class=\"col-sm-10\"><select id=\"rapporten\" class=\"form-control\"><option repeat.for=\"type of reportTypes\" value.bind=\"type\">${type}</option></select></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"begin\">Begin Datum</label><div class=\"col-sm-10\"><input type=\"date\" id=\"begin\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"eind\">Eind Datum</label><div class=\"col-sm-10\"><input type=\"date\" id=\"eind\" class=\"form-control\"></div></div><input type=\"submit\" value=\"Download\"></form></div></template>"; });
 define('text!sidebar.html', ['module'], function(module) { module.exports = "<template><div class=\"sidebar col-md-2 base-shadow\"><ul><li repeat.for=\"item of items\" class=\"${item.isActive ? 'active' : ''}\"><a class=\"sidebar-item\" route-href=\"route.bind: item.route\">${item.value}</a></li></ul></div></template>"; });
-define('text!timesheet.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form form class=\"form-horizontal form-height center form-width\" submit.trigger=\"addLog()\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"hours\">Uren</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"hours\"></div><label class=\"col-sm-offset-0 col-sm-2 control-label\" for=\"minutes\">Minuten</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"minutes\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"datum\">Datum</label><div class=\"col-sm-6\"><input type=\"date\" id=\"datum\" class=\"form-control\" value.two-way=\"logDate\"></div></div><div class=\"form-group\"><div class=\"col-sm-offset-4 col-sm-8\"><button type=\"submit\" class=\"col-sm-4\">Add Log</button></div></div><div class=\"form-group\"><table class=\"table table-striped\"><tr repeat.for=\"Log of Logs\" class=\"tablerow\"><td>${Log.logDate}</td><td>${Log.minutes}</td></tr></table></div></form></div></template>"; });
+define('text!timesheet.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form form class=\"form-horizontal form-height center form-width\" submit.trigger=\"addLog()\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"hours\">Uren</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"hours\" min=\"0\" max=\"12\" step=\"1\"></div><label class=\"col-sm-offset-0 col-sm-2 control-label\" for=\"minutes\">Minuten</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"minutes\" min=\"0\" max=\"59\" step=\"5\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"datum\">Datum</label><div class=\"col-sm-6\"><input type=\"date\" id=\"datum\" class=\"form-control\" value.two-way=\"logDate\"></div></div><div class=\"form-group\"><div class=\"col-sm-offset-4 col-sm-8\"><button type=\"submit\" class=\"col-sm-4\" id=\"submitBtn\">Opslaan</button></div></div><div class=\"form-group\"><table class=\"table table-striped\"><thead><tr><th>Datum</th><th>Tijd gelogd</th></tr></thead><tr repeat.for=\"Log of Logs\"><td innerhtml.bind=\"$parent.Logs[$index].logDate\"></td><td innerhtml.bind=\"minuteString($index)\"></td><td><button type=\"button\" class=\"button edit-log\" click.delegate=\"editLog($index)\">Aanpassen</button></td><td><button type=\"button\" class=\"button delete-log\" click.delegate=\"deleteLog($index)\">Verwijderen</button></td></tr></table></div></form></div></template>"; });
 define('text!activiteiten/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
 define('text!consultants/aanmaak-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
 define('text!consultants/beheer-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
 define('text!consultants/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form><a route-href=\"route: maakConsultant\">consultant</a></form></div></template>"; });
-define('text!organisaties/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
 define('text!projecten/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
+define('text!organisaties/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map
