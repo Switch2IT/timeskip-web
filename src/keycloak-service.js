@@ -23,16 +23,5 @@ export default class KeycloakService {
 
   static getToken() {
     return KeycloakService.auth.authz.token;
-   /*return new Promise(function(resolve, reject) {
-     if (KeycloakService.auth.authz.token) {
-        KeycloakService.auth.authz.updateToken(5)
-          .success(function() {
-            resolve(KeycloakService.auth.authz.token);
-          })
-         .error(function() {
-            reject('Failed to refresh token');
-         });
-     }
-   });*/
  }
 }
