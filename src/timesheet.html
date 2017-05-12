@@ -23,7 +23,14 @@
                     <button type="submit" class="col-sm-4">Add Log</button>
                 </div>
             </div>
+            <div class="form-group">
+                <table class="table table-striped">
+                    <tr repeat.for="Log of Logs" >
+                        <td>${Log.logDate}</td>
+                        <td>${Log.minutes}</td>
+                    </tr>
+                </table>
+            </div>
         </form>
-
     </div>
 </template>
