@@ -7,14 +7,14 @@ export class Lijst{
     constructor(router){
         this.title='Consultants'
         this.consultants;
-        this.api= new RestApi();
+        this.api = new RestApi();
         this.router = router;
     }
 
      async activate(params, routeConfig) {
         this.routeConfig = routeConfig;
         this.routeConfig.navModel.setTitle('Consultants');
-        var response=await this.api.getUsersWithParams({"role":"consultant"});
+        var response = await this.api.getUsers() //this.api.getUsersWithParams({"role":"consultant"});
         this.consultants = JSON.parse(response);
      }
      editConsultant(id){

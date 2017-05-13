@@ -3,6 +3,29 @@
         <h2 class="center">${title}</h2>
         <form form class="form-horizontal form-height center form-width" submit.trigger="addLog()">
             <div class="form-group">
+                <h3>${user.firstName + ' ' + user.lastName}</h3>
+                <br />
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="organizations">Organisatie</label>
+                <div class="col-sm-6">
+                    <select class="form-control" name="organizations" value.bind="organization">
+                        <option repeat.for="organization of organizations" model.bind="organization.id" innerHtml.bind="organization.name"></option>
+                    </select>
+                    <br />
+                </div>
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="projects">Project</label>
+                <div class="col-sm-6">
+                    <select class="form-control" name="projects" value.bind="project">
+                        <option repeat.for="project of projects" model.bind="project.id" innerHtml.bind="project.name"></option>
+                    </select>
+                    <br />
+                </div>
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="activities">Activiteit</label>
+                <div class="col-sm-6">
+                    <select class="form-control" name="activities" value.bind="activity">
+                        <option repeat.for="activity of activities" model.bind="activity.id" innerHtml.bind="activity.name"></option>
+                    </select>
+                    <br />
+                </div>
                 <label class="col-sm-offset-2 col-sm-2 control-label" for="hours">Uren</label>
                 <div class="col-sm-2">
                     <input id="minutes" type="number" class="form-control" value.bind="hours" min="0" max="12" step="1" />

@@ -1,9 +1,8 @@
 export default class Consultant{
     
-    constructor(name,role,email, id){
-        this.name=name;
-        this.role=role;
-        this.email=email;
-        this.id = id;
+    constructor(firstName,lastName,email){
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
     }
 }

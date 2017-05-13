@@ -1,5 +1,4 @@
 import KeycloakService from './keycloak-service';
-import NotFound from './notfound'
 import {RouterConfiguration, Router} from 'aurelia-router';
 
 export class App {
