@@ -1,5 +1,5 @@
 {
-  "name": "Canguru-Web",
+  "name": "Timeskip-Web",
   "type": "project:application",
   "platform": {
     "id": "web",
@@ -13,7 +13,9 @@
     "fileExtension": ".js",
     "options": {
       "plugins": [
-        "transform-es2015-modules-amd"
+        "transform-es2015-modules-amd",
+        "transform-decorators-legacy",
+        "transform-async-to-generator"
       ]
     },
     "source": "src/**/*.js"
@@ -101,6 +103,7 @@
           "aurelia-framework",
           "aurelia-history",
           "aurelia-history-browser",
+          "aurelia-http-client",
           "aurelia-loader",
           "aurelia-loader-default",
           "aurelia-logging",
@@ -117,6 +120,7 @@
           "aurelia-templating-binding",
           "text",
           "jquery",
+          "keycloak-js",
   {
     "name": "bootstrap",
     "path": "../node_modules/bootstrap/dist",

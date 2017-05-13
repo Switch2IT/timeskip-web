@@ -2,7 +2,26 @@
     <div class="main-view base-shadow">
         <h2 class="center">${title}</h2>
         <form>
-            <a route-href="route: maakConsultant"> consultant</a>
+            <button>Niewe Consultant</button>
         </form>
+        <div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>voornaam</th>
+                        <th>familienaam</th>
+                        <th>e-mail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr repeat.for="consultant of consultants">
+                        <td>${consultant.firstName}</td>
+                        <td>${consultant.lastName}</td>
+                        <td>${consultant.email}</td>
+                        <td><button type="button" click.delegate="editConsultant(consultant.id)">Wijzigen</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>

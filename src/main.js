@@ -1,4 +1,5 @@
 import environment from './environment';
+import KeycloakService from './keycloak-service';
 
 //Configure Bluebird Promises.
 Promise.config({
@@ -11,6 +12,9 @@ export function configure(aurelia) {
   aurelia.use
     .standardConfiguration()
     .feature('resources');
+
+  KeycloakService.init()
+    .then(() => aurelia.start().then(() => aurelia.setRoot()));
 
   if (environment.debug) {
     aurelia.use.developmentLogging();
