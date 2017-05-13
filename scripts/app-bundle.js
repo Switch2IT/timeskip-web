@@ -1,4 +1,4 @@
-define('app',['exports', './keycloak-service'], function (exports, _keycloakService) {
+define('app',['exports', './keycloak-service', './notfound', 'aurelia-router'], function (exports, _keycloakService, _notfound, _aureliaRouter) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -7,6 +7,8 @@ define('app',['exports', './keycloak-service'], function (exports, _keycloakServ
   exports.App = undefined;
 
   var _keycloakService2 = _interopRequireDefault(_keycloakService);
+
+  var _notfound2 = _interopRequireDefault(_notfound);
 
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -24,8 +26,8 @@ define('app',['exports', './keycloak-service'], function (exports, _keycloakServ
     configureRouter(config, router) {
       this.router = router;
       config.title = '';
-      config.map([{ route: '', moduleId: 'timesheet', title: 'Timesheet', name: 'timesheet', nav: true }, { route: 'rapporten', moduleId: 'rapporten', name: 'rapporten', nav: true }, { route: 'consultants', moduleId: 'consultants/lijst', name: 'consultants', nav: true }, { route: 'consultants/aanmaken', moduleId: 'consultants/aanmaak-detail', name: 'maakConsultant' }, { route: 'consultants/:id', moduleId: 'consultants/beheer-detail', name: 'consultantDetail' }, { route: 'projecten', moduleId: 'projecten/lijst', name: 'projecten', nav: true }, { route: 'projecten/aanmaken', moduleId: 'projecten/detail', name: 'maakProject' }, { route: 'projecten/:id', moduleId: 'projecten/detail', name: 'projectDetail' }, { route: 'activiteiten', moduleId: 'activiteiten/lijst', name: 'activiteiten', nav: true }, { route: 'activiteiten/aanmaken', moduleId: 'activiteiten/detail', name: 'maakActiviteit' }, { route: 'activiteiten/:id', moduleId: 'activiteiten/detail', name: 'activiteitDetail' }, { route: 'organisaties', moduleId: 'organisaties/lijst', name: 'organisaties', nav: true }, { route: 'organisaties/aanmaken', moduleId: 'organisaties/detail', name: 'maakOrganisatie' }, { route: 'organisaties/:id', moduleId: 'organisaties/detail', name: 'organisatieDetail' }]);
 
+      config.map([{ route: '', moduleId: 'timesheet', title: 'Timesheet', name: 'timesheet', nav: true }, { route: 'rapporten', moduleId: 'rapporten', name: 'rapporten', nav: true }, { route: 'consultants', moduleId: 'consultants/lijst', name: 'consultants', nav: true }, { route: 'consultants/aanmaken', moduleId: 'consultants/aanmaak-detail', name: 'maakConsultant' }, { route: 'consultants/:id', moduleId: 'consultants/beheer-detail', name: 'consultantDetail', href: '#id', nav: true }, { route: 'projecten', moduleId: 'projecten/lijst', name: 'projecten', nav: true }, { route: 'projecten/aanmaken', moduleId: 'projecten/detail', name: 'maakProject' }, { route: 'projecten/:id', moduleId: 'projecten/detail', name: 'projectDetail' }, { route: 'activiteiten', moduleId: 'activiteiten/lijst', name: 'activiteiten', nav: true }, { route: 'activiteiten/aanmaken', moduleId: 'activiteiten/detail', name: 'maakActiviteit' }, { route: 'activiteiten/:id', moduleId: 'activiteiten/detail', name: 'activiteitDetail' }, { route: 'organisaties', moduleId: 'organisaties/lijst', name: 'organisaties', nav: true }, { route: 'organisaties/aanmaken', moduleId: 'organisaties/detail', name: 'maakOrganisatie' }, { route: 'organisaties/:id', moduleId: 'organisaties/detail', name: 'organisatieDetail' }]);
       config.mapUnknownRoutes('notfound');
     }
   };
@@ -277,11 +279,21 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             })();
         }
 
-        createUser(body) {
+        getUser(userid) {
             var _this3 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this3.postData("/users");
+                var data = yield _this3.getData("/users/".concat(userid));
+                console.log(data);
+                return data.response;
+            })();
+        }
+
+        createUser(body) {
+            var _this4 = this;
+
+            return _asyncToGenerator(function* () {
+                var data = yield _this4.postData("/users");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -291,10 +303,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getCurrentUser() {
-            var _this4 = this;
+            var _this5 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this4.getData("/users/current");
+                var data = yield _this5.getData("/users/current");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -304,10 +316,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateCurrentUser(body) {
-            var _this5 = this;
+            var _this6 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this5.patchData("/users/current", body);
+                var data = yield _this6.patchData("/users/current", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -317,10 +329,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateCurrentUserWorklogs(body) {
-            var _this6 = this;
+            var _this7 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this6.putData("/users/current/worklogs", body);
+                var data = yield _this7.putData("/users/current/worklogs", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -330,10 +342,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUser(userId) {
-            var _this7 = this;
+            var _this8 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this7.getData("/users/".concat(userId));
+                var data = yield _this8.getData("/users/".concat(userId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -343,10 +355,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateUser(userId, body) {
-            var _this8 = this;
+            var _this9 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this8.patchData("/users/".concat(userId), body);
+                var data = yield _this9.patchData("/users/".concat(userId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -356,10 +368,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUserMemberships(userId) {
-            var _this9 = this;
+            var _this10 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this9.getData("/users/".concat(userId).concat("/memberships"));
+                var data = yield _this10.getData("/users/".concat(userId).concat("/memberships"));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -369,10 +381,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateUserMemberships(userId, organizationId, body) {
-            var _this10 = this;
+            var _this11 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this10.putData("/users/".concat(userId).concat("/memberships/organizations/").concat(organizationId), body);
+                var data = yield _this11.putData("/users/".concat(userId).concat("/memberships/organizations/").concat(organizationId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -382,10 +394,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         removeUserMembership(userId, organizationId) {
-            var _this11 = this;
+            var _this12 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this11.deleteData("/users/".concat(userId).concat("/memberships/").concat(organizationId));
+                var data = yield _this12.deleteData("/users/".concat(userId).concat("/memberships/").concat(organizationId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -401,10 +413,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         //ORGANIZATIONS
 
         getOrganizations() {
-            var _this12 = this;
+            var _this13 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this12.getData("/organizations");
+                var data = yield _this13.getData("/organizations");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -414,10 +426,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getOrganization(organizationId) {
-            var _this13 = this;
+            var _this14 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this13.getData("/organizations/".concat(organizationId));
+                var data = yield _this14.getData("/organizations/".concat(organizationId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -427,10 +439,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createOrganization(body) {
-            var _this14 = this;
+            var _this15 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this14.postData("/organizations", body);
+                var data = yield _this15.postData("/organizations", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -440,10 +452,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateOrganization(id, body) {
-            var _this15 = this;
+            var _this16 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this15.patchData("/organizations".concat(id), body);
+                var data = yield _this16.patchData("/organizations".concat(id), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -453,10 +465,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         removeOrganization(organizationId) {
-            var _this16 = this;
+            var _this17 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this16.deleteData("/organizations/".concat(organizationId));
+                var data = yield _this17.deleteData("/organizations/".concat(organizationId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -468,10 +480,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         //PROJECTS
 
         getProjects(organizationId) {
-            var _this17 = this;
+            var _this18 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this17.getData("/organizations/".concat(organizationId).concat("/projects"));
+                var data = yield _this18.getData("/organizations/".concat(organizationId).concat("/projects"));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -481,10 +493,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getProject(organizationId, projectId) {
-            var _this18 = this;
+            var _this19 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this18.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId));
+                var data = yield _this19.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -494,10 +506,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createProject(organizationId, body) {
-            var _this19 = this;
+            var _this20 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this19.postData("/organizations/".concat(organizationId).concat("/projects"), body);
+                var data = yield _this20.postData("/organizations/".concat(organizationId).concat("/projects"), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -507,10 +519,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateProject(organizationId, projectId, body) {
-            var _this20 = this;
+            var _this21 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this20.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId), body);
+                var data = yield _this21.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -520,10 +532,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         deleteProject(organizationId, projectId) {
-            var _this21 = this;
+            var _this22 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this21.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId));
+                var data = yield _this22.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -535,10 +547,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         //ACTIVITIES
 
         getActivities(organizationId, projectId) {
-            var _this22 = this;
+            var _this23 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this22.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities"));
+                var data = yield _this23.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities"));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -548,10 +560,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getActivity(organizationId, projectId, activityId) {
-            var _this23 = this;
+            var _this24 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this23.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId));
+                var data = yield _this24.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -561,10 +573,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createActivity(organizationId, projectId, body) {
-            var _this24 = this;
+            var _this25 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this24.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities"), body);
+                var data = yield _this25.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities"), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -574,10 +586,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateActvitiy(organizationId, projectId, activityId, body) {
-            var _this25 = this;
+            var _this26 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this25.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId), body);
+                var data = yield _this26.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -587,10 +599,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         deleteActivity(organizationId, projectId, activityId) {
-            var _this26 = this;
+            var _this27 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this26.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId));
+                var data = yield _this27.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -602,10 +614,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         //WORKLOGS
 
         getWorklogs(organizationId, projectId, activityId) {
-            var _this27 = this;
+            var _this28 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this27.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs"));
+                var data = yield _this28.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs"));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -615,10 +627,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getWorklogs(organizationId, projectId, activityId, worklogId) {
-            var _this28 = this;
+            var _this29 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this28.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs/").concat(worklogId));
+                var data = yield _this29.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs/").concat(worklogId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -628,10 +640,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createWorklog(organizationId, projectId, activityId, body) {
-            var _this29 = this;
+            var _this30 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this29.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities").concat(activityId).concat("/worklogs"), body);
+                var data = yield _this30.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities").concat(activityId).concat("/worklogs"), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -641,10 +653,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createWorklogForCurrentUser(organizationId, projectId, activityId, body) {
-            var _this30 = this;
+            var _this31 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this30.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities").concat(activityId).concat("/worklogs").concat("/currentuser"), body);
+                var data = yield _this31.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities").concat(activityId).concat("/worklogs").concat("/currentuser"), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -654,10 +666,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateWorklog(organizationId, projectId, activityId, worklogId, body) {
-            var _this31 = this;
+            var _this32 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this31.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs/").concat(worklogId), body);
+                var data = yield _this32.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs/").concat(worklogId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -667,10 +679,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         deleteWorklog(organizationId, projectId, activityId, worklogId) {
-            var _this32 = this;
+            var _this33 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this32.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs/").concat(worklogId));
+                var data = yield _this33.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs/").concat(worklogId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -684,10 +696,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
          */
 
         getMailTemplates() {
-            var _this33 = this;
+            var _this34 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this33.getData("/configuration/mail/templates");
+                var data = yield _this34.getData("/configuration/mail/templates");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -697,10 +709,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getMailTemplateByTopic(topic) {
-            var _this34 = this;
+            var _this35 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this34.getData("/configuration/mail/templates/".concat(topic));
+                var data = yield _this35.getData("/configuration/mail/templates/".concat(topic));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -710,10 +722,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateMailTemplate(topic, body) {
-            var _this35 = this;
+            var _this36 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this35.patchData("/configuration/mail/templates/".concat(topic), body);
+                var data = yield _this36.patchData("/configuration/mail/templates/".concat(topic), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -723,10 +735,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getPaygrades() {
-            var _this36 = this;
+            var _this37 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this36.getData("/configuration/paygrades");
+                var data = yield _this37.getData("/configuration/paygrades");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -736,10 +748,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getPaygrade(paygradeId) {
-            var _this37 = this;
+            var _this38 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this37.getData("/configuration/paygrades/".concat(paygradeId));
+                var data = yield _this38.getData("/configuration/paygrades/".concat(paygradeId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -749,10 +761,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createPaygrade(body) {
-            var _this38 = this;
+            var _this39 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this38.postData("/configuration/paygrades", body);
+                var data = yield _this39.postData("/configuration/paygrades", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -762,10 +774,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getDayOfMontlyReminder() {
-            var _this39 = this;
+            var _this40 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this39.getData("/configuration/schedule/dayofmonthlyreminder");
+                var data = yield _this40.getData("/configuration/schedule/dayofmonthlyreminder");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -775,10 +787,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateDayOfMontlyReminder(body) {
-            var _this40 = this;
+            var _this41 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this40.putData("/configuration/schedule/dayofmonthlyreminder", body);
+                var data = yield _this41.putData("/configuration/schedule/dayofmonthlyreminder", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -792,10 +804,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
          */
 
         getRoles() {
-            var _this41 = this;
+            var _this42 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this41.getData("/roles");
+                var data = yield _this42.getData("/roles");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -805,10 +817,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getRole(roleId) {
-            var _this42 = this;
+            var _this43 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this42.getData("/roles/".concat(roleId));
+                var data = yield _this43.getData("/roles/".concat(roleId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -818,10 +830,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createRole(body) {
-            var _this43 = this;
+            var _this44 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this43.postData("/roles", body);
+                var data = yield _this44.postData("/roles", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -831,10 +843,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateRole(roleId, body) {
-            var _this44 = this;
+            var _this45 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this44.patchData("/roles".concat(roleId), body);
+                var data = yield _this45.patchData("/roles".concat(roleId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -844,10 +856,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         removeRole(roleId) {
-            var _this45 = this;
+            var _this46 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this45.deleteData("/roles/".concat(roleId));
+                var data = yield _this46.deleteData("/roles/".concat(roleId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -861,10 +873,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
          */
 
         getBillingReport(params) {
-            var _this46 = this;
+            var _this47 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this46.getDataWithParams("/reports/billing");
+                var data = yield _this47.getDataWithParams("/reports/billing");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -874,10 +886,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getBillingReportAsPdf(params) {
-            var _this47 = this;
+            var _this48 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this47.getPdfDataWithParams("/reports/billing/pdf");
+                var data = yield _this48.getPdfDataWithParams("/reports/billing/pdf");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -887,10 +899,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getTimeLogReport(params) {
-            var _this48 = this;
+            var _this49 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this48.getDataWithParams("/reports/loggedtime");
+                var data = yield _this49.getDataWithParams("/reports/loggedtime");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -900,10 +912,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getTimeLogReportAsPdf(params) {
-            var _this49 = this;
+            var _this50 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this49.getPdfDataWithParams("/reports/loggedtime/pdf");
+                var data = yield _this50.getPdfDataWithParams("/reports/loggedtime/pdf");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -913,10 +925,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getCurrentUserTimeLogReport(params) {
-            var _this50 = this;
+            var _this51 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this50.getDataWithParams("/reports/loggedtime/users/current");
+                var data = yield _this51.getDataWithParams("/reports/loggedtime/users/current");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -926,10 +938,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUserTimeLogReportAsPdf(params) {
-            var _this51 = this;
+            var _this52 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this51.getPdfDataWithParams("/reports/loggedtime/users/current/pdf");
+                var data = yield _this52.getPdfDataWithParams("/reports/loggedtime/users/current/pdf");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -939,10 +951,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUserTimeLogReport(params, userId) {
-            var _this52 = this;
+            var _this53 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this52.getDataWithParams("/reports/loggedtime/users/".concat(userId));
+                var data = yield _this53.getDataWithParams("/reports/loggedtime/users/".concat(userId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -952,10 +964,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getCurrentUserTimeLogReportAsPdf(params, userId) {
-            var _this53 = this;
+            var _this54 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this53.getPdfDataWithParams("/reports/loggedtime/users/".concat(userId).concat("/pdf"));
+                var data = yield _this54.getPdfDataWithParams("/reports/loggedtime/users/".concat(userId).concat("/pdf"));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -965,10 +977,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getOvertimeReport(params) {
-            var _this54 = this;
+            var _this55 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this54.getDataWithParams("/reports/overtime");
+                var data = yield _this55.getDataWithParams("/reports/overtime");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -978,10 +990,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getOvertimeReportAsPdf(params) {
-            var _this55 = this;
+            var _this56 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this55.getPdfDataWithParams("/reports/overtime/pdf");
+                var data = yield _this56.getPdfDataWithParams("/reports/overtime/pdf");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -991,10 +1003,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUndertimeReport(params) {
-            var _this56 = this;
+            var _this57 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this56.getDataWithParams("/reports/undertime");
+                var data = yield _this57.getDataWithParams("/reports/undertime");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -1004,10 +1016,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUndertimeReportAsPdf(params) {
-            var _this57 = this;
+            var _this58 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this57.getPdfDataWithParams("/reports/undertime/pdf");
+                var data = yield _this58.getPdfDataWithParams("/reports/undertime/pdf");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -1137,20 +1149,78 @@ define('consultants/aanmaak-detail',['exports'], function (exports) {
         }
     };
 });
-define('consultants/beheer-detail',['exports'], function (exports) {
+define('consultants/beheer-detail',['exports', '../rest-api', './consultant'], function (exports, _restApi, _consultant) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
+    exports.BeheerkDetail = undefined;
+
+    var _restApi2 = _interopRequireDefault(_restApi);
+
+    var _consultant2 = _interopRequireDefault(_consultant);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    function _asyncToGenerator(fn) {
+        return function () {
+            var gen = fn.apply(this, arguments);
+            return new Promise(function (resolve, reject) {
+                function step(key, arg) {
+                    try {
+                        var info = gen[key](arg);
+                        var value = info.value;
+                    } catch (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    if (info.done) {
+                        resolve(value);
+                    } else {
+                        return Promise.resolve(value).then(function (value) {
+                            step("next", value);
+                        }, function (err) {
+                            step("throw", err);
+                        });
+                    }
+                }
+
+                return step("next");
+            });
+        };
+    }
+
     let BeheerkDetail = exports.BeheerkDetail = class BeheerkDetail {
         constructor() {
-            this.title = 'Consultant Beherem';
+            this.title = 'Consultant Beheren';
+            this.consultant;
+            this.api = new _restApi2.default();
         }
 
         activate(params, routeConfig) {
-            this.routeConfig = routeConfig;
-            this.routeConfig.navModel.setTitle('Consultant Beheren');
+            var _this = this;
+
+            return _asyncToGenerator(function* () {
+                _this.routeConfig = routeConfig;
+                _this.routeConfig.navModel.setTitle('Consultant Beheren');
+                _this.consultant = params.id;
+                var response = yield _this.api.getUser(params.id);
+                _this.consultant = JSON.parse(response);
+                if (_this.consultant !== undefined && _this.consultant != null) {
+                    _this.fillForm(_this.consultant);
+                }
+            })();
+        }
+        fillForm(consultant) {
+            this.email = consultant.email;
+            this.firstName = consultant.firstName;
+            this.lastName = consultant.lastName;
         }
     };
 });
@@ -1162,15 +1232,16 @@ define('consultants/consultant',["exports"], function (exports) {
     });
     let Consultant = class Consultant {
 
-        constructor(name, role, email) {
+        constructor(name, role, email, id) {
             this.name = name;
             this.role = role;
             this.email = email;
+            this.id = id;
         }
     };
     exports.default = Consultant;
 });
-define('consultants/lijst',['exports', '../rest-api'], function (exports, _restApi) {
+define('consultants/lijst',['exports', '../rest-api', 'aurelia-framework', 'aurelia-router'], function (exports, _restApi, _aureliaFramework, _aureliaRouter) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {
@@ -1215,11 +1286,14 @@ define('consultants/lijst',['exports', '../rest-api'], function (exports, _restA
         };
     }
 
-    let Lijst = exports.Lijst = class Lijst {
-        constructor() {
+    var _dec, _class;
+
+    let Lijst = exports.Lijst = (_dec = (0, _aureliaFramework.inject)(_aureliaRouter.Router), _dec(_class = class Lijst {
+        constructor(router) {
             this.title = 'Consultants';
             this.consultants;
             this.api = new _restApi2.default();
+            this.router = router;
         }
 
         activate(params, routeConfig) {
@@ -1232,7 +1306,10 @@ define('consultants/lijst',['exports', '../rest-api'], function (exports, _restA
                 _this.consultants = JSON.parse(response);
             })();
         }
-    };
+        editConsultant(id) {
+            this.router.navigate('consultants/' + id);
+        }
+    }) || _class);
 });
 define('organisaties/lijst',['exports'], function (exports) {
     'use strict';
@@ -1287,8 +1364,8 @@ define('text!sidebar.html', ['module'], function(module) { module.exports = "<te
 define('text!timesheet.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
 define('text!activiteiten/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
 define('text!consultants/aanmaak-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
-define('text!consultants/beheer-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
-define('text!consultants/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form><button>Niewe Consultant</button></form><div><table><tr><th>voornaam</th><th>familienaam</th><th>e-mail</th></tr><tr repeat.for=\"consultant of consultants\"><td>${consultant.firstName}</td><td>${consultant.lastName}</td><td>${consultant.email}</td></tr></table></div></div></template>"; });
+define('text!consultants/beheer-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\" submit.trigger=\"updateConsultant()\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\" value.two-way=\"email\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\" value.two-way=\"firstName\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\" value.two-way=\"lastName\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
+define('text!consultants/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form><button>Niewe Consultant</button></form><div><table class=\"table table-striped\"><thead><tr><th>voornaam</th><th>familienaam</th><th>e-mail</th></tr></thead><tbody><tr repeat.for=\"consultant of consultants\"><td>${consultant.firstName}</td><td>${consultant.lastName}</td><td>${consultant.email}</td><td><button type=\"button\" click.delegate=\"editConsultant(consultant.id)\">Wijzigen</button></td></tr></tbody></table></div></div></template>"; });
 define('text!organisaties/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
 define('text!projecten/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map
