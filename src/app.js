@@ -1,4 +1,6 @@
 import KeycloakService from './keycloak-service';
+import NotFound from './notfound'
+import {RouterConfiguration, Router} from 'aurelia-router';
 
 export class App {
   activate(){
@@ -7,16 +9,19 @@ export class App {
   logout(){
     KeycloakService.logout();
   }
+  
 
   configureRouter(config, router){
     this.router = router;
     config.title = '';
+    
+    
     config.map([
       { route: '', moduleId: 'timesheet',   title: 'Timesheet', name:'timesheet', nav:true},
       { route: 'rapporten',  moduleId: 'rapporten', name:'rapporten', nav:true },
       { route: 'consultants',  moduleId: 'consultants/lijst', name:'consultants', nav:true },
       { route: 'consultants/aanmaken',  moduleId: 'consultants/aanmaak-detail', name:'maakConsultant'},
-      { route: 'consultants/:id',  moduleId: 'consultants/beheer-detail', name:'consultantDetail'},
+      { route: 'consultants/:id',  moduleId: 'consultants/beheer-detail', name:'consultantDetail', href:'#id', nav:true },
       { route: 'projecten',  moduleId: 'projecten/lijst', name:'projecten', nav:true },
       { route: 'projecten/aanmaken',  moduleId: 'projecten/detail', name:'maakProject'},
       { route: 'projecten/:id',  moduleId: 'projecten/detail', name:'projectDetail'},
@@ -27,7 +32,7 @@ export class App {
       { route: 'organisaties/aanmaken',  moduleId: 'organisaties/detail', name:'maakOrganisatie'},
       { route: 'organisaties/:id',  moduleId: 'organisaties/detail', name:'organisatieDetail'}
     ]);
-
     config.mapUnknownRoutes('notfound');
+
   }
 }
