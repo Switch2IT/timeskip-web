@@ -14,7 +14,7 @@ export class Lijst{
      async activate(params, routeConfig) {
         this.routeConfig = routeConfig;
         this.routeConfig.navModel.setTitle('Consultants');
-        var response = await this.api.getUsers();
+        var response=await this.api.getUsersWithParams({"role":"consultant"});
         this.consultants = JSON.parse(response);
      }
      editConsultant(id){
