@@ -5,17 +5,22 @@
             <button>Niewe Consultant</button>
         </form>
         <div>
-            <table>
-                <tr>
-                    <th>voornaam</th>
-                    <th>familienaam</th>
-                    <th>e-mail</th>
-                </tr>
-                <tr repeat.for="consultant of consultants">
-                    <td>${consultant.firstName}</td>
-                    <td>${consultant.lastName}</td>
-                    <td>${consultant.email}</td>
-                </tr>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>voornaam</th>
+                        <th>familienaam</th>
+                        <th>e-mail</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr repeat.for="consultant of consultants">
+                        <td>${consultant.firstName}</td>
+                        <td>${consultant.lastName}</td>
+                        <td>${consultant.email}</td>
+                        <td><button type="button" click.delegate="editConsultant(consultant.id)">Wijzigen</button></td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>

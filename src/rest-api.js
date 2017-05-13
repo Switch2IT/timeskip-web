@@ -38,6 +38,12 @@ export default class RestApi {
         }
     }
 
+    async getUser(userid) {
+        var data = await this.getData("/users/".concat(userid));
+        console.log(data);
+        return data.response;
+    }
+
     async createUser(body) {
         var data = await this.postData("/users");
         if (data.statusCode < 400) {
