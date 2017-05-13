@@ -1,6 +1,11 @@
 import { HttpClient } from 'aurelia-http-client';
 import KeycloakService from './keycloak-service';
 
+/**
+ * This class provides methods to perform REST calls to the timeskip backend.
+ * Params are a map of key/value pairs.
+ * Body is json string of the required object
+ */
 export default class RestApi {
     constructor() {
         this.http = new HttpClient();
@@ -298,12 +303,88 @@ export default class RestApi {
             .concat("/projects/").concat(projectId)
             .concat("/activities/").concat(activityId)
             .concat("/worklogs/").concat(worklogId));
-        if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
+        if (data.statusCode < 400) { 
+            return data.response; 
+        } else { 
+            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        }
     }
 
     /**
-     * Following methods are used for management and HR only calls.
+     * Following methods are used for management and HR only calls. 
      */
+    
+    async getMailTemplates() {
+        var data = await this.getData("/configuration/mail/templates");
+        if (data.statusCode < 400) { 
+            return data.response; 
+        } else { 
+            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        }
+    }
+
+    async getMailTemplateByTopic(topic) {
+        var data = await this.getData("/configuration/mail/templates/".concat(topic));
+        if (data.statusCode < 400) { 
+            return data.response; 
+        } else { 
+            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        }
+    }
+
+    async updateMailTemplate(topic,body) {
+        var data = await this.patchData("/configuration/mail/templates/".concat(topic),body);
+        if (data.statusCode < 400) { 
+            return data.response; 
+        } else { 
+            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        }
+    }
+
+   async getPaygrades() {
+        var data = await this.getData("/configuration/paygrades");
+        if (data.statusCode < 400) { 
+            return data.response; 
+        } else { 
+            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        }
+    } 
+
+    async getPaygrade(paygradeId) {
+        var data = await this.getData("/configuration/paygrades/".concat(paygradeId));
+        if (data.statusCode < 400) { 
+            return data.response; 
+        } else { 
+            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        }
+    } 
+
+    async createPaygrade(body) {
+        var data = await this.postData("/configuration/paygrades",body);
+        if (data.statusCode < 400) { 
+            return data.response; 
+        } else { 
+            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        }
+    } 
+
+    async getDayOfMontlyReminder() {
+        var data = await this.getData("/configuration/schedule/dayofmonthlyreminder");
+        if (data.statusCode < 400) { 
+            return data.response; 
+        } else { 
+            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        }
+    }
+
+    async updateDayOfMontlyReminder(body) {
+        var data = await this.putData("/configuration/schedule/dayofmonthlyreminder",body);
+        if (data.statusCode < 400) { 
+            return data.response; 
+        } else { 
+            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        }
+    }
 
     /**
      * Following methods are used for management of roles.

@@ -680,18 +680,122 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         /**
-         * Following methods are used for management and HR only calls.
+         * Following methods are used for management and HR only calls. 
          */
+
+        getMailTemplates() {
+            var _this33 = this;
+
+            return _asyncToGenerator(function* () {
+                var data = yield _this33.getData("/configuration/mail/templates");
+                if (data.statusCode < 400) {
+                    return data.response;
+                } else {
+                    alert(data.statusCode.concat(' - ').concat(data.statusText));
+                }
+            })();
+        }
+
+        getMailTemplateByTopic(topic) {
+            var _this34 = this;
+
+            return _asyncToGenerator(function* () {
+                var data = yield _this34.getData("/configuration/mail/templates/".concat(topic));
+                if (data.statusCode < 400) {
+                    return data.response;
+                } else {
+                    alert(data.statusCode.concat(' - ').concat(data.statusText));
+                }
+            })();
+        }
+
+        updateMailTemplate(topic, body) {
+            var _this35 = this;
+
+            return _asyncToGenerator(function* () {
+                var data = yield _this35.patchData("/configuration/mail/templates/".concat(topic), body);
+                if (data.statusCode < 400) {
+                    return data.response;
+                } else {
+                    alert(data.statusCode.concat(' - ').concat(data.statusText));
+                }
+            })();
+        }
+
+        getPaygrades() {
+            var _this36 = this;
+
+            return _asyncToGenerator(function* () {
+                var data = yield _this36.getData("/configuration/paygrades");
+                if (data.statusCode < 400) {
+                    return data.response;
+                } else {
+                    alert(data.statusCode.concat(' - ').concat(data.statusText));
+                }
+            })();
+        }
+
+        getPaygrade(paygradeId) {
+            var _this37 = this;
+
+            return _asyncToGenerator(function* () {
+                var data = yield _this37.getData("/configuration/paygrades/".concat(paygradeId));
+                if (data.statusCode < 400) {
+                    return data.response;
+                } else {
+                    alert(data.statusCode.concat(' - ').concat(data.statusText));
+                }
+            })();
+        }
+
+        createPaygrade(body) {
+            var _this38 = this;
+
+            return _asyncToGenerator(function* () {
+                var data = yield _this38.postData("/configuration/paygrades", body);
+                if (data.statusCode < 400) {
+                    return data.response;
+                } else {
+                    alert(data.statusCode.concat(' - ').concat(data.statusText));
+                }
+            })();
+        }
+
+        getDayOfMontlyReminder() {
+            var _this39 = this;
+
+            return _asyncToGenerator(function* () {
+                var data = yield _this39.getData("/configuration/schedule/dayofmonthlyreminder");
+                if (data.statusCode < 400) {
+                    return data.response;
+                } else {
+                    alert(data.statusCode.concat(' - ').concat(data.statusText));
+                }
+            })();
+        }
+
+        updateDayOfMontlyReminder(body) {
+            var _this40 = this;
+
+            return _asyncToGenerator(function* () {
+                var data = yield _this40.putData("/configuration/schedule/dayofmonthlyreminder", body);
+                if (data.statusCode < 400) {
+                    return data.response;
+                } else {
+                    alert(data.statusCode.concat(' - ').concat(data.statusText));
+                }
+            })();
+        }
 
         /**
          * Following methods are used for management of roles.
          */
 
         getRoles() {
-            var _this33 = this;
+            var _this41 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this33.getData("/roles");
+                var data = yield _this41.getData("/roles");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -701,10 +805,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getRole(roleId) {
-            var _this34 = this;
+            var _this42 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this34.getData("/roles/".concat(roleId));
+                var data = yield _this42.getData("/roles/".concat(roleId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -714,10 +818,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createRole(body) {
-            var _this35 = this;
+            var _this43 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this35.postData("/roles", body);
+                var data = yield _this43.postData("/roles", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -727,10 +831,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateRole(roleId, body) {
-            var _this36 = this;
+            var _this44 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this36.patchData("/roles".concat(roleId), body);
+                var data = yield _this44.patchData("/roles".concat(roleId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -740,10 +844,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         removeRole(roleId) {
-            var _this37 = this;
+            var _this45 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this37.deleteData("/roles/".concat(roleId));
+                var data = yield _this45.deleteData("/roles/".concat(roleId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -757,10 +861,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
          */
 
         getBillingReport(params) {
-            var _this38 = this;
+            var _this46 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this38.getDataWithParams("/reports/billing");
+                var data = yield _this46.getDataWithParams("/reports/billing");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -770,10 +874,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getBillingReportAsPdf(params) {
-            var _this39 = this;
+            var _this47 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this39.getPdfDataWithParams("/reports/billing/pdf");
+                var data = yield _this47.getPdfDataWithParams("/reports/billing/pdf");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -783,10 +887,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getTimeLogReport(params) {
-            var _this40 = this;
+            var _this48 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this40.getDataWithParams("/reports/loggedtime");
+                var data = yield _this48.getDataWithParams("/reports/loggedtime");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -796,10 +900,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getTimeLogReportAsPdf(params) {
-            var _this41 = this;
+            var _this49 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this41.getPdfDataWithParams("/reports/loggedtime/pdf");
+                var data = yield _this49.getPdfDataWithParams("/reports/loggedtime/pdf");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -809,10 +913,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getCurrentUserTimeLogReport(params) {
-            var _this42 = this;
+            var _this50 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this42.getDataWithParams("/reports/loggedtime/users/current");
+                var data = yield _this50.getDataWithParams("/reports/loggedtime/users/current");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -822,10 +926,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUserTimeLogReportAsPdf(params) {
-            var _this43 = this;
+            var _this51 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this43.getPdfDataWithParams("/reports/loggedtime/users/current/pdf");
+                var data = yield _this51.getPdfDataWithParams("/reports/loggedtime/users/current/pdf");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -835,10 +939,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUserTimeLogReport(params, userId) {
-            var _this44 = this;
+            var _this52 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this44.getDataWithParams("/reports/loggedtime/users/".concat(userId));
+                var data = yield _this52.getDataWithParams("/reports/loggedtime/users/".concat(userId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -848,10 +952,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getCurrentUserTimeLogReportAsPdf(params, userId) {
-            var _this45 = this;
+            var _this53 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this45.getPdfDataWithParams("/reports/loggedtime/users/".concat(userId).concat("/pdf"));
+                var data = yield _this53.getPdfDataWithParams("/reports/loggedtime/users/".concat(userId).concat("/pdf"));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -861,10 +965,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getOvertimeReport(params) {
-            var _this46 = this;
+            var _this54 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this46.getDataWithParams("/reports/overtime");
+                var data = yield _this54.getDataWithParams("/reports/overtime");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -874,10 +978,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getOvertimeReportAsPdf(params) {
-            var _this47 = this;
+            var _this55 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this47.getPdfDataWithParams("/reports/overtime/pdf");
+                var data = yield _this55.getPdfDataWithParams("/reports/overtime/pdf");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -887,10 +991,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUndertimeReport(params) {
-            var _this48 = this;
+            var _this56 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this48.getDataWithParams("/reports/undertime");
+                var data = yield _this56.getDataWithParams("/reports/undertime");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -900,10 +1004,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUndertimeReportAsPdf(params) {
-            var _this49 = this;
+            var _this57 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this49.getPdfDataWithParams("/reports/undertime/pdf");
+                var data = yield _this57.getPdfDataWithParams("/reports/undertime/pdf");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
