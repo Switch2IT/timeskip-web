@@ -1,10 +1,23 @@
+import RestApi from '../rest-api';
+import {inject} from 'aurelia-framework';
+import {Router} from 'aurelia-router';
+
+@inject(Router)
 export class Lijst{
-    constructor(){
+    constructor(router){
         this.title='Consultants'
+        this.consultants;
+        this.api= new RestApi();
+        this.router = router;
     }
 
-     activate(params, routeConfig) {
+     async activate(params, routeConfig) {
         this.routeConfig = routeConfig;
-        this.routeConfig.navModel.setTitle('Consultants')
+        this.routeConfig.navModel.setTitle('Consultants');
+        var response=await this.api.getUsersWithParams({"role":"consultant"});
+        this.consultants = JSON.parse(response);
+     }
+     editConsultant(id){
+         this.router.navigate('consultants/' + id);
      }
 }
