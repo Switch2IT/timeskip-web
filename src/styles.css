@@ -1,153 +1,184 @@
-body { 
-    padding-top: 3.5%; 
-    }
+body {
+    padding-top: 3.5%;
+}
 
 section {
-  margin: 0 20px;
+    margin: 0 20px;
 }
 
 a:focus {
-  outline: none;
+    outline: none;
 }
 
 .navbar {
     height: 4%;
-    position: fixed!important;
+    position: fixed !important;
 }
 
-.navbar-brand{
-    padding:0;
+.navbar-brand {
+    padding: 0;
 }
 
 .no-selection {
-  margin: 20px;
+    margin: 20px;
 }
 
 .contact-list {
-  overflow-y: auto;
-  border: 1px solid #ddd;
-  padding: 10px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
 }
 
 .panel {
-  margin: 20px;
+    margin: 20px;
 }
 
 .button-bar {
-  right: 0;
-  left: 0;
-  bottom: 0;
-  border-top: 1px solid #ddd;
-  background: white;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    border-top: 1px solid #ddd;
+    background: white;
 }
 
-.button-bar > button {
-  float: right;
-  margin: 20px;
-}
+    .button-bar > button {
+        float: right;
+        margin: 20px;
+    }
 
 li.list-group-item {
-  list-style: none;
+    list-style: none;
 }
 
-li.list-group-item > a {
-  text-decoration: none;
-}
+    li.list-group-item > a {
+        text-decoration: none;
+    }
 
-li.list-group-item.active > a {
-  color: white;
-}
+    li.list-group-item.active > a {
+        color: white;
+    }
 
-.main-view{
-    height:88%;
+.main-view {
+    height: 88%;
     width: 80%;
     margin-top: 1%;
     padding: 10px;
-    position: fixed!important;
+    position: fixed !important;
     border: thin solid lightgrey;
 }
 
-.sidebar{
+.sidebar {
     height: 100%;
-    z-index:1;
-    position: fixed!important;
+    z-index: 1;
+    position: fixed !important;
     padding-top: 3%;
-    overflow:auto;
+    overflow: auto;
     border-right: thin solid lightgrey;
     border-bottom: thin solid lightgrey;
 }
 
-.sidebar ul{
-  padding: 0;
-}
+    .sidebar ul {
+        padding: 0;
+    }
 
-.sidebar li{
-    list-style: none;
-    border-bottom: thin solid lightgrey;
-    width: auto;
-}
+    .sidebar li {
+        list-style: none;
+        border-bottom: thin solid lightgrey;
+        width: auto;
+    }
 
-.sidebar-item{
+.sidebar-item {
     color: gray;
     font-size: 1.5em;
-    font-style: bold;
+    font-weight: bold;
 }
 
-.sidebar li ul li:first-child{
+.sidebar li ul li:first-child {
     list-style: none;
     border-top: thin solid lightgrey;
     border-bottom: thin solid lightgrey;
     width: auto;
 }
 
-.sidebar li ul li{
+.sidebar li ul li {
     list-style: none;
     border-bottom: thin solid lightgrey;
     width: auto;
 }
 
-.sidebar li ul li:last-child{
-    list-style: none;
-    width: auto;
-}
+    .sidebar li ul li:last-child {
+        list-style: none;
+        width: auto;
+    }
 
-.sidebar-subItem{
+.sidebar-subItem {
     padding-left: 10%;
     color: gray;
     font-size: 1em;
-    font-style: bold;
+    font-weight: bold;
 }
 
-.col-md-2{
+.col-md-2 {
     margin-right: 1%;
 }
-.base-shadow{
+
+.base-shadow {
     box-shadow: 0 3px 10px 2px lightgrey;
 }
 
-.center{
+.center {
     text-align: center;
 }
 
-.center-div{
+.center-div {
     margin: 0 auto;
     float: none;
 }
 
-.header-logo{
+.header-logo {
     height: 100%;
     width: auto;
     float: left;
 }
 
-.form-width{
+.form-width {
     width: 70%;
     margin-left: 15%;
     margin-right: 15%;
 }
 
-.form-height{
-    height: 80%;
-    margin-top: 10%;
-    margin-bottom: 10%;
+.form-height {
+    margin-top: 3vh;
+    margin-bottom: 3vh;
+}
+
+.row-seperated {
+    margin-bottom: 0.8em;
+}
+
+.table-striped > tbody > tr.outsideRegularDays {
+    background-color: #faffc4;
+}
+
+.vert-scroll {    
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+.group:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.table-responsive {
+    overflow-y: auto;
+}
+.timesheet-div {
+   width: 70%;   
+   margin: 0 15%;
+}
+.table-div {
+   overflow-y: scroll;
+   max-height: 20vh;
+   margin: 3vh 0 3vh;
 }

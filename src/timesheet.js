@@ -1,8 +1,8 @@
 import 'bootstrap';
+import Organisatie from './organisaties/organisaties';
 import RestApi from './rest-api';
 import {inject} from 'aurelia-framework';
 import {Router} from 'aurelia-router';
-import Log from './log';
 
 @inject(Router)
 export class Home{
@@ -11,61 +11,122 @@ export class Home{
         this.title = 'Home';
         this.minutes = 0;
         this.logDate = (new Date).toISOString().slice(0,10);
-        this.Logs = [];
+        this.logs = [];
         this.Update = false;
         this.api = new RestApi();
         this.router = router;
+        this.memberships =[];
         this.organizations = [];
         this.organization;
         this.projects = [];
         this.project;
+        this.workDays = [];
     }
+
     async activate(params, routeConfig) {
         this.routeConfig = routeConfig;
         this.routeConfig.navModel.setTitle('Log tijden');
         
-        //var report = await this.api.getCurrentUserTimeLogReport();
+        await this.getCurrentUser();
+        this.workDays = this.user.workDays;
+        
+        await this.getMemberships();        
+        
+        await this.getOrganisationsWithMembership();
+        
+        //await this.getProjects();
+        
+        //await this.getActivities();
 
-
+        //await this.getWorklogs();
        
+    }
+
+
+    async changeOrganization(){
+        await this.getProjects();
+    }
+
+    async changeProject(){
+        await this.getActivities();
+    }
+
+    async changeActivity(){
+        await this.getWorklogs();
+    }
+
+    async getCurrentUser(){
         var user = await this.api.getCurrentUser();
         this.user = JSON.parse(user);
         this.hours = parseInt(this.user.defaultHoursPerDay);
-       
+    }
+
+    async getMemberships(){
         var memberships = await this.api.getUserMemberships(this.user.id);
         this.memberships = JSON.parse(memberships);
-        
-        var organizationJson = await this.api.getOrganizations();
-        var organizations = JSON.parse(organizationJson);
-        for (var i = 0; i < organizations.length; ++i){
-            var keep = false;
-            var organization = organizations[i];
-            this.memberships.forEach(function(item){
-                if (item.organizationId == organization.id){
-                    keep = true;
+    }
+
+    async getOrganisationsWithMembership(){
+        var doc =this;
+        var orgJson = await doc.api.getOrganizations();
+        var orgs = JSON.parse(orgJson)
+        this.organizations = orgs.filter(function(org){
+            for (var i = 0; i < doc.memberships.length; ++i){
+                if (org.id == doc.memberships[i].organizationId){
+                    return true;
                 }
-            });
-            if(keep){
-                this.organizations.push(organization);
-            }            
-        }
-        this.organization = this.organizations[0];
-              
+                return false;
+            }
+        });
+        
+        this.organization = this.organizations[0]; 
+        await this.changeOrganization();
+    }
+
+    async getOrganization(id){
+        var organizationJson = await this.api.getOrganization(id);
+        var organization = JSON.parse(organizationJson);
+        this.organization = organization;
+        this.clearForm();
+    }
+
+
+    async getProjects(){
         var projects = await this.api.getProjects(this.organization.id);
         this.projects = JSON.parse(projects);
         this.project = this.projects[0];
-        
+        await this.changeProject()
+    }
+
+    async getActivities(){
         var activities = await this.api.getActivities(this.organization.id, this.project.id)
         this.activities =  JSON.parse(activities);
         this.activity = this.activities[0];
-
-        //var logs = await this.api.getWorklogs(this.organization.id, this.project.id, this.activity.id);
-        //this.Logs = JSON.parse(logs);
+        await this.changeActivity();
     }
 
-    
+    async getWorklogs(){
+        var doc = this;
+        var today = new Date();
+        var from = new Date(today.getFullYear(), today.getMonth() , 2).toISOString().slice(0,10);
+        var to = new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString().slice(0,10);
+        var params = new Map([["from",from],["to",to]]);
+        var logs = await doc.api.getWorklogs(this.organization.id, this.project.id, this.activity.id, params);
+        logs = JSON.parse(logs);
+        logs = logs.filter(function(log) {
+            return (log.userId == doc.user.id);
+        });       
+        logs = logs.filter(function(log, index, logs){
+            var date = (new Date(log.day));
+            var day = date.getDay();
+            log.weekday = date.toLocaleDateString('nl-BE',{ weekday: 'short'});
+            log.regularDays = (day == 6 || day == 0) ? 'outsideRegularDays' : 'regular';
+            return true;
+        });
+        doc.logs = doc.sortLogs(logs);
+    }
 
-    addLog() {
+    async addLog() {
         var min = 0
         if (this.hours > 0 || this.minutes > 0){
             min = (this.hours * 60) + parseInt(this.minutes);
@@ -73,56 +134,73 @@ export class Home{
         else {
             alert("Gelieve uren en/of minuten in te vullen.");
         }
+
         if (min > 0){
-            var log = new Log(min, this.logDate.toString())
-            if (this.Update){
-                this.Logs.forEach(function(item,index,Logs){
-                    if (item.logDate == log.logDate){
-                        Logs.splice(index,1);                    
-                        Logs.push(log);
-                    }             
-                });
-                this.Update = false;
+            if (this.Update){        
+                var body = JSON.stringify({'id': this.log.id, 'userId': this.user.id, 'day': this.logDate.toString(), 'loggedMinutes': min, 'confirmed': false });
+                var updated = await this.api.updateWorklog(this.organization.id, this.project.id, this.activity.id, this.log.id, body)
+               }
+            else{   
+                var body = JSON.stringify({"day": this.logDate.toString(), "loggedMinutes": min, "confirmed": false});
+                var created = await this.api.createWorklogForCurrentUser(this.organization.id, this.project.id, this.activity.id, body) 
             }
-            else{
-                this.Logs.push(log);
-            }
-            this.Logs.sort(function(a,b){
-                var firstDate = new Date(a.logDate);
-                var secondDate = new Date(b.logDate);
-                return firstDate.getDate()-secondDate.getDate()
-            } )
+            await this.getWorklogs();
             this.clearForm();
-        }        
+        }
+    }        
+
+    sortLogs(logs){
+        return logs.sort(function(a,b){
+            var firstDate = new Date(a.day);
+            var secondDate = new Date(b.day);
+            return firstDate.getDate()-secondDate.getDate()
+        } )
     }
 
     editLog(index){
-        var current = this.Logs[index]
-        this.minutes = parseInt(current.minutes) % 60;
-        this.hours =  (parseInt(current.minutes)-this.minutes)/60;
-        this.logDate = (new Date(current.logDate)).toISOString().slice(0,10);
+        var current = this.logs[index]
+        this.log = current
+        this.minutes = parseInt(current.loggedMinutes) % 60;
+        this.hours =  (parseInt(current.loggedMinutes)-this.minutes)/60;
+        this.logDate = (new Date(current.day)).toISOString().slice(0,10);
         this.Update = true;
         document.getElementById("submitBtn").textContent ="Updaten";
         document.getElementById("datum").disabled= true;
     }
   
-    deleteLog(index){
-        this.Logs.splice(index,1);
+    async deleteLog(index){
+        this.log = this.logs[index];
+        var deleted = await this.api.deleteWorklog(this.organization.id, this.project.id, this.activity.id, this.log.id);
+        await this.getWorklogs();
     }
    
     clearForm(){
         this.minutes = 0;
-        this.hours = 0;
+        this.hours = this.user.defaultHoursPerDay;
         this.logDate = (new Date).toISOString().slice(0,10);
         document.getElementById("submitBtn").textContent ="Opslaan";
         document.getElementById("datum").disabled= false;
+        this.Update = false
+    }
+
+    dateString(log){
+        var string = null;
+        //var log = this.logs[index];
+        if (log.day != undefined){
+            string = (new Date(log.day)).toLocaleDateString('nl-BE', {year: 'numeric', month: 'short', day: 'numeric' });
+        }
+        return string;
     }
    
-    minuteString(index){
-        var log = this.Logs[index];
-        var time = parseInt(log.minutes);
-        var mins= time%60;
-        return  this.pad2((time-mins)/60) +  ":" + this.pad2(mins);
+    minuteString(log){
+        var string = null;
+        //var log = this.logs[index];
+        if (log.loggedMinutes != undefined){
+            var time = parseInt(log.loggedMinutes);
+            var mins= time%60;
+            string = this.pad2((time-mins)/60) +  ":" + this.pad2(mins);
+        }
+        return string;
     }
    
     pad2(num){

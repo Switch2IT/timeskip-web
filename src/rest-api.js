@@ -179,7 +179,7 @@ export default class RestApi {
         if (data.statusCode < 400) { 
             return data.response; 
         } else {
-             alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
         }
     }
 
@@ -258,36 +258,54 @@ export default class RestApi {
 
     //WORKLOGS
 
-    async getWorklogs(organizationId, projectId, activityId) {
-        var data = await this.getData("/organizations/".concat(organizationId)
-            .concat("/projects/").concat(projectId)
-            .concat("/activities/").concat(activityId)
-            .concat("/worklogs"));
+    async getWorklogs(organizationId, projectId, activityId, params) {
+        var parameters = params;
+        var data;
+        if (params = undefined){
+            data = await this.getData("/organizations/".concat(organizationId)
+                .concat("/projects/").concat(projectId)
+                .concat("/activities/").concat(activityId)
+                .concat("/worklogs"));
+        }
+        else {
+            data = await this.getDataWithParams("/organizations/".concat(organizationId)
+                            .concat("/projects/").concat(projectId)
+                            .concat("/activities/").concat(activityId)
+                            .concat("/worklogs"), parameters);
+        }
         if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
     }
 
-    async getWorklogs(organizationId, projectId, activityId, worklogId) {
-        var data = await this.getData("/organizations/".concat(organizationId)
-            .concat("/projects/").concat(projectId)
-            .concat("/activities/").concat(activityId)
-            .concat("/worklogs/").concat(worklogId));
+    async getWorklog(organizationId, projectId, activityId, worklogId) {
+        var str = "/organizations/".concat(organizationId)
+             .concat("/projects/").concat(projectId)
+             .concat("/activities/").concat(activityId)
+             .concat("/worklogs/")       
+             .concat(worklogId);
+            
+        var data = await this.getData(str);
         if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
     }
 
     async createWorklog(organizationId, projectId, activityId, body) {
         var data = await this.postData("/organizations/".concat(organizationId)
             .concat("/projects/").concat(projectId)
-            .concat("/activities").concat(activityId)
+            .concat("/activities/").concat(activityId)
             .concat("/worklogs"), body);
         if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
     }
 
     async createWorklogForCurrentUser(organizationId, projectId, activityId, body) {
-        var data = await this.postData("/organizations/".concat(organizationId)
+        try {
+            var data = await this.postData("/organizations/".concat(organizationId)
             .concat("/projects/").concat(projectId)
-            .concat("/activities").concat(activityId)
+            .concat("/activities/").concat(activityId)
             .concat("/worklogs").concat("/currentuser"), body);
-        if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
+            if (data.statusCode < 400) { return data.response; }
+        } catch (e) {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
+            return null;
+        }
     }
 
     async updateWorklog(organizationId, projectId, activityId, worklogId, body) {
@@ -341,7 +359,7 @@ export default class RestApi {
         }
     }
 
-   async getPaygrades() {
+    async getPaygrades() {
         var data = await this.getData("/configuration/paygrades");
         if (data.statusCode < 400) { 
             return data.response; 
@@ -390,7 +408,7 @@ export default class RestApi {
      * Following methods are used for management of roles.
      */
 
-     async getRoles() {
+    async getRoles() {
         var data = await this.getData("/roles");
         if (data.statusCode < 400) { 
             return data.response; 
@@ -476,14 +494,14 @@ export default class RestApi {
     }
 
     async getCurrentUserTimeLogReport(params){
-        var data = await this.getDataWithParams("/reports/loggedtime/users/current");
+        var data = await this.getDataWithParams("/reports/loggedtime/users/current" ,params);
         if (data.statusCode < 400) { 
             return data.response; 
         } else { 
             alert(data.statusCode.concat(' - ').concat(data.statusText)); 
         }
     }
-
+ 
     async getUserTimeLogReportAsPdf(params){
         var data = await this.getPdfDataWithParams("/reports/loggedtime/users/current/pdf");
         if (data.statusCode < 400) { 
@@ -595,6 +613,7 @@ export default class RestApi {
     }
 
     getDataWithParams(location, params) {
+        var params = params;
         return this.http.createRequest(location)
             .asGet()
             .withParams(params)
