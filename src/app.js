@@ -16,7 +16,7 @@ export class App {
     
     
     config.map([
-      { route: '', moduleId: 'timesheet',   title: 'Timesheet', name:'timesheet', nav:true},
+      { route: '', moduleId: 'timesheet/timesheet',   title: 'Timesheet', name:'timesheet', nav:true},
       { route: 'rapporten',  moduleId: 'reports/rapporten', name:'rapporten', nav:true },      
       { route: 'rapporten/billing',  moduleId: 'reports/billing-detail', name:'billingDetail', nav:true },      
       { route: 'rapporten/overtime',  moduleId: 'reports/time-difference', name:'overtimeDetail', nav:true },      

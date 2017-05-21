@@ -62,10 +62,10 @@ li.list-group-item {
     height: 88%;
     width: 80%;
     margin-top: 1%;
-    padding: 10px;
+    padding: 0 10px;
     position: fixed !important;
     border: thin solid lightgrey;
-    overflow: scroll;
+    overflow-y: auto;
 }
 
 .sidebar {
@@ -149,8 +149,8 @@ li.list-group-item {
 }
 
 .form-height {
-    margin-top: 3vh;
-    margin-bottom: 3vh;
+    margin-top: 3%;
+    margin-bottom: 3%;
 }
 
 .row-seperated {
@@ -171,15 +171,14 @@ li.list-group-item {
   display: table;
   clear: both;
 }
-.table-responsive {
-    overflow-y: auto;
-}
+
 .timesheet-div {
    width: 70%;   
    margin: 0 15%;
 }
+
 .table-div {
-   overflow-y: scroll;
+   overflow-y: auto;   
    max-height: 20vh;
    margin: 3vh 0 3vh;
 }
@@ -190,7 +189,7 @@ li.list-group-item {
 }
 .button.confirmed{
     font-weight:normal;
-    color: GrayText;
+    color: lightgrey;
 }
 .notConfirmed {
     font-weight: bold;
@@ -198,5 +197,5 @@ li.list-group-item {
 }
 .button.notConfirmed{
     font-weight:normal;
-    color: ButtonText;
+    color: initial;
 }

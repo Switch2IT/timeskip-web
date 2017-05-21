@@ -80,14 +80,14 @@ export default class RestApi {
         }
     }
 
-    async getUser(userId) {
-        var data = await this.getData("/users/".concat(userId));
-        if (data.statusCode < 400) {
-            return data.response;
-        } else {
-            alert(data.statusCode.concat(' - ').concat(data.statusText));
-        }
-    }
+    //async getUser(userId) {
+    //    var data = await this.getData("/users/".concat(userId));
+    //    if (data.statusCode < 400) {
+    //        return data.response;
+    //    } else {
+    //        alert(data.statusCode.concat(' - ').concat(data.statusText));
+    //    }
+    //}
 
     async updateUser(userId, body) {
         var data = await this.patchData("/users/".concat(userId), body);

@@ -7,7 +7,7 @@ import {Router} from 'aurelia-router';
 export class Home{
    
     constructor(router){
-        this.title = 'Home';
+        this.title = 'Timesheet';
         this.api = new RestApi();
         this.router = router;
         this.minutes = 0;
@@ -111,9 +111,9 @@ export class Home{
         var params = {"user":this.user.id, "from":from,"to":to,"organization": this.organization.id,"project":this.project.id,"activity":this.activity.id};
         var logs = await doc.api.getUserWorklogs(params);
         logs = JSON.parse(logs);
-        logs = logs.filter(function(log) {
-            return (log.userId == doc.user.id);
-        });       
+        //logs = logs.filter(function(log) {
+        //    return (log.userId == doc.user.id);
+        //});  
         logs = logs.filter(function(log, index, logs){
             var date = (new Date(log.day));
             var day = date.getDay();
