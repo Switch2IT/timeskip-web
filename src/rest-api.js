@@ -38,6 +38,12 @@ export default class RestApi {
         }
     }
 
+    async getUser(userid) {
+        var data = await this.getData("/users/".concat(userid));
+        console.log(data);
+        return data.response;
+    }
+
     async createUser(body) {
         var data = await this.postData("/users");
         if (data.statusCode < 400) {
@@ -128,46 +134,46 @@ export default class RestApi {
 
     async getOrganizations() {
         var data = await this.getData("/organizations");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async getOrganization(organizationId) {
         var data = await this.getData("/organizations/".concat(organizationId));
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async createOrganization(body) {
         var data = await this.postData("/organizations", body);
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async updateOrganization(id, body) {
         var data = await this.patchData("/organizations".concat(id), body);
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async removeOrganization(organizationId) {
         var data = await this.deleteData("/organizations/".concat(organizationId));
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
@@ -176,40 +182,40 @@ export default class RestApi {
     async getProjects(organizationId) {
         var data = await this.getData("/organizations/".concat(organizationId)
             .concat("/projects"));
-        if (data.statusCode < 400) { 
-            return data.response; 
+        if (data.statusCode < 400) {
+            return data.response;
         } else {
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async getProject(organizationId, projectId) {
         var data = await this.getData("/organizations/".concat(organizationId)
             .concat("/projects/").concat(projectId));
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async createProject(organizationId, body) {
         var data = await this.postData("/organizations/".concat(organizationId)
             .concat("/projects"), body);
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async updateProject(organizationId, projectId, body) {
         var data = await this.patchData("/organizations/".concat(organizationId)
             .concat("/projects/").concat(projectId), body);
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
@@ -320,10 +326,10 @@ export default class RestApi {
             .concat("/projects/").concat(projectId)
             .concat("/activities/").concat(activityId)
             .concat("/worklogs/").concat(worklogId));
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
@@ -350,76 +356,76 @@ export default class RestApi {
     /**
      * Following methods are used for management and HR only calls. 
      */
-    
+
     async getMailTemplates() {
         var data = await this.getData("/configuration/mail/templates");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async getMailTemplateByTopic(topic) {
         var data = await this.getData("/configuration/mail/templates/".concat(topic));
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
-    async updateMailTemplate(topic,body) {
-        var data = await this.patchData("/configuration/mail/templates/".concat(topic),body);
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+    async updateMailTemplate(topic, body) {
+        var data = await this.patchData("/configuration/mail/templates/".concat(topic), body);
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async getPaygrades() {
         var data = await this.getData("/configuration/paygrades");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
-    } 
+    }
 
     async getPaygrade(paygradeId) {
         var data = await this.getData("/configuration/paygrades/".concat(paygradeId));
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
-    } 
+    }
 
     async createPaygrade(body) {
-        var data = await this.postData("/configuration/paygrades",body);
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        var data = await this.postData("/configuration/paygrades", body);
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
-    } 
+    }
 
     async getDayOfMontlyReminder() {
         var data = await this.getData("/configuration/schedule/dayofmonthlyreminder");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async updateDayOfMontlyReminder(body) {
-        var data = await this.putData("/configuration/schedule/dayofmonthlyreminder",body);
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        var data = await this.putData("/configuration/schedule/dayofmonthlyreminder", body);
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
@@ -429,46 +435,46 @@ export default class RestApi {
 
     async getRoles() {
         var data = await this.getData("/roles");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async getRole(roleId) {
         var data = await this.getData("/roles/".concat(roleId));
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async createRole(body) {
         var data = await this.postData("/roles", body);
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async updateRole(roleId, body) {
         var data = await this.patchData("/roles".concat(roleId), body);
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async removeRole(roleId) {
         var data = await this.deleteData("/roles/".concat(roleId));
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
@@ -476,112 +482,113 @@ export default class RestApi {
      * Following methods are used to request reports.
      */
 
-    async getBillingReport(params){
-        var data = await this.getDataWithParams("/reports/billing");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+    async getBillingReport(params) {
+        var data = await this.getDataWithParams("/reports/billing", params);
+        console.log(params);
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
-    async getBillingReportAsPdf(params){
-        var data = await this.getPdfDataWithParams("/reports/billing/pdf");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+    async getBillingReportAsPdf(params) {
+        var data = await this.getPdfDataWithParams("/reports/billing/pdf", params);
+        console.log(data);
+        if (data.statusCode < 400) {
+            return data.content;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
-    async getTimeLogReport(params){
-        var data = await this.getDataWithParams("/reports/loggedtime");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+    async getTimeLogReport(params) {
+        var data = await this.getDataWithParams("/reports/loggedtime", params);
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
-    async getTimeLogReportAsPdf(params){
-        var data = await this.getPdfDataWithParams("/reports/loggedtime/pdf");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+    async getTimeLogReportAsPdf(params) {
+        var data = await this.getPdfDataWithParams("/reports/loggedtime/pdf", params);
+        if (data.statusCode < 400) {
+            return data.content;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
-    async getCurrentUserTimeLogReport(params){        
-        var data = await this.getDataWithParams("/reports/loggedtime/users/current" ,params);
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
-        }
-    }
- 
-    async getUserTimeLogReportAsPdf(params){
-        var data = await this.getPdfDataWithParams("/reports/loggedtime/users/current/pdf");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+    async getCurrentUserTimeLogReport(params) {
+        var data = await this.getDataWithParams("/reports/loggedtime/users/current", params);
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
-    async getUserTimeLogReport(params,userId){
-        var query = "/reports/loggedtime/users/".concat(userId )
-        try {
-            var data = await this.getDataWithParams(query, params);
-            return data.response; 
-        } catch (e) {
-            var ex =e;
+    async getUserTimeLogReportAsPdf(params, userId) {
+        var data = await this.getPdfDataWithParams("/reports/loggedtime/users/".concat(userId).concat("/pdf"), params);
+        if (data.statusCode < 400) {
+            return data.content;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
-    async getCurrentUserTimeLogReportAsPdf(params,userId){
-        var data = await this.getPdfDataWithParams("/reports/loggedtime/users/".concat(userId).concat("/pdf"));
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+    async getUserTimeLogReport(params, userId) {
+        var data = await this.getDataWithParams("/reports/loggedtime/users/".concat(userId), params);
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
-    async getOvertimeReport(params){
-        var data = await this.getDataWithParams("/reports/overtime");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+    async getCurrentUserTimeLogReportAsPdf(params) {
+        var data = await this.getPdfDataWithParams("/reports/loggedtime/users/current/pdf", params);
+        if (data.statusCode < 400) {
+            return data.content;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
-    async getOvertimeReportAsPdf(params){
-        var data = await this.getPdfDataWithParams("/reports/overtime/pdf");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+    async getOvertimeReport(params) {
+        var data = await this.getDataWithParams("/reports/overtime", params);
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
-    async getUndertimeReport(params){
-        var data = await this.getDataWithParams("/reports/undertime");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+    async getOvertimeReportAsPdf(params) {
+        var data = await this.getPdfDataWithParams("/reports/overtime/pdf", params);
+        if (data.statusCode < 400) {
+            return data.content;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
-    async getUndertimeReportAsPdf(params){
-        var data = await this.getPdfDataWithParams("/reports/undertime/pdf");
-        if (data.statusCode < 400) { 
-            return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+    async getUndertimeReport(params) {
+        var data = await this.getDataWithParams("/reports/undertime", params);
+        if (data.statusCode < 400) {
+            return data.response;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
+        }
+    }
+
+    async getUndertimeReportAsPdf(params) {
+        var data = await this.getPdfDataWithParams("/reports/undertime/pdf", params);
+        if (data.statusCode < 400) {
+            return data.content;
+        } else {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
@@ -633,6 +640,7 @@ export default class RestApi {
     }
 
     getDataWithParams(location, params) {
+        console.log(params);
         return this.http.createRequest(location)
             .asGet()
             .withParams(params)
@@ -644,6 +652,7 @@ export default class RestApi {
             .asGet()
             .withParams(params)
             .withHeader("Accept", "application/pdf")
+            .withResponseType('blob')
             .send();
     }
 }

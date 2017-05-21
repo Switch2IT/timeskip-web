@@ -65,6 +65,7 @@ li.list-group-item {
     padding: 10px;
     position: fixed !important;
     border: thin solid lightgrey;
+    overflow: scroll;
 }
 
 .sidebar {
