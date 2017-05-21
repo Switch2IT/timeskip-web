@@ -27,8 +27,7 @@ define('app',['exports', './keycloak-service', './notfound', 'aurelia-router'], 
       this.router = router;
       config.title = '';
 
-      config.map([{ route: '', moduleId: 'timesheet', title: 'Timesheet', name: 'timesheet', nav: true }, { route: 'rapporten', moduleId: 'rapporten', name: 'rapporten', nav: true }, { route: 'consultants', moduleId: 'consultants/lijst', name: 'consultants', nav: true }, { route: 'consultants/aanmaken', moduleId: 'consultants/aanmaak-detail', name: 'maakConsultant' }, { route: 'consultants/:id', moduleId: 'consultants/beheer-detail', name: 'consultantDetail', href: '#id', nav: true }, { route: 'projecten', moduleId: 'projecten/lijst', name: 'projecten', nav: true }, { route: 'projecten/aanmaken', moduleId: 'projecten/detail', name: 'maakProject' }, { route: 'projecten/:id', moduleId: 'projecten/detail', name: 'projectDetail' }, { route: 'activiteiten', moduleId: 'activiteiten/lijst', name: 'activiteiten', nav: true }, { route: 'activiteiten/aanmaken', moduleId: 'activiteiten/detail', name: 'maakActiviteit' }, { route: 'activiteiten/:id', moduleId: 'activiteiten/detail', name: 'activiteitDetail' }, { route: 'organisaties', moduleId: 'organisaties/lijst', name: 'organisaties', nav: true }, { route: 'organisaties/aanmaken', moduleId: 'organisaties/detail', name: 'maakOrganisatie' }, { route: 'organisaties/:id', moduleId: 'organisaties/detail', name: 'organisatieDetail' }]);
-      config.mapUnknownRoutes('notfound');
+      config.map([{ route: '', moduleId: 'timesheet', title: 'Timesheet', name: 'timesheet', nav: true }, { route: 'rapporten', moduleId: 'reports/rapporten', name: 'rapporten', nav: true }, { route: 'rapporten/billing', moduleId: 'reports/billing-detail', name: 'billingDetail', nav: true }, { route: 'rapporten/overtime', moduleId: 'reports/time-difference', name: 'overtimeDetail', nav: true }, { route: 'rapporten/undertime', moduleId: 'reports/time-difference', name: 'undertimeDetail', nav: true }, { route: 'rapporten/loggedtime', moduleId: 'reports/timelog-detail', name: 'loggedtimeDetail', nav: true }, { route: 'consultants', moduleId: 'consultants/lijst', name: 'consultants', nav: true }, { route: 'consultants/aanmaken', moduleId: 'consultants/aanmaak-detail', name: 'maakConsultant' }, { route: 'consultants/:id', moduleId: 'consultants/beheer-detail', name: 'consultantDetail', href: '#id', nav: true }, { route: 'projecten', moduleId: 'projecten/lijst', name: 'projecten', nav: true }, { route: 'projecten/aanmaken', moduleId: 'projecten/detail', name: 'maakProject' }, { route: 'projecten/:id', moduleId: 'projecten/detail', name: 'projectDetail' }, { route: 'activiteiten', moduleId: 'activiteiten/lijst', name: 'activiteiten', nav: true }, { route: 'activiteiten/aanmaken', moduleId: 'activiteiten/detail', name: 'maakActiviteit' }, { route: 'activiteiten/:id', moduleId: 'activiteiten/detail', name: 'activiteitDetail' }, { route: 'organisaties', moduleId: 'organisaties/lijst', name: 'organisaties', nav: true }, { route: 'organisaties/aanmaken', moduleId: 'organisaties/detail', name: 'maakOrganisatie' }, { route: 'organisaties/:id', moduleId: 'organisaties/detail', name: 'organisatieDetail' }]);
     }
   };
 });
@@ -872,7 +871,8 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             var _this47 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this47.getDataWithParams("/reports/billing");
+                var data = yield _this47.getDataWithParams("/reports/billing", params);
+                console.log(params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -885,9 +885,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             var _this48 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this48.getPdfDataWithParams("/reports/billing/pdf");
+                var data = yield _this48.getPdfDataWithParams("/reports/billing/pdf", params);
+                console.log(data);
                 if (data.statusCode < 400) {
-                    return data.response;
+                    return data.content;
                 } else {
                     alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
@@ -898,7 +899,7 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             var _this49 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this49.getDataWithParams("/reports/loggedtime");
+                var data = yield _this49.getDataWithParams("/reports/loggedtime", params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -911,9 +912,9 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             var _this50 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this50.getPdfDataWithParams("/reports/loggedtime/pdf");
+                var data = yield _this50.getPdfDataWithParams("/reports/loggedtime/pdf", params);
                 if (data.statusCode < 400) {
-                    return data.response;
+                    return data.content;
                 } else {
                     alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
@@ -924,7 +925,7 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             var _this51 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this51.getDataWithParams("/reports/loggedtime/users/current");
+                var data = yield _this51.getDataWithParams("/reports/loggedtime/users/current", params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -933,13 +934,13 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             })();
         }
 
-        getUserTimeLogReportAsPdf(params) {
+        getUserTimeLogReportAsPdf(params, userId) {
             var _this52 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this52.getPdfDataWithParams("/reports/loggedtime/users/current/pdf");
+                var data = yield _this52.getPdfDataWithParams("/reports/loggedtime/users/".concat(userId).concat("/pdf"), params);
                 if (data.statusCode < 400) {
-                    return data.response;
+                    return data.content;
                 } else {
                     alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
@@ -950,7 +951,7 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             var _this53 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this53.getDataWithParams("/reports/loggedtime/users/".concat(userId));
+                var data = yield _this53.getDataWithParams("/reports/loggedtime/users/".concat(userId), params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -959,13 +960,13 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             })();
         }
 
-        getCurrentUserTimeLogReportAsPdf(params, userId) {
+        getCurrentUserTimeLogReportAsPdf(params) {
             var _this54 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this54.getPdfDataWithParams("/reports/loggedtime/users/".concat(userId).concat("/pdf"));
+                var data = yield _this54.getPdfDataWithParams("/reports/loggedtime/users/current/pdf", params);
                 if (data.statusCode < 400) {
-                    return data.response;
+                    return data.content;
                 } else {
                     alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
@@ -976,7 +977,7 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             var _this55 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this55.getDataWithParams("/reports/overtime");
+                var data = yield _this55.getDataWithParams("/reports/overtime", params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -989,9 +990,9 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             var _this56 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this56.getPdfDataWithParams("/reports/overtime/pdf");
+                var data = yield _this56.getPdfDataWithParams("/reports/overtime/pdf", params);
                 if (data.statusCode < 400) {
-                    return data.response;
+                    return data.content;
                 } else {
                     alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
@@ -1002,7 +1003,7 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             var _this57 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this57.getDataWithParams("/reports/undertime");
+                var data = yield _this57.getDataWithParams("/reports/undertime", params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -1015,9 +1016,9 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             var _this58 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this58.getPdfDataWithParams("/reports/undertime/pdf");
+                var data = yield _this58.getPdfDataWithParams("/reports/undertime/pdf", params);
                 if (data.statusCode < 400) {
-                    return data.response;
+                    return data.content;
                 } else {
                     alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
@@ -1053,11 +1054,12 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getDataWithParams(location, params) {
+            console.log(params);
             return this.http.createRequest(location).asGet().withParams(params).send();
         }
 
         getPdfDataWithParams(location, params) {
-            return this.http.createRequest(location).asGet().withParams(params).withHeader("Accept", "application/pdf").send();
+            return this.http.createRequest(location).asGet().withParams(params).withHeader("Accept", "application/pdf").withResponseType('blob').send();
         }
     };
     exports.default = RestApi;
@@ -1790,7 +1792,7 @@ define('rapporten',['exports'], function (exports) {
     };
 });
 define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"./styles.css\"></require><require from=\"./sidebar\"></require><nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\"><div class=\"navbar-header\"><a class=\"navbar-brand\" href=\"#\"><img class=\"header-logo\" src=\"src/logo/Canguru-Logo.png\" alt=\"logo\"> <i class=\"fa fa-user\"></i></a></div><div class=\"navbar-header\"><button type=\"button\" click.delegate=\"logout()\">Logout</button></div></nav><div><div class=\"row\"><sidebar class=\"col-md-2\"></sidebar><router-view class=\"col-md-8\"></router-view></div></div></template>"; });
-define('text!styles.css', ['module'], function(module) { module.exports = "body { \n    padding-top: 3.5%; \n    }\n\nsection {\n  margin: 0 20px;\n}\n\na:focus {\n  outline: none;\n}\n\n.navbar {\n    height: 4%;\n    position: fixed!important;\n}\n\n.navbar-brand{\n    padding:0;\n}\n\n.no-selection {\n  margin: 20px;\n}\n\n.contact-list {\n  overflow-y: auto;\n  border: 1px solid #ddd;\n  padding: 10px;\n}\n\n.panel {\n  margin: 20px;\n}\n\n.button-bar {\n  right: 0;\n  left: 0;\n  bottom: 0;\n  border-top: 1px solid #ddd;\n  background: white;\n}\n\n.button-bar > button {\n  float: right;\n  margin: 20px;\n}\n\nli.list-group-item {\n  list-style: none;\n}\n\nli.list-group-item > a {\n  text-decoration: none;\n}\n\nli.list-group-item.active > a {\n  color: white;\n}\n\n.main-view{\n    height:88%;\n    width: 80%;\n    margin-top: 1%;\n    padding: 10px;\n    position: fixed!important;\n    border: thin solid lightgrey;\n}\n\n.sidebar{\n    height: 100%;\n    z-index:1;\n    position: fixed!important;\n    padding-top: 3%;\n    overflow:auto;\n    border-right: thin solid lightgrey;\n    border-bottom: thin solid lightgrey;\n}\n\n.sidebar ul{\n  padding: 0;\n}\n\n.sidebar li{\n    list-style: none;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n.sidebar-item{\n    color: gray;\n    font-size: 1.5em;\n    font-style: bold;\n}\n\n.sidebar li ul li:first-child{\n    list-style: none;\n    border-top: thin solid lightgrey;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n.sidebar li ul li{\n    list-style: none;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n.sidebar li ul li:last-child{\n    list-style: none;\n    width: auto;\n}\n\n.sidebar-subItem{\n    padding-left: 10%;\n    color: gray;\n    font-size: 1em;\n    font-style: bold;\n}\n\n.col-md-2{\n    margin-right: 1%;\n}\n.base-shadow{\n    box-shadow: 0 3px 10px 2px lightgrey;\n}\n\n.center{\n    text-align: center;\n}\n\n.center-div{\n    margin: 0 auto;\n    float: none;\n}\n\n.header-logo{\n    height: 100%;\n    width: auto;\n    float: left;\n}\n\n.form-width{\n    width: 70%;\n    margin-left: 15%;\n    margin-right: 15%;\n}\n\n.form-height{\n    height: 80%;\n    margin-top: 10%;\n    margin-bottom: 10%;\n}"; });
+define('text!styles.css', ['module'], function(module) { module.exports = "body { \n    padding-top: 3.5%; \n    }\n\nsection {\n  margin: 0 20px;\n}\n\na:focus {\n  outline: none;\n}\n\n.navbar {\n    height: 4%;\n    position: fixed!important;\n}\n\n.navbar-brand{\n    padding:0;\n}\n\n.no-selection {\n  margin: 20px;\n}\n\n.contact-list {\n  overflow-y: auto;\n  border: 1px solid #ddd;\n  padding: 10px;\n}\n\n.panel {\n  margin: 20px;\n}\n\n.button-bar {\n  right: 0;\n  left: 0;\n  bottom: 0;\n  border-top: 1px solid #ddd;\n  background: white;\n}\n\n.button-bar > button {\n  float: right;\n  margin: 20px;\n}\n\nli.list-group-item {\n  list-style: none;\n}\n\nli.list-group-item > a {\n  text-decoration: none;\n}\n\nli.list-group-item.active > a {\n  color: white;\n}\n\n.main-view{\n    height:88%;\n    width: 80%;\n    margin-top: 1%;\n    padding: 10px;\n    position: fixed!important;\n    border: thin solid lightgrey;\n    overflow: scroll;\n}\n\n.sidebar{\n    height: 100%;\n    z-index:1;\n    position: fixed!important;\n    padding-top: 3%;\n    overflow:auto;\n    border-right: thin solid lightgrey;\n    border-bottom: thin solid lightgrey;\n}\n\n.sidebar ul{\n  padding: 0;\n}\n\n.sidebar li{\n    list-style: none;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n.sidebar-item{\n    color: gray;\n    font-size: 1.5em;\n    font-style: bold;\n}\n\n.sidebar li ul li:first-child{\n    list-style: none;\n    border-top: thin solid lightgrey;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n.sidebar li ul li{\n    list-style: none;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n.sidebar li ul li:last-child{\n    list-style: none;\n    width: auto;\n}\n\n.sidebar-subItem{\n    padding-left: 10%;\n    color: gray;\n    font-size: 1em;\n    font-style: bold;\n}\n\n.col-md-2{\n    margin-right: 1%;\n}\n.base-shadow{\n    box-shadow: 0 3px 10px 2px lightgrey;\n}\n\n.center{\n    text-align: center;\n}\n\n.center-div{\n    margin: 0 auto;\n    float: none;\n}\n\n.header-logo{\n    height: 100%;\n    width: auto;\n    float: left;\n}\n\n.form-width{\n    width: 70%;\n    margin-left: 15%;\n    margin-right: 15%;\n}\n\n.form-height{\n    height: 80%;\n    margin-top: 10%;\n    margin-bottom: 10%;\n}\n\n.outer-table{\n    border: thin solid black;\n}\n\n.table-nested{\n    border-left: thin solid black;\n    margin: 0!important;\n    border-collapse: collapse;\n}\n\n.no-padding{\n    padding:0!important;\n}"; });
 define('text!notfound.html', ['module'], function(module) { module.exports = "<template><h1>404 suck it</h1></template>"; });
 define('text!sidebar.html', ['module'], function(module) { module.exports = "<template><div class=\"sidebar col-md-2 base-shadow\"><ul><li repeat.for=\"item of items\" class=\"${item.isActive ? 'active' : ''}\"><a class=\"sidebar-item\" route-href=\"route.bind: item.route\">${item.value}</a></li></ul></div></template>"; });
 define('text!timesheet.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form form class=\"form-horizontal form-height center form-width\" submit.trigger=\"addLog()\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"hours\">Uren</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"hours\"></div><label class=\"col-sm-offset-0 col-sm-2 control-label\" for=\"minutes\">Minuten</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"minutes\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"datum\">Datum</label><div class=\"col-sm-6\"><input type=\"date\" id=\"datum\" class=\"form-control\" value.two-way=\"logDate\"></div></div><div class=\"form-group\"><div class=\"col-sm-offset-4 col-sm-8\"><button type=\"submit\" class=\"col-sm-4\">Add Log</button></div></div></form></div></template>"; });

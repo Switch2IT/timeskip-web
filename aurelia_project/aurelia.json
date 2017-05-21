@@ -120,6 +120,7 @@
           "aurelia-templating-binding",
           "text",
           "jquery",
+          "moment",
           "keycloak-js",
   {
     "name": "bootstrap",
