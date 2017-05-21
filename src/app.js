@@ -6,11 +6,12 @@ import RestApi from './rest-api';
 export class App {
   constructor(){
       this.api = new RestApi();
+      this.userName;
   }
 
   activate(){
-    //this.currentUser = JSON.parse(this.api.getCurrentUser());
-    //console.log(this.currentUser);
+    this.currentUser = KeycloakService.getUser();
+    this.userName = this.currentUser.name;
   }
 
   logout(){

@@ -1,4 +1,4 @@
-define('app',['exports', './keycloak-service', 'aurelia-router'], function (exports, _keycloakService, _aureliaRouter) {
+define('app',['exports', './keycloak-service', './notfound', 'aurelia-router', './rest-api'], function (exports, _keycloakService, _notfound, _aureliaRouter, _restApi) {
   'use strict';
 
   Object.defineProperty(exports, "__esModule", {
@@ -8,6 +8,10 @@ define('app',['exports', './keycloak-service', 'aurelia-router'], function (expo
 
   var _keycloakService2 = _interopRequireDefault(_keycloakService);
 
+  var _notfound2 = _interopRequireDefault(_notfound);
+
+  var _restApi2 = _interopRequireDefault(_restApi);
+
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
       default: obj
@@ -15,7 +19,15 @@ define('app',['exports', './keycloak-service', 'aurelia-router'], function (expo
   }
 
   let App = exports.App = class App {
-    activate() {}
+    constructor() {
+      this.api = new _restApi2.default();
+      this.userName;
+    }
+
+    activate() {
+      this.currentUser = _keycloakService2.default.getUser();
+      this.userName = this.currentUser.name;
+    }
 
     logout() {
       _keycloakService2.default.logout();
@@ -25,8 +37,7 @@ define('app',['exports', './keycloak-service', 'aurelia-router'], function (expo
       this.router = router;
       config.title = '';
 
-      config.map([{ route: '', moduleId: 'timesheet/timesheet', title: 'Timesheet', name: 'timesheet', nav: true }, { route: 'rapporten', moduleId: 'rapporten/rapporten', name: 'rapporten', nav: true }, { route: 'consultants', moduleId: 'consultants/lijst', name: 'consultants', nav: true }, { route: 'consultants/aanmaken', moduleId: 'consultants/aanmaak-detail', name: 'maakConsultant' }, { route: 'consultants/:id', moduleId: 'consultants/beheer-detail', name: 'consultantDetail', href: '#id', nav: true }, { route: 'projecten', moduleId: 'projecten/lijst', name: 'projecten', nav: true }, { route: 'projecten/aanmaken', moduleId: 'projecten/detail', name: 'maakProject' }, { route: 'projecten/:id', moduleId: 'projecten/detail', name: 'projectDetail' }, { route: 'activiteiten', moduleId: 'activiteiten/lijst', name: 'activiteiten', nav: true }, { route: 'activiteiten/aanmaken', moduleId: 'activiteiten/detail', name: 'maakActiviteit' }, { route: 'activiteiten/:id', moduleId: 'activiteiten/detail', name: 'activiteitDetail' }, { route: 'organisaties', moduleId: 'organisaties/lijst', name: 'organisaties', nav: true }, { route: 'organisaties/aanmaken', moduleId: 'organisaties/detail', name: 'maakOrganisatie' }, { route: 'organisaties/:id', moduleId: 'organisaties/detail', name: 'organisatieDetail' }]);
-      config.mapUnknownRoutes('notfound');
+      config.map([{ route: '', moduleId: 'timesheet', title: 'Timesheet', name: 'timesheet', nav: true }, { route: 'rapporten', moduleId: 'reports/rapporten', name: 'rapporten', nav: true }, { route: 'rapporten/billing', moduleId: 'reports/billing-detail', name: 'billingDetail', nav: true }, { route: 'rapporten/overtime', moduleId: 'reports/time-difference', name: 'overtimeDetail', nav: true }, { route: 'rapporten/undertime', moduleId: 'reports/time-difference', name: 'undertimeDetail', nav: true }, { route: 'rapporten/loggedtime', moduleId: 'reports/timelog-detail', name: 'loggedtimeDetail', nav: true }, { route: 'consultants', moduleId: 'consultants/lijst', name: 'consultants', nav: true }, { route: 'consultants/aanmaken', moduleId: 'consultants/aanmaak-detail', name: 'maakConsultant' }, { route: 'consultants/:id', moduleId: 'consultants/beheer-detail', name: 'consultantDetail', href: '#id', nav: true }, { route: 'projecten', moduleId: 'projecten/lijst', name: 'projecten', nav: true }, { route: 'projecten/aanmaken', moduleId: 'projecten/detail', name: 'maakProject' }, { route: 'projecten/:id', moduleId: 'projecten/detail', name: 'projectDetail' }, { route: 'activiteiten', moduleId: 'activiteiten/lijst', name: 'activiteiten', nav: true }, { route: 'activiteiten/aanmaken', moduleId: 'activiteiten/detail', name: 'maakActiviteit' }, { route: 'activiteiten/:id', moduleId: 'activiteiten/detail', name: 'activiteitDetail' }, { route: 'organisaties', moduleId: 'organisaties/lijst', name: 'organisaties', nav: true }, { route: 'organisaties/aanmaken', moduleId: 'organisaties/detail', name: 'maakOrganisatie' }, { route: 'organisaties/:id', moduleId: 'organisaties/detail', name: 'organisatieDetail' }]);
     }
   };
 });
@@ -95,6 +106,10 @@ define('keycloak-service',["exports"], function (exports) {
 
     static getToken() {
       return KeycloakService.auth.authz.token;
+    }
+
+    static getUser() {
+      return KeycloakService.auth.authz.tokenParsed;
     }
   };
   exports.default = KeycloakService;
@@ -258,11 +273,21 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             })();
         }
 
-        createUser(body) {
+        getUser(userid) {
             var _this3 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this3.postData("/users");
+                var data = yield _this3.getData("/users/".concat(userid));
+                console.log(data);
+                return data.response;
+            })();
+        }
+
+        createUser(body) {
+            var _this4 = this;
+
+            return _asyncToGenerator(function* () {
+                var data = yield _this4.postData("/users");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -272,10 +297,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getCurrentUser() {
-            var _this4 = this;
+            var _this5 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this4.getData("/users/current");
+                var data = yield _this5.getData("/users/current");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -285,10 +310,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateCurrentUser(body) {
-            var _this5 = this;
+            var _this6 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this5.patchData("/users/current", body);
+                var data = yield _this6.patchData("/users/current", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -298,10 +323,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateCurrentUserWorklogs(body) {
-            var _this6 = this;
+            var _this7 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this6.putData("/users/current/worklogs", body);
+                var data = yield _this7.putData("/users/current/worklogs", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -311,10 +336,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUser(userId) {
-            var _this7 = this;
+            var _this8 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this7.getData("/users/".concat(userId));
+                var data = yield _this8.getData("/users/".concat(userId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -324,10 +349,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateUser(userId, body) {
-            var _this8 = this;
+            var _this9 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this8.patchData("/users/".concat(userId), body);
+                var data = yield _this9.patchData("/users/".concat(userId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -337,10 +362,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUserMemberships(userId) {
-            var _this9 = this;
+            var _this10 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this9.getData("/users/".concat(userId).concat("/memberships"));
+                var data = yield _this10.getData("/users/".concat(userId).concat("/memberships"));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -350,10 +375,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateUserMemberships(userId, organizationId, body) {
-            var _this10 = this;
+            var _this11 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this10.putData("/users/".concat(userId).concat("/memberships/organizations/").concat(organizationId), body);
+                var data = yield _this11.putData("/users/".concat(userId).concat("/memberships/organizations/").concat(organizationId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -363,10 +388,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         removeUserMembership(userId, organizationId) {
-            var _this11 = this;
+            var _this12 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this11.deleteData("/users/".concat(userId).concat("/memberships/").concat(organizationId));
+                var data = yield _this12.deleteData("/users/".concat(userId).concat("/memberships/").concat(organizationId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -382,10 +407,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         //ORGANIZATIONS
 
         getOrganizations() {
-            var _this12 = this;
+            var _this13 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this12.getData("/organizations");
+                var data = yield _this13.getData("/organizations");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -395,10 +420,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getOrganization(organizationId) {
-            var _this13 = this;
+            var _this14 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this13.getData("/organizations/".concat(organizationId));
+                var data = yield _this14.getData("/organizations/".concat(organizationId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -408,10 +433,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createOrganization(body) {
-            var _this14 = this;
+            var _this15 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this14.postData("/organizations", body);
+                var data = yield _this15.postData("/organizations", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -421,10 +446,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateOrganization(id, body) {
-            var _this15 = this;
+            var _this16 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this15.patchData("/organizations".concat(id), body);
+                var data = yield _this16.patchData("/organizations".concat(id), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -434,10 +459,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         removeOrganization(organizationId) {
-            var _this16 = this;
+            var _this17 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this16.deleteData("/organizations/".concat(organizationId));
+                var data = yield _this17.deleteData("/organizations/".concat(organizationId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -449,10 +474,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         //PROJECTS
 
         getProjects(organizationId) {
-            var _this17 = this;
+            var _this18 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this17.getData("/organizations/".concat(organizationId).concat("/projects"));
+                var data = yield _this18.getData("/organizations/".concat(organizationId).concat("/projects"));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -462,10 +487,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getProject(organizationId, projectId) {
-            var _this18 = this;
+            var _this19 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this18.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId));
+                var data = yield _this19.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -475,10 +500,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createProject(organizationId, body) {
-            var _this19 = this;
+            var _this20 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this19.postData("/organizations/".concat(organizationId).concat("/projects"), body);
+                var data = yield _this20.postData("/organizations/".concat(organizationId).concat("/projects"), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -488,10 +513,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateProject(organizationId, projectId, body) {
-            var _this20 = this;
+            var _this21 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this20.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId), body);
+                var data = yield _this21.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -501,10 +526,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         deleteProject(organizationId, projectId) {
-            var _this21 = this;
+            var _this22 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this21.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId));
+                var data = yield _this22.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -516,10 +541,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         //ACTIVITIES
 
         getActivities(organizationId, projectId) {
-            var _this22 = this;
+            var _this23 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this22.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities"));
+                var data = yield _this23.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities"));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -529,10 +554,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getActivity(organizationId, projectId, activityId) {
-            var _this23 = this;
+            var _this24 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this23.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId));
+                var data = yield _this24.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -542,10 +567,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createActivity(organizationId, projectId, body) {
-            var _this24 = this;
+            var _this25 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this24.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities"), body);
+                var data = yield _this25.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities"), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -555,10 +580,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateActvitiy(organizationId, projectId, activityId, body) {
-            var _this25 = this;
+            var _this26 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this25.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId), body);
+                var data = yield _this26.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -568,10 +593,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         deleteActivity(organizationId, projectId, activityId) {
-            var _this26 = this;
+            var _this27 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this26.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId));
+                var data = yield _this27.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -583,10 +608,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         //WORKLOGS
 
         getWorklogs(organizationId, projectId, activityId, params) {
-            var _this27 = this;
+            var _this28 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this27.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs"));
+                var data = yield _this28.getData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs"));
 
                 if (data.statusCode < 400) {
                     return data.response;
@@ -597,12 +622,12 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getWorklog(organizationId, projectId, activityId, worklogId) {
-            var _this28 = this;
+            var _this29 = this;
 
             return _asyncToGenerator(function* () {
                 var str = "/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs/").concat(worklogId);
 
-                var data = yield _this28.getData(str);
+                var data = yield _this29.getData(str);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -612,11 +637,11 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createWorklog(organizationId, projectId, activityId, body) {
-            var _this29 = this;
+            var _this30 = this;
 
             return _asyncToGenerator(function* () {
                 try {
-                    var data = yield _this29.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs"), body);
+                    var data = yield _this30.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs"), body);
                     if (data.statusCode < 400) {
                         return data.response;
                     } else {
@@ -627,11 +652,11 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createWorklogForCurrentUser(organizationId, projectId, activityId, body) {
-            var _this30 = this;
+            var _this31 = this;
 
             return _asyncToGenerator(function* () {
                 try {
-                    var data = yield _this30.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs").concat("/currentuser"), body);
+                    var data = yield _this31.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs").concat("/currentuser"), body);
                     if (data.statusCode < 400) {
                         return data.response;
                     }
@@ -643,10 +668,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateWorklog(organizationId, projectId, activityId, worklogId, body) {
-            var _this31 = this;
+            var _this32 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this31.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs/").concat(worklogId), body);
+                var data = yield _this32.patchData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs/").concat(worklogId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -656,10 +681,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         deleteWorklog(organizationId, projectId, activityId, worklogId) {
-            var _this32 = this;
+            var _this33 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this32.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs/").concat(worklogId));
+                var data = yield _this33.deleteData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs/").concat(worklogId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -669,12 +694,12 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUserWorklogs(params) {
-            var _this33 = this;
+            var _this34 = this;
 
             return _asyncToGenerator(function* () {
                 var parameters = params;
                 try {
-                    var data = yield _this33.getDataWithParams("/users/worklogs/", parameters);
+                    var data = yield _this34.getDataWithParams("/users/worklogs/", parameters);
                     return data.response;
                 } catch (e) {
                     return null;
@@ -683,12 +708,12 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getCurrentUserWorklogs(params) {
-            var _this34 = this;
+            var _this35 = this;
 
             return _asyncToGenerator(function* () {
                 var parameters = params;
                 try {
-                    var data = yield _this34.getDataWithParams("/users/current/worklogs/", parameters);
+                    var data = yield _this35.getDataWithParams("/users/current/worklogs/", parameters);
                     return data.response;
                 } catch (e) {
                     return null;
@@ -701,10 +726,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
          */
 
         getMailTemplates() {
-            var _this35 = this;
+            var _this36 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this35.getData("/configuration/mail/templates");
+                var data = yield _this36.getData("/configuration/mail/templates");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -714,10 +739,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getMailTemplateByTopic(topic) {
-            var _this36 = this;
+            var _this37 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this36.getData("/configuration/mail/templates/".concat(topic));
+                var data = yield _this37.getData("/configuration/mail/templates/".concat(topic));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -727,10 +752,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateMailTemplate(topic, body) {
-            var _this37 = this;
+            var _this38 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this37.patchData("/configuration/mail/templates/".concat(topic), body);
+                var data = yield _this38.patchData("/configuration/mail/templates/".concat(topic), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -740,10 +765,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getPaygrades() {
-            var _this38 = this;
+            var _this39 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this38.getData("/configuration/paygrades");
+                var data = yield _this39.getData("/configuration/paygrades");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -753,10 +778,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getPaygrade(paygradeId) {
-            var _this39 = this;
+            var _this40 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this39.getData("/configuration/paygrades/".concat(paygradeId));
+                var data = yield _this40.getData("/configuration/paygrades/".concat(paygradeId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -766,10 +791,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createPaygrade(body) {
-            var _this40 = this;
+            var _this41 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this40.postData("/configuration/paygrades", body);
+                var data = yield _this41.postData("/configuration/paygrades", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -779,10 +804,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getDayOfMontlyReminder() {
-            var _this41 = this;
+            var _this42 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this41.getData("/configuration/schedule/dayofmonthlyreminder");
+                var data = yield _this42.getData("/configuration/schedule/dayofmonthlyreminder");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -792,10 +817,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateDayOfMontlyReminder(body) {
-            var _this42 = this;
+            var _this43 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this42.putData("/configuration/schedule/dayofmonthlyreminder", body);
+                var data = yield _this43.putData("/configuration/schedule/dayofmonthlyreminder", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -809,10 +834,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
          */
 
         getRoles() {
-            var _this43 = this;
+            var _this44 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this43.getData("/roles");
+                var data = yield _this44.getData("/roles");
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -822,10 +847,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getRole(roleId) {
-            var _this44 = this;
+            var _this45 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this44.getData("/roles/".concat(roleId));
+                var data = yield _this45.getData("/roles/".concat(roleId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -835,10 +860,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         createRole(body) {
-            var _this45 = this;
+            var _this46 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this45.postData("/roles", body);
+                var data = yield _this46.postData("/roles", body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -848,10 +873,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         updateRole(roleId, body) {
-            var _this46 = this;
+            var _this47 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this46.patchData("/roles".concat(roleId), body);
+                var data = yield _this47.patchData("/roles".concat(roleId), body);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -861,10 +886,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         removeRole(roleId) {
-            var _this47 = this;
+            var _this48 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this47.deleteData("/roles/".concat(roleId));
+                var data = yield _this48.deleteData("/roles/".concat(roleId));
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -878,10 +903,11 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
          */
 
         getBillingReport(params) {
-            var _this48 = this;
+            var _this49 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this48.getDataWithParams("/reports/billing");
+                var data = yield _this49.getDataWithParams("/reports/billing", params);
+                console.log(params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -891,12 +917,13 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getBillingReportAsPdf(params) {
-            var _this49 = this;
+            var _this50 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this49.getPdfDataWithParams("/reports/billing/pdf");
+                var data = yield _this50.getPdfDataWithParams("/reports/billing/pdf", params);
+                console.log(data);
                 if (data.statusCode < 400) {
-                    return data.response;
+                    return data.content;
                 } else {
                     alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
@@ -904,10 +931,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getTimeLogReport(params) {
-            var _this50 = this;
+            var _this51 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this50.getDataWithParams("/reports/loggedtime");
+                var data = yield _this51.getDataWithParams("/reports/loggedtime", params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -917,12 +944,12 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getTimeLogReportAsPdf(params) {
-            var _this51 = this;
+            var _this52 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this51.getPdfDataWithParams("/reports/loggedtime/pdf");
+                var data = yield _this52.getPdfDataWithParams("/reports/loggedtime/pdf", params);
                 if (data.statusCode < 400) {
-                    return data.response;
+                    return data.content;
                 } else {
                     alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
@@ -930,10 +957,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getCurrentUserTimeLogReport(params) {
-            var _this52 = this;
+            var _this53 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this52.getDataWithParams("/reports/loggedtime/users/current", params);
+                var data = yield _this53.getDataWithParams("/reports/loggedtime/users/current", params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -942,13 +969,13 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             })();
         }
 
-        getUserTimeLogReportAsPdf(params) {
-            var _this53 = this;
+        getUserTimeLogReportAsPdf(params, userId) {
+            var _this54 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this53.getPdfDataWithParams("/reports/loggedtime/users/current/pdf");
+                var data = yield _this54.getPdfDataWithParams("/reports/loggedtime/users/".concat(userId).concat("/pdf"), params);
                 if (data.statusCode < 400) {
-                    return data.response;
+                    return data.content;
                 } else {
                     alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
@@ -956,24 +983,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUserTimeLogReport(params, userId) {
-            var _this54 = this;
-
-            return _asyncToGenerator(function* () {
-                var query = "/reports/loggedtime/users/".concat(userId);
-                try {
-                    var data = yield _this54.getDataWithParams(query, params);
-                    return data.response;
-                } catch (e) {
-                    var ex = e;
-                }
-            })();
-        }
-
-        getCurrentUserTimeLogReportAsPdf(params, userId) {
             var _this55 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this55.getPdfDataWithParams("/reports/loggedtime/users/".concat(userId).concat("/pdf"));
+                var data = yield _this55.getDataWithParams("/reports/loggedtime/users/".concat(userId), params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -982,11 +995,24 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             })();
         }
 
-        getOvertimeReport(params) {
+        getCurrentUserTimeLogReportAsPdf(params) {
             var _this56 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this56.getDataWithParams("/reports/overtime");
+                var data = yield _this56.getPdfDataWithParams("/reports/loggedtime/users/current/pdf", params);
+                if (data.statusCode < 400) {
+                    return data.content;
+                } else {
+                    alert(data.statusCode.concat(' - ').concat(data.statusText));
+                }
+            })();
+        }
+
+        getOvertimeReport(params) {
+            var _this57 = this;
+
+            return _asyncToGenerator(function* () {
+                var data = yield _this57.getDataWithParams("/reports/overtime", params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -996,12 +1022,12 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getOvertimeReportAsPdf(params) {
-            var _this57 = this;
+            var _this58 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this57.getPdfDataWithParams("/reports/overtime/pdf");
+                var data = yield _this58.getPdfDataWithParams("/reports/overtime/pdf", params);
                 if (data.statusCode < 400) {
-                    return data.response;
+                    return data.content;
                 } else {
                     alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
@@ -1009,10 +1035,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUndertimeReport(params) {
-            var _this58 = this;
+            var _this59 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this58.getDataWithParams("/reports/undertime");
+                var data = yield _this59.getDataWithParams("/reports/undertime", params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
@@ -1022,12 +1048,12 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getUndertimeReportAsPdf(params) {
-            var _this59 = this;
+            var _this60 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this59.getPdfDataWithParams("/reports/undertime/pdf");
+                var data = yield _this60.getPdfDataWithParams("/reports/undertime/pdf", params);
                 if (data.statusCode < 400) {
-                    return data.response;
+                    return data.content;
                 } else {
                     alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
@@ -1063,11 +1089,12 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getDataWithParams(location, params) {
+            console.log(params);
             return this.http.createRequest(location).asGet().withParams(params).send();
         }
 
         getPdfDataWithParams(location, params) {
-            return this.http.createRequest(location).asGet().withParams(params).withHeader("Accept", "application/pdf").send();
+            return this.http.createRequest(location).asGet().withParams(params).withHeader("Accept", "application/pdf").withResponseType('blob').send();
         }
     };
     exports.default = RestApi;
@@ -1394,25 +1421,6 @@ define('projecten/projecten',['exports', '../organisaties/organisaties'], functi
     };
     exports.default = Project;
 });
-define('raporten/rapporten',['exports'], function (exports) {
-    'use strict';
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-    let Report = exports.Report = class Report {
-        constructor() {
-            this.title = 'Reports';
-            this.reportTypes;
-        }
-
-        activate(params, routeConfig) {
-            this.routeConfig = routeConfig;
-            this.routeConfig.navModel.setTitle('Reports');
-            this.reportTypes = ['Report 1', 'Report 2', 'Report 3'];
-        }
-    };
-});
 define('resources/index',["exports"], function (exports) {
   "use strict";
 
@@ -1423,6 +1431,400 @@ define('resources/index',["exports"], function (exports) {
   function configure(config) {
     //config.globalResources([]);
   }
+});
+define('reports/billing-detail',["exports", "../rest-api"], function (exports, _restApi) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.default = undefined;
+
+    var _restApi2 = _interopRequireDefault(_restApi);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    function _asyncToGenerator(fn) {
+        return function () {
+            var gen = fn.apply(this, arguments);
+            return new Promise(function (resolve, reject) {
+                function step(key, arg) {
+                    try {
+                        var info = gen[key](arg);
+                        var value = info.value;
+                    } catch (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    if (info.done) {
+                        resolve(value);
+                    } else {
+                        return Promise.resolve(value).then(function (value) {
+                            step("next", value);
+                        }, function (err) {
+                            step("throw", err);
+                        });
+                    }
+                }
+
+                return step("next");
+            });
+        };
+    }
+
+    let ReportDetail = class ReportDetail {
+        constructor() {
+            this.report;
+            this.api = new _restApi2.default();
+            this.from;
+            this.to;
+        }
+
+        activate(params) {
+            var _this = this;
+
+            return _asyncToGenerator(function* () {
+                _this.from = params["from"];
+                _this.to = params["to"];
+                _this.report = JSON.parse((yield _this.api.getBillingReport(params)));
+                console.log(_this.report);
+            })();
+        }
+    };
+    exports.default = ReportDetail;
+});
+define('reports/rapporten',["exports", "../rest-api", "./report-type", "../keycloak-service", "aurelia-router", "aurelia-framework"], function (exports, _restApi, _reportType, _keycloakService, _aureliaRouter, _aureliaFramework) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.Report = undefined;
+
+    var _restApi2 = _interopRequireDefault(_restApi);
+
+    var _reportType2 = _interopRequireDefault(_reportType);
+
+    var _keycloakService2 = _interopRequireDefault(_keycloakService);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    function _asyncToGenerator(fn) {
+        return function () {
+            var gen = fn.apply(this, arguments);
+            return new Promise(function (resolve, reject) {
+                function step(key, arg) {
+                    try {
+                        var info = gen[key](arg);
+                        var value = info.value;
+                    } catch (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    if (info.done) {
+                        resolve(value);
+                    } else {
+                        return Promise.resolve(value).then(function (value) {
+                            step("next", value);
+                        }, function (err) {
+                            step("throw", err);
+                        });
+                    }
+                }
+
+                return step("next");
+            });
+        };
+    }
+
+    var _dec, _class;
+
+    let Report = exports.Report = (_dec = (0, _aureliaFramework.inject)(_aureliaRouter.Router), _dec(_class = class Report {
+
+        constructor(router) {
+            this.title = 'Reports';
+            this.reportTypes;
+            this.router = router;
+            this.organizations;
+            this.users;
+            this.activities;
+            this.projects;
+        }
+
+        activate(params, routeConfig) {
+            var _this = this;
+
+            return _asyncToGenerator(function* () {
+                _this.routeConfig = routeConfig;
+                _this.routeConfig.navModel.setTitle('Reports');
+                _this.reportTypes = [new _reportType2.default('Facturatie', 'billing'), new _reportType2.default('Overuren', 'overtime'), new _reportType2.default('Onderuren', 'undertime'), new _reportType2.default('Uurlog', 'loggedTime'), new _reportType2.default('Persoonlijk Uurlog', 'personalLoggedTime'), new _reportType2.default('Gebruikers Uurlog', 'userLoggedTime')];
+                _this.api = new _restApi2.default();
+                _this.organizations = JSON.parse((yield _this.api.getOrganizations()));
+                _this.users = JSON.parse((yield _this.api.getUsers()));
+            })();
+        }
+
+        setProjects(organizationId) {
+            var _this2 = this;
+
+            return _asyncToGenerator(function* () {
+                _this2.projects = JSON.parse((yield _this2.api.getProjects(organizationId)));
+                _this2.users = JSON.parse((yield _this2.api.getUsersWithParams({ "organization": organizationId })));
+                _this2.activities = null;
+            })();
+        }
+
+        setActivities(organizationId, projectId) {
+            var _this3 = this;
+
+            return _asyncToGenerator(function* () {
+                _this3.activities = JSON.parse((yield _this3.api.getActivities(organizationId, projectId)));
+            })();
+        }
+
+        getPdfReport(type, params) {
+            var _this4 = this;
+
+            return _asyncToGenerator(function* () {
+                var param;
+                for (param in params) {
+                    if (params[param] === "" || params[param] === null) {
+                        delete params[param];
+                    }
+                }
+
+                var defaultFileName = type.concat("_report.pdf");
+                var report;
+
+                var user = params["user"];
+                if ("billing" === type) {
+                    report = yield _this4.api.getBillingReportAsPdf(params);
+                } else if ("overtime" === type) {
+                    report = yield _this4.api.getOvertimeReportAsPdf(params);
+                } else if ("undertime" === type) {
+                    report = yield _this4.api.getUndertimeReportAsPdf(params);
+                } else if ("loggedTime" === type) {
+                    report = yield _this4.api.getTimeLogReportAsPdf(params);
+                } else if ("personalLoggedTime" === type) {
+                    report = yield _this4.api.getCurrentUserTimeLogReportAsPdf(params);
+                } else if ("userLoggedTime" === type) {
+                    report = yield _this4.api.getUserTimeLogReportAsPdf(params, user);
+                }
+                if (report.size > 0) {
+                    var anchor = document.createElement('a');
+                    var fileURL = window.URL.createObjectURL(report);
+                    anchor.href = fileURL;
+                    anchor.download = defaultFileName;
+                    document.body.appendChild(anchor);
+                    anchor.click();
+                    document.body.removeChild(anchor);
+                } else {
+                    alert("No data available");
+                }
+            })();
+        }
+
+        getReport(type, params) {
+            var param;
+            for (param in params) {
+                if (params[param] === "" || params[param] === null) {
+                    delete params[param];
+                }
+            }
+            params["type"] = type;
+            if ("billing" === type) {
+                this.router.navigateToRoute('billingDetail', params, { replace: true });
+            } else if ("overtime" === type) {
+                this.router.navigateToRoute('overtimeDetail', params, { replace: true });
+            } else if ("undertime" === type) {
+                this.router.navigateToRoute('undertimeDetail', params, { replace: true });
+            } else if ("loggedTime" === type) {
+                this.router.navigateToRoute('loggedtimeDetail', params, { replace: true });
+            } else if ("personalLoggedTime" === type) {
+                this.router.navigateToRoute('loggedtimeDetail', params, { replace: true });
+            } else if ("userLoggedTime" === type) {
+                this.router.navigateToRoute('loggedtimeDetail', params, { replace: true });
+            }
+        }
+    }) || _class);
+});
+define('reports/report-type',["exports"], function (exports) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    let ReportType = class ReportType {
+        constructor(name, value, roles) {
+            this.name = name;
+            this.value = value;
+            this.roles = roles;
+        }
+    };
+    exports.default = ReportType;
+});
+define('reports/time-difference',["exports", "../rest-api"], function (exports, _restApi) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.default = undefined;
+
+    var _restApi2 = _interopRequireDefault(_restApi);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    function _asyncToGenerator(fn) {
+        return function () {
+            var gen = fn.apply(this, arguments);
+            return new Promise(function (resolve, reject) {
+                function step(key, arg) {
+                    try {
+                        var info = gen[key](arg);
+                        var value = info.value;
+                    } catch (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    if (info.done) {
+                        resolve(value);
+                    } else {
+                        return Promise.resolve(value).then(function (value) {
+                            step("next", value);
+                        }, function (err) {
+                            step("throw", err);
+                        });
+                    }
+                }
+
+                return step("next");
+            });
+        };
+    }
+
+    let TimeDifference = class TimeDifference {
+        constructor() {
+            this.report;
+            this.api = new _restApi2.default();
+            this.type;
+            this.title;
+            this.from;
+            this.to;
+        }
+
+        activate(params) {
+            var _this = this;
+
+            return _asyncToGenerator(function* () {
+                _this.type = params["type"];
+                _this.from = params["from"];
+                _this.to = params["to"];
+                if (_this.type == "overtime") {
+                    _this.title = "Overuren";
+                    _this.report = JSON.parse((yield _this.api.getOvertimeReport(params)));
+                } else if (_this.type == "undertime") {
+                    _this.title = "Onderuren";
+                    _this.report = JSON.parse((yield _this.api.getUndertimeReport(params)));
+                }
+                console.log(_this.report);
+            })();
+        }
+    };
+    exports.default = TimeDifference;
+});
+define('reports/timelog-detail',["exports", "../rest-api"], function (exports, _restApi) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.default = undefined;
+
+    var _restApi2 = _interopRequireDefault(_restApi);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    function _asyncToGenerator(fn) {
+        return function () {
+            var gen = fn.apply(this, arguments);
+            return new Promise(function (resolve, reject) {
+                function step(key, arg) {
+                    try {
+                        var info = gen[key](arg);
+                        var value = info.value;
+                    } catch (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    if (info.done) {
+                        resolve(value);
+                    } else {
+                        return Promise.resolve(value).then(function (value) {
+                            step("next", value);
+                        }, function (err) {
+                            step("throw", err);
+                        });
+                    }
+                }
+
+                return step("next");
+            });
+        };
+    }
+
+    let TimelogDetail = class TimelogDetail {
+        constructor() {
+            this.report;
+            this.api = new _restApi2.default();
+            this.type;
+            this.title;
+            this.user;
+            this.from;
+            this.to;
+        }
+
+        activate(params) {
+            var _this = this;
+
+            return _asyncToGenerator(function* () {
+                _this.type = params["type"];
+                _this.from = params["from"];
+                _this.user = params["user"];
+                _this.to = params["to"];
+                _this.title = "Gelogde uren";
+                if ("loggedTime" === _this.type) {
+                    _this.report = JSON.parse((yield _this.api.getTimeLogReport(params)));
+                } else if ("personalLoggedTime" === _this.type) {
+                    _this.report = JSON.parse((yield _this.api.getCurrentUserTimeLogReport(params)));
+                } else if ("userLoggedTime" === _this.type) {
+                    _this.report = JSON.parse((yield _this.api.getUserTimeLogReport(params, _this.user)));
+                }
+                console.log(_this.report);
+            })();
+        }
+    };
+    exports.default = TimelogDetail;
 });
 define('timesheet/log',["exports"], function (exports) {
     "use strict";
@@ -1772,8 +2174,8 @@ define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'au
         }
     }) || _class);
 });
-define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"./styles.css\"></require><require from=\"./sidebar\"></require><nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\"><div class=\"navbar-header\"><a class=\"navbar-brand\" href=\"#\"><img class=\"header-logo\" src=\"src/logo/Canguru-Logo.png\" alt=\"logo\"> <i class=\"fa fa-user\"></i></a></div><div class=\"navbar-header\"><button type=\"button\" click.delegate=\"logout()\">Logout</button></div></nav><div><div class=\"row\"><sidebar class=\"col-md-2\"></sidebar><router-view class=\"col-md-8\"></router-view></div></div></template>"; });
-define('text!styles.css', ['module'], function(module) { module.exports = "body {\r\n    padding-top: 3.5%;\r\n}\r\n\r\nsection {\r\n    margin: 0 20px;\r\n}\r\n\r\na:focus {\r\n    outline: none;\r\n}\r\n\r\n.navbar {\r\n    height: 4%;\r\n    position: fixed !important;\r\n}\r\n\r\n.navbar-brand {\r\n    padding: 0;\r\n}\r\n\r\n.no-selection {\r\n    margin: 20px;\r\n}\r\n\r\n.contact-list {\r\n    overflow-y: auto;\r\n    border: 1px solid #ddd;\r\n    padding: 10px;\r\n}\r\n\r\n.panel {\r\n    margin: 20px;\r\n}\r\n\r\n.button-bar {\r\n    right: 0;\r\n    left: 0;\r\n    bottom: 0;\r\n    border-top: 1px solid #ddd;\r\n    background: white;\r\n}\r\n\r\n    .button-bar > button {\r\n        float: right;\r\n        margin: 20px;\r\n    }\r\n\r\nli.list-group-item {\r\n    list-style: none;\r\n}\r\n\r\n    li.list-group-item > a {\r\n        text-decoration: none;\r\n    }\r\n\r\n    li.list-group-item.active > a {\r\n        color: white;\r\n    }\r\n\r\n.main-view {\r\n    height: 88%;\r\n    width: 80%;\r\n    margin-top: 1%;\r\n    padding: 10px;\r\n    position: fixed !important;\r\n    border: thin solid lightgrey;\r\n}\r\n\r\n.sidebar {\r\n    height: 100%;\r\n    z-index: 1;\r\n    position: fixed !important;\r\n    padding-top: 3%;\r\n    overflow: auto;\r\n    border-right: thin solid lightgrey;\r\n    border-bottom: thin solid lightgrey;\r\n}\r\n\r\n    .sidebar ul {\r\n        padding: 0;\r\n    }\r\n\r\n    .sidebar li {\r\n        list-style: none;\r\n        border-bottom: thin solid lightgrey;\r\n        width: auto;\r\n    }\r\n\r\n.sidebar-item {\r\n    color: gray;\r\n    font-size: 1.5em;\r\n    font-weight: bold;\r\n}\r\n\r\n.sidebar li ul li:first-child {\r\n    list-style: none;\r\n    border-top: thin solid lightgrey;\r\n    border-bottom: thin solid lightgrey;\r\n    width: auto;\r\n}\r\n\r\n.sidebar li ul li {\r\n    list-style: none;\r\n    border-bottom: thin solid lightgrey;\r\n    width: auto;\r\n}\r\n\r\n    .sidebar li ul li:last-child {\r\n        list-style: none;\r\n        width: auto;\r\n    }\r\n\r\n.sidebar-subItem {\r\n    padding-left: 10%;\r\n    color: gray;\r\n    font-size: 1em;\r\n    font-weight: bold;\r\n}\r\n\r\n.col-md-2 {\r\n    margin-right: 1%;\r\n}\r\n\r\n.base-shadow {\r\n    box-shadow: 0 3px 10px 2px lightgrey;\r\n}\r\n\r\n.center {\r\n    text-align: center;\r\n}\r\n\r\n.center-div {\r\n    margin: 0 auto;\r\n    float: none;\r\n}\r\n\r\n.header-logo {\r\n    height: 100%;\r\n    width: auto;\r\n    float: left;\r\n}\r\n\r\n.form-width {\r\n    width: 70%;\r\n    margin-left: 15%;\r\n    margin-right: 15%;\r\n}\r\n\r\n.form-height {\r\n    margin-top: 3vh;\r\n    margin-bottom: 3vh;\r\n}\r\n\r\n.row-seperated {\r\n    margin-bottom: 0.8em;\r\n}\r\n\r\n.table-striped > tbody > tr.outsideRegularDays {\r\n    background-color: #faffc4;\r\n}\r\n\r\n.vert-scroll {    \r\n    overflow-x: hidden;\r\n    overflow-y: scroll;\r\n}\r\n\r\n.group:after {\r\n  content: \"\";\r\n  display: table;\r\n  clear: both;\r\n}\r\n.table-responsive {\r\n    overflow-y: auto;\r\n}\r\n.timesheet-div {\r\n   width: 70%;   \r\n   margin: 0 15%;\r\n}\r\n.table-div {\r\n   overflow-y: scroll;\r\n   max-height: 20vh;\r\n   margin: 3vh 0 3vh;\r\n}\r\n\r\n.confirmed {\r\n    font-weight: bold;\r\n    color: green;\r\n}\r\n.button.confirmed{\r\n    font-weight:normal;\r\n    color: GrayText;\r\n}\r\n.notConfirmed {\r\n    font-weight: bold;\r\n    color: red;\r\n}\r\n.button.notConfirmed{\r\n    font-weight:normal;\r\n    color: ButtonText;\r\n}"; });
+define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"./styles.css\"></require><require from=\"./sidebar\"></require><nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\"><div class=\"navbar-header\"><a class=\"navbar-brand\" href=\"#\"><img class=\"header-logo\" src=\"src/logo/Canguru-Logo.png\" alt=\"logo\"> <i class=\"fa fa-user\"></i></a></div><div class=\"navbar-header float-right\"><span>Welkom ${userName}</span> <button type=\"button\" click.delegate=\"logout()\">Logout</button></div></nav><div><div class=\"row\"><sidebar class=\"col-md-2\"></sidebar><router-view class=\"col-md-8\"></router-view></div></div></template>"; });
+define('text!styles.css', ['module'], function(module) { module.exports = "body {\n    padding-top: 3.5%;\n}\n\nsection {\n    margin: 0 20px;\n}\n\na:focus {\n    outline: none;\n}\n\n.navbar {\n    height: 4%;\n    position: fixed !important;\n}\n\n.navbar-brand {\n    padding: 0;\n}\n\n.no-selection {\n    margin: 20px;\n}\n\n.contact-list {\n    overflow-y: auto;\n    border: 1px solid #ddd;\n    padding: 10px;\n}\n\n.panel {\n    margin: 20px;\n}\n\n.button-bar {\n    right: 0;\n    left: 0;\n    bottom: 0;\n    border-top: 1px solid #ddd;\n    background: white;\n}\n\n    .button-bar > button {\n        float: right;\n        margin: 20px;\n    }\n\nli.list-group-item {\n    list-style: none;\n}\n\n    li.list-group-item > a {\n        text-decoration: none;\n    }\n\n    li.list-group-item.active > a {\n        color: white;\n    }\n\n.main-view {\n    height: 88%;\n    width: 80%;\n    margin-top: 1%;\n    padding: 10px;\n    position: fixed !important;\n    border: thin solid lightgrey;\n    overflow: scroll;\n}\n\n.sidebar {\n    height: 100%;\n    z-index: 1;\n    position: fixed !important;\n    padding-top: 3%;\n    overflow: auto;\n    border-right: thin solid lightgrey;\n    border-bottom: thin solid lightgrey;\n}\n\n    .sidebar ul {\n        padding: 0;\n    }\n\n    .sidebar li {\n        list-style: none;\n        border-bottom: thin solid lightgrey;\n        width: auto;\n    }\n\n.sidebar-item {\n    color: gray;\n    font-size: 1.5em;\n    font-weight: bold;\n}\n\n.sidebar li ul li:first-child {\n    list-style: none;\n    border-top: thin solid lightgrey;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n.sidebar li ul li {\n    list-style: none;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n    .sidebar li ul li:last-child {\n        list-style: none;\n        width: auto;\n    }\n\n.sidebar-subItem {\n    padding-left: 10%;\n    color: gray;\n    font-size: 1em;\n    font-weight: bold;\n}\n\n.col-md-2 {\n    margin-right: 1%;\n}\n\n.base-shadow {\n    box-shadow: 0 3px 10px 2px lightgrey;\n}\n\n.table-border{\n    border: thin solid black;\n}\n\n.nested-border{\n    border-left: thin solid black;\n    margin-bottom: 0;\n}\n\n.no-padding{\n    padding:0!important;\n}\n.center {\n    text-align: center;\n}\n\n.center-div {\n    margin: 0 auto;\n    float: none;\n}\n\n.header-logo {\n    height: 100%;\n    width: auto;\n    float: left;\n}\n\n.float-right{\n    float: right!important;\n}\n\n.form-width{\n    width: 70%;\n    margin-left: 15%;\n    margin-right: 15%;\n}\n\n.form-height {\n    margin-top: 3vh;\n    margin-bottom: 3vh;\n}\n\n.row-seperated {\n    margin-bottom: 0.8em;\n}\n\n.table-striped > tbody > tr.outsideRegularDays {\n    background-color: #faffc4;\n}\n\n.vert-scroll {\n    overflow-x: hidden;\n    overflow-y: scroll;\n}\n\n.group:after {\n  content: \"\";\n  display: table;\n  clear: both;\n}\n.table-responsive {\n    overflow-y: auto;\n}\n.timesheet-div {\n   width: 70%;\n   margin: 0 15%;\n}\n.table-div {\n   overflow-y: scroll;\n   max-height: 20vh;\n   margin: 3vh 0 3vh;\n}\n\n.confirmed {\n    font-weight: bold;\n    color: green;\n}\n.button.confirmed{\n    font-weight:normal;\n    color: GrayText;\n}\n.notConfirmed {\n    font-weight: bold;\n    color: red;\n}\n.button.notConfirmed{\n    font-weight:normal;\n    color: ButtonText;\n}"; });
 define('text!notfound.html', ['module'], function(module) { module.exports = "<template><h1>404 suck it</h1></template>"; });
 define('text!sidebar.html', ['module'], function(module) { module.exports = "<template><div class=\"sidebar col-md-2 base-shadow\"><ul><li repeat.for=\"item of items\" class=\"${item.isActive ? 'active' : ''}\"><a class=\"sidebar-item\" route-href=\"route.bind: item.route\">${item.value}</a></li></ul></div></template>"; });
 define('text!activiteiten/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
@@ -1781,7 +2183,10 @@ define('text!consultants/aanmaak-detail.html', ['module'], function(module) { mo
 define('text!consultants/beheer-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\" submit.trigger=\"updateConsultant()\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\" value.two-way=\"email\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\" value.two-way=\"firstName\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\" value.two-way=\"lastName\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
 define('text!consultants/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form><button>Niewe Consultant</button></form><div><table class=\"table table-striped\"><thead><tr><th>voornaam</th><th>familienaam</th><th>e-mail</th></tr></thead><tbody><tr repeat.for=\"consultant of consultants\"><td>${consultant.firstName}</td><td>${consultant.lastName}</td><td>${consultant.email}</td><td><button type=\"button\" click.delegate=\"editConsultant(consultant.id)\">Wijzigen</button></td></tr></tbody></table></div></div></template>"; });
 define('text!organisaties/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
-define('text!raporten/rapporten.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"rapporten\">Rapport</label><div class=\"col-sm-10\"><select id=\"rapporten\" class=\"form-control\"><option repeat.for=\"type of reportTypes\" value.bind=\"type\">${type}</option></select></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"begin\">Begin Datum</label><div class=\"col-sm-10\"><input type=\"date\" id=\"begin\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"eind\">Eind Datum</label><div class=\"col-sm-10\"><input type=\"date\" id=\"eind\" class=\"form-control\"></div></div><input type=\"submit\" value=\"Download\"></form></div></template>"; });
+define('text!reports/billing-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">Facturatie ${from} - ${to}</h2><table class=\"table table-striped table-border\"><tr><th colspan=\"3\">Organisatie</th></tr><tr repeat.for=\"organization of report.organizations\"><td>${organization.organization.name}</td><td colspan=\"2\" class=\"no-padding\"><table class=\"table table-striped nested-border\"><tr><th colspan=\"3\">Dag</th></tr><tr repeat.for=\"day of organization.days\"><td>${day.day}</td><td colspan=\"2\" class=\"no-padding\"><table class=\"table table-striped nested-border\"><tr><th colspan=\"3\">Project</th></tr><tr repeat.for=\"project of day.projects\"><td>${project.project.name}</td><td colspan=\"2\" class=\"no-padding\"><table class=\"table table-striped nested-border\"><tr><th colspan=\"3\">Activiteit</th></tr><tr repeat.for=\"activity of project.activities\"><td>${activity.activity.name}</td><td colspan=\"2\" class=\"no-padding\"><table table class=\"table table-striped nested-border\"><tr><th>Werknemer</th><th>Uren</th><th>Te betalen</th></tr><tr repeat.for=\"user of activity.users\"><td>${user.user.lastName} ${user.user.firstName}</td><td>${user.totalBillableHours} uur</td><td>€ ${user.totalAmountDue}</td></tr><tr><th>Totaal</th><td>${activity.totalBillableHours} uur</td><td>€ ${activity.totalAmountDue}</td></tr></table></td></tr><tr><th>Totaal</th><td>${project.totalBillableHours} uur</td><td>€ ${project.totalAmountDue}</td></tr></table></td></tr><tr><th>Totaal</th><td>${day.totalBillableHours} uur</td><td>€ ${day.totalAmountDue}</td></tr></table></td></tr><tr><th>Totaal</th><td>${organization.totalBillableHours} uur</td><td>€ ${organization.totalAmountDue}</td></tr></table></td></tr><tr><th>Totaal</th><td>${report.totalBillableHours} uren</td><td>€ ${report.totalAmountDue}</td></tr></table></div></template>"; });
+define('text!reports/rapporten.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"rapporten\">Rapport</label><div class=\"col-sm-10\"><select id=\"rapporten\" class=\"form-control\" value.bind=\"selectedType\"><option>--Selecteer een rapport--</option><option repeat.for=\"type of reportTypes\" model.bind=\"type.value\">${type.name}</option></select></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"organisaties\">Organisatie</label><div class=\"col-sm-10\"><select id=\"organisaties\" class=\"form-control\" value.bind=\"params.organization\" change.delegate=\"setProjects(params.organization)\"><option if.bind=\"selectedType == 'overtime' || selectedType == 'undertime'\" value=\"\">--Selecteer een Organisatie--</option><option if.bind=\"!(selectedType == 'overtime' || selectedType == 'undertime')\" value=\"\">--Alle Organisaties--</option><option repeat.for=\"organization of organizations\" model.bind=\"organization.id\">${organization.name}</option></select></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"users\">Werknemer</label><div class=\"col-sm-10\"><select id=\"users\" class=\"form-control\" value.bind=\"params.user\"><option value=\"\">--Alle Werknemers--</option><option repeat.for=\"user of users\" model.bind=\"user.id\">${user.lastName} ${user.firstName}</option></select></div></div><div class=\"form-group\" if.bind=\"params.organization\"><label class=\"col-sm-2 control-label\" for=\"projecten\">Project</label><div class=\"col-sm-10\"><select id=\"projecten\" class=\"form-control\" value.bind=\"params.project\" change.delegate=\"setActivities(params.organization,params.project)\"><option value=\"\">--Alle Projecten--</option><option repeat.for=\"project of projects\" model.bind=\"project.id\">${project.name}</option></select></div></div><div class=\"form-group\" if.bind=\"params.project\"><label class=\"col-sm-2 control-label\" for=\"activiteiten\">Activiteit</label><div class=\"col-sm-10\"><select id=\"activiteiten\" class=\"form-control\" value.bind=\"params.activity\"><option value=\"\">--Alle Activiteiten--</option><option repeat.for=\"activity of activities\" model.bind=\"activity.id\">${activity.name}</option></select></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"begin\">Begin Datum</label><div class=\"col-sm-4\"><input type=\"date\" id=\"begin\" class=\"form-control\" required=\"required\" value.bind=\"params.from\"></div><label class=\"col-sm-2 control-label\" for=\"eind\">Eind Datum</label><div class=\"col-sm-4\"><input type=\"date\" id=\"eind\" class=\"form-control\" required=\"required\" value.bind=\"params.to\"></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"pdf\">als pdf</label><input type=\"checkbox\" checked.bind=\"pdf\" id=\"pdf\"></div><div if.bind=\"pdf\"><button type=\"button\" click.delegate=\"getPdfReport(selectedType,params)\">Download</button></div><div if.bind=\"!pdf\"><button type=\"button\" click.delegate=\"getReport(selectedType,params)\">Weergeven</button></div></form></div></template>"; });
+define('text!reports/time-difference.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title} ${from} - ${to}</h2><table class=\"table table-striped table-border\"><tr><th colspan=\"2\">Werknemer</th></tr><tr repeat.for=\"workday of report.userWorkdays\"><td>${workday.user.lastName} ${workday.user.firstName}</td><td class=\"no-padding\"><table class=\"table table-striped nested-border\"><tr><th>Dag</th><th>Uren</th></tr><tr repeat.for=\"day of workday.workdays\"><td>${day.day}</td><td>${day.loggedMinutes/60}</td></tr></table></td></tr></table></div></template>"; });
+define('text!reports/timelog-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title} ${report.user.lastName} ${report.user.firstName} ${from} - ${to}</h2><table class=\"table table-striped table-border\"><tr><th colspan=\"2\">Organisatie</th></tr><tr repeat.for=\"organization of report.organizations\"><td>${organization.organization.name}</td><td class=\"no-padding\"><table class=\"table table-striped nested-border\"><tr><th>Project</th></tr><tr repeat.for=\"project of organization.projects\"><td>${project.project.name}</td><td class=\"no-padding\"><table class=\"table table-striped nested-border\"><tr><th>Activiteit</th><th>Uren</th></tr><tr repeat.for=\"activity of project.activities\"><td>${activity.activity.name}</td><td>${activity.totalLoggedMinutes/60}</td></tr><tr><th>Totaal</th><td>${project.totalLoggedMinutes/60} uur</td></tr></table></td></tr><tr><th>Totaal</th><td>${organization.totalLoggedMinutes/60} uur</td></tr></table></td></tr><tr repeat.for=\"organization of report.report.organizations\"><td>${organization.organization.name}</td><td class=\"no-padding\"><table class=\"table table-striped nested-border\"><tr><th>Project</th></tr><tr repeat.for=\"project of organization.projects\"><td>${project.project.name}</td><td class=\"no-padding\"><table class=\"table table-striped nested-border\"><tr><th>Activiteit</th><th>Uren</th></tr><tr repeat.for=\"activity of project.activities\"><td>${activity.activity.name}</td><td>${activity.totalLoggedMinutes/60}</td></tr><tr><th>Totaal</th><td>${project.totalLoggedMinutes/60} uur</td></tr></table></td></tr><tr><th>Totaal</th><td>${organization.totalLoggedMinutes/60} uur</td></tr></table></td></tr></table></div></template>"; });
 define('text!projecten/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
 define('text!timesheet/timesheet.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow group\"><h2 class=\"center\">${title}</h2><form form class=\"form-horizontal form-height center form-width\" submit.trigger=\"saveLog()\"><div class=\"form-group\"><h3>${user.firstName + ' ' + user.lastName}</h3><br><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"organizations\">Organisatie</label><div class=\"col-sm-6\"><select class=\"form-control\" name=\"organizations\" value.bind=\"organization\" change.delegate=\"changeOrganization()\"><option repeat.for=\"organization of organizations\" model.bind=\"organization\" innerhtml.bind=\"organization.name\"></option></select></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"projects\">Project</label><div class=\"col-sm-6\"><select class=\"form-control\" name=\"projects\" value.bind=\"project\" change.delegate=\"changeProject()\"><option repeat.for=\"project of projects\" model.bind=\"project\" innerhtml.bind=\"project.name\"></option></select></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"activities\">Activiteit</label><div class=\"col-sm-6\"><select class=\"form-control\" name=\"activities\" value.bind=\"activity\" change.delegate=\"changeActivity()\"><option repeat.for=\"activity of activities\" model.bind=\"activity\" innerhtml.bind=\"activity.name\"></option></select></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"hours\">Uren</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"hours\" min=\"0\" max=\"12\" step=\"1\"></div><label class=\"col-sm-offset-0 col-sm-2 control-label\" for=\"minutes\">Minuten</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"minutes\" min=\"0\" max=\"59\" step=\"5\"></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"datum\">Datum</label><div class=\"col-sm-6\"><input type=\"date\" id=\"datum\" class=\"form-control\" value.two-way=\"logDate\" change.delegate=\"changeDate()\"></div></div><div class=\"row row-seperated\"><div class=\"col-sm-offset-4 col-sm-8\"><button type=\"submit\" class=\"col-sm-4\" id=\"submitBtn\">Opslaan</button></div></div></div></form><div class=\"timesheet-div\"><h3 class=\"center\"><span innerhtml.bind=\"organization.name + ' / ' + project.name + ' / ' + activity.name\"></span> <button type=\"button\" id=\"collapseBtn\" click.delegate=\"collapse()\" class=\"close\">&bigwedge;</button></h3><div id=\"collapse1\" class=\"panel-table collapse in table-div\"><table class=\"table table-striped\"><thead><tr><th>Dag</th><th>Datum</th><th>Tijd gelogd</th><th>Bevestigd</th></tr></thead><tbody><tr repeat.for=\"log of logs\" class=\"${log.regularDays}\"><td innerhtml.bind=\"$parent.logs[$index].weekday\"></td><td innerhtml.bind=\"dateString($parent.logs[$index])\"></td><td innerhtml.bind=\"minuteString($parent.logs[$index])\"></td><td><span innerhtml.bind=\"confirmed($parent.logs[$index])\" class.bind=\"confirmedcolor(log)\"></span></td><td><button type=\"button\" class=\"button\" class.bind=\"confirmedcolor(log)\" click.delegate=\"editLog($parent.logs[$index])\" disabled.bind=\"log.confirmed\">Aanpassen</button></td><td><button type=\"button\" class=\"button\" class.bind=\"confirmedcolor(log)\" click.delegate=\"deleteLog($parent.logs[$index])\" disabled.bind=\"log.confirmed\">Verwijderen</button></td></tr></tbody></table></div></div></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map

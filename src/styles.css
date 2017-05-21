@@ -127,6 +127,18 @@ li.list-group-item {
     box-shadow: 0 3px 10px 2px lightgrey;
 }
 
+.table-border{
+    border: thin solid black;
+}
+
+.nested-border{
+    border-left: thin solid black;
+    margin-bottom: 0;
+}
+
+.no-padding{
+    padding:0!important;
+}
 .center {
     text-align: center;
 }
