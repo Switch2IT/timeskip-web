@@ -264,36 +264,53 @@ export default class RestApi {
 
     //WORKLOGS
 
-    async getWorklogs(organizationId, projectId, activityId) {
+    async getWorklogs(organizationId, projectId, activityId, params) {
         var data = await this.getData("/organizations/".concat(organizationId)
             .concat("/projects/").concat(projectId)
             .concat("/activities/").concat(activityId)
             .concat("/worklogs"));
+       
         if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
     }
 
-    async getWorklogs(organizationId, projectId, activityId, worklogId) {
-        var data = await this.getData("/organizations/".concat(organizationId)
-            .concat("/projects/").concat(projectId)
-            .concat("/activities/").concat(activityId)
-            .concat("/worklogs/").concat(worklogId));
+    async getWorklog(organizationId, projectId, activityId, worklogId) {
+        var str = "/organizations/".concat(organizationId)
+             .concat("/projects/").concat(projectId)
+             .concat("/activities/").concat(activityId)
+             .concat("/worklogs/")       
+             .concat(worklogId);
+            
+        var data = await this.getData(str);
         if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
     }
 
     async createWorklog(organizationId, projectId, activityId, body) {
-        var data = await this.postData("/organizations/".concat(organizationId)
-            .concat("/projects/").concat(projectId)
-            .concat("/activities").concat(activityId)
-            .concat("/worklogs"), body);
-        if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
+        try {
+            var data = await this.postData("/organizations/".concat(organizationId)
+                   .concat("/projects/").concat(projectId)
+                   .concat("/activities/").concat(activityId)
+                   .concat("/worklogs"), body);
+            if (data.statusCode < 400) {
+                return data.response; 
+            } else {
+                alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+            }
+        } catch (e) {
+    
+        }            
     }
 
     async createWorklogForCurrentUser(organizationId, projectId, activityId, body) {
-        var data = await this.postData("/organizations/".concat(organizationId)
+        try {
+            var data = await this.postData("/organizations/".concat(organizationId)
             .concat("/projects/").concat(projectId)
-            .concat("/activities").concat(activityId)
+            .concat("/activities/").concat(activityId)
             .concat("/worklogs").concat("/currentuser"), body);
-        if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
+            if (data.statusCode < 400) { return data.response; }
+        } catch (e) {
+            alert(data.statusCode.concat(' - ').concat(data.statusText));
+            return null;
+        }
     }
 
     async updateWorklog(organizationId, projectId, activityId, worklogId, body) {
@@ -314,6 +331,26 @@ export default class RestApi {
         } else {
             alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
+    }
+
+    async getUserWorklogs(params){
+        var parameters = params;   
+        try {
+            var data = await this.getDataWithParams("/users/worklogs/", parameters)
+            return data.response;
+        } catch (e) {
+            return null;
+        }        
+    }
+
+    async getCurrentUserWorklogs(params){
+        var parameters = params;   
+        try {
+            var data = await this.getDataWithParams("/users/current/worklogs/", parameters)
+            return data.response;
+        } catch (e) {
+            return null;
+        }        
     }
 
     /**

@@ -1,0 +1,85 @@
+<template>
+    <div class="main-view base-shadow group">
+        <h2 class="center">${title}</h2>
+        <form form class="form-horizontal form-height center form-width" submit.trigger="saveLog()">
+            <div class="form-group">
+                <h3>${user.firstName + ' ' + user.lastName}</h3>
+                <br />
+                <div class="row row-seperated">
+                    <label class="col-sm-offset-2 col-sm-2 control-label" for="organizations">Organisatie</label>
+                    <div class="col-sm-6">
+                        <select class="form-control" name="organizations" value.bind="organization" change.delegate="changeOrganization()">
+                            <option repeat.for="organization of organizations" model.bind="organization" innerHtml.bind="organization.name"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row row-seperated">
+                    <label class="col-sm-offset-2 col-sm-2 control-label" for="projects">Project</label>
+                    <div class="col-sm-6">
+                        <select class="form-control" name="projects" value.bind="project" change.delegate="changeProject()">
+                            <option repeat.for="project of projects" model.bind="project" innerHtml.bind="project.name"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row row-seperated">
+                    <label class="col-sm-offset-2 col-sm-2 control-label" for="activities">Activiteit</label>
+                    <div class="col-sm-6">
+                        <select class="form-control" name="activities" value.bind="activity" change.delegate="changeActivity()">
+                            <option repeat.for="activity of activities" model.bind="activity" innerHtml.bind="activity.name"></option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row row-seperated">
+                    <label class="col-sm-offset-2 col-sm-2 control-label" for="hours">Uren</label>
+                    <div class="col-sm-2">
+                        <input id="minutes" type="number" class="form-control" value.bind="hours" min="0" max="12" step="1" />
+                    </div>
+
+                    <label class="col-sm-offset-0 col-sm-2 control-label" for="minutes">Minuten</label>
+                    <div class="col-sm-2">
+                        <input id="minutes" type="number" class="form-control" value.bind="minutes" min="0" max="59" step="5" />
+                    </div>
+                </div>
+                <div class="row row-seperated">
+                    <label class="col-sm-offset-2 col-sm-2 control-label" for="datum">Datum</label>
+                    <div class="col-sm-6">
+                        <input type="date" id="datum" class="form-control" value.two-way="logDate" change.delegate="changeDate()" />
+                    </div>
+                </div>
+                <div class="row row-seperated">
+                    <div class="col-sm-offset-4 col-sm-8">
+                        <button type="submit" class="col-sm-4" id="submitBtn">Opslaan</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="timesheet-div">
+            <h3 class="center">
+                <span innerHtml.bind="organization.name + ' / ' + project.name + ' / ' + activity.name"></span>
+                <button type="button" id="collapseBtn" click.delegate="collapse()" class="close">&bigwedge;</button>
+            </h3>
+            <div id="collapse1" class="panel-table collapse in table-div">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Dag</th>
+                            <th>Datum</th>
+                            <th>Tijd gelogd</th>
+                            <th>Bevestigd</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr repeat.for="log of logs" class="${log.regularDays}">
+                            <td innerHtml.bind="$parent.logs[$index].weekday"></td>
+                            <td innerHtml.bind="dateString($parent.logs[$index])"></td>
+                            <td innerHtml.bind="minuteString($parent.logs[$index])"></td>
+                            <td><span innerhtml.bind="confirmed($parent.logs[$index])" class.bind="confirmedcolor(log)"></span></td>
+                            <td><button type="button" class="button" class.bind="confirmedcolor(log)" click.delegate="editLog($parent.logs[$index])"  disabled.bind="log.confirmed">Aanpassen</button></td>
+                            <td><button type="button" class="button" class.bind="confirmedcolor(log)" click.delegate="deleteLog($parent.logs[$index])" disabled.bind="log.confirmed">Verwijderen</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>            
+        </div>
+    </div>
+</template>
