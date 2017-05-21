@@ -20,4 +20,7 @@ export class Lijst{
      editConsultant(id){
          this.router.navigate('consultants/' + id);
      }
+     makeConsultant(){
+         this.router.navigate('consultants/aanmaken');
+     }
 }
