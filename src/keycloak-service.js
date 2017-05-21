@@ -24,4 +24,8 @@ export default class KeycloakService {
   static getToken() {
     return KeycloakService.auth.authz.token;
  }
+
+ static getUser(){
+   return KeycloakService.auth.authz.tokenParsed;
+ }
 }

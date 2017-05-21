@@ -141,6 +141,10 @@ li.list-group-item.active > a {
     float: left;
 }
 
+.float-right{
+    float: right!important;
+}
+
 .form-width{
     width: 70%;
     margin-left: 15%;
