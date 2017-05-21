@@ -1,6 +1,5 @@
 import 'bootstrap';
-import Organisatie from './organisaties/organisaties';
-import RestApi from './rest-api';
+import RestApi from '../rest-api';
 import {inject} from 'aurelia-framework';
 import {Router} from 'aurelia-router';
 
@@ -10,8 +9,8 @@ export class Home{
     constructor(router){
         this.title = 'Home';
         this.minutes = 0;
+        this.workDays = [];
         this.logDate = (new Date).toISOString().slice(0,10);
-        this.logs = [];
         this.Update = false;
         this.api = new RestApi();
         this.router = router;
@@ -20,7 +19,8 @@ export class Home{
         this.organization;
         this.projects = [];
         this.project;
-        this.workDays = [];
+        this.allLogs = [];
+        this.logs = [];
     }
 
     async activate(params, routeConfig) {
@@ -31,15 +31,10 @@ export class Home{
         this.workDays = this.user.workDays;
         
         await this.getMemberships();        
-        
         await this.getOrganisationsWithMembership();
-        
         //await this.getProjects();
-        
         //await this.getActivities();
-
-        //await this.getWorklogs();
-       
+        //await this.getWorklogs()       
     }
 
 
@@ -67,7 +62,7 @@ export class Home{
     }
 
     async getOrganisationsWithMembership(){
-        var doc =this;
+        var doc = this;
         var orgJson = await doc.api.getOrganizations();
         var orgs = JSON.parse(orgJson)
         this.organizations = orgs.filter(function(org){
@@ -88,6 +83,7 @@ export class Home{
         var organization = JSON.parse(organizationJson);
         this.organization = organization;
         this.clearForm();
+
     }
 
 
@@ -105,13 +101,13 @@ export class Home{
         await this.changeActivity();
     }
 
-    async getWorklogs(){
+    async getWorklogs(month){
         var doc = this;
         var today = new Date();
         var from = new Date(today.getFullYear(), today.getMonth() , 2).toISOString().slice(0,10);
         var to = new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString().slice(0,10);
-        var params = new Map([["from",from],["to",to]]);
-        var logs = await doc.api.getWorklogs(this.organization.id, this.project.id, this.activity.id, params);
+        var params = {"user":this.user.id, "from":from,"to":to,"organization": this.organization.id,"project":this.project.id,"activity":this.activity.id};
+        var logs = await doc.api.getUserWorklogs(params);
         logs = JSON.parse(logs);
         logs = logs.filter(function(log) {
             return (log.userId == doc.user.id);
@@ -153,7 +149,7 @@ export class Home{
         return logs.sort(function(a,b){
             var firstDate = new Date(a.day);
             var secondDate = new Date(b.day);
-            return firstDate.getDate()-secondDate.getDate()
+            return firstDate -secondDate
         } )
     }
 
@@ -198,7 +194,7 @@ export class Home{
         if (log.loggedMinutes != undefined){
             var time = parseInt(log.loggedMinutes);
             var mins= time%60;
-            string = this.pad2((time-mins)/60) +  ":" + this.pad2(mins);
+            string = this.pad2((time-mins)/60) +  "," + this.pad2(mins);
         }
         return string;
     }

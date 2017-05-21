@@ -259,20 +259,11 @@ export default class RestApi {
     //WORKLOGS
 
     async getWorklogs(organizationId, projectId, activityId, params) {
-        var parameters = params;
-        var data;
-        if (params = undefined){
-            data = await this.getData("/organizations/".concat(organizationId)
-                .concat("/projects/").concat(projectId)
-                .concat("/activities/").concat(activityId)
-                .concat("/worklogs"));
-        }
-        else {
-            data = await this.getDataWithParams("/organizations/".concat(organizationId)
-                            .concat("/projects/").concat(projectId)
-                            .concat("/activities/").concat(activityId)
-                            .concat("/worklogs"), parameters);
-        }
+        var data = await this.getData("/organizations/".concat(organizationId)
+            .concat("/projects/").concat(projectId)
+            .concat("/activities/").concat(activityId)
+            .concat("/worklogs"));
+       
         if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
     }
 
@@ -326,6 +317,26 @@ export default class RestApi {
         } else { 
             alert(data.statusCode.concat(' - ').concat(data.statusText)); 
         }
+    }
+
+    async getUserWorklogs(params){
+        var parameters = params;   
+        try {
+            var data = await this.getDataWithParams("/users/worklogs/", parameters)
+            return data.response;
+        } catch (e) {
+            return null;
+        }        
+    }
+
+    async getCurrentUserWorklogs(params){
+        var parameters = params;   
+        try {
+            var data = await this.getDataWithParams("/users/current/worklogs/", parameters)
+            return data.response;
+        } catch (e) {
+            return null;
+        }        
     }
 
     /**
@@ -493,7 +504,7 @@ export default class RestApi {
         }
     }
 
-    async getCurrentUserTimeLogReport(params){
+    async getCurrentUserTimeLogReport(params){        
         var data = await this.getDataWithParams("/reports/loggedtime/users/current" ,params);
         if (data.statusCode < 400) { 
             return data.response; 
@@ -512,11 +523,12 @@ export default class RestApi {
     }
 
     async getUserTimeLogReport(params,userId){
-        var data = await this.getDataWithParams("/reports/loggedtime/users/".concat(userId));
-        if (data.statusCode < 400) { 
+        var query = "/reports/loggedtime/users/".concat(userId )
+        try {
+            var data = await this.getDataWithParams(query, params);
             return data.response; 
-        } else { 
-            alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+        } catch (e) {
+            var ex =e;
         }
     }
 
@@ -613,7 +625,6 @@ export default class RestApi {
     }
 
     getDataWithParams(location, params) {
-        var params = params;
         return this.http.createRequest(location)
             .asGet()
             .withParams(params)

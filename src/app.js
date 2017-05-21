@@ -16,8 +16,8 @@ export class App {
     
     
     config.map([
-      { route: '', moduleId: 'timesheet',   title: 'Timesheet', name:'timesheet', nav:true},
-      { route: 'rapporten',  moduleId: 'rapporten', name:'rapporten', nav:true },
+      { route: '', moduleId: 'timesheet/timesheet',   title: 'Timesheet', name:'timesheet', nav:true},
+      { route: 'rapporten',  moduleId: 'rapporten/rapporten', name:'rapporten', nav:true },
       { route: 'consultants',  moduleId: 'consultants/lijst', name:'consultants', nav:true },
       { route: 'consultants/aanmaken',  moduleId: 'consultants/aanmaak-detail', name:'maakConsultant'},
       { route: 'consultants/:id',  moduleId: 'consultants/beheer-detail', name:'consultantDetail', href:'#id', nav:true },
