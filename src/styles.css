@@ -65,6 +65,7 @@ li.list-group-item.active > a {
     padding: 10px;
     position: fixed!important;
     border: thin solid lightgrey;
+    overflow: scroll;
 }
 
 .sidebar{
@@ -150,4 +151,18 @@ li.list-group-item.active > a {
     height: 80%;
     margin-top: 10%;
     margin-bottom: 10%;
+}
+
+.outer-table{
+    border: thin solid black;
+}
+
+.table-nested{
+    border-left: thin solid black;
+    margin: 0!important;
+    border-collapse: collapse;
+}
+
+.no-padding{
+    padding:0!important;
 }

@@ -23,6 +23,7 @@
     "flatpickr": "^2.6.1",
     "jquery": "^2.2.4",
     "keycloak-js": "^2.5.0",
+    "moment": "^2.18.1",
     "requirejs": "^2.3.2",
     "text": "github:requirejs/text#latest"
   },

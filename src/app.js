@@ -10,7 +10,6 @@ export class App {
     KeycloakService.logout();
   }
   
-
   configureRouter(config, router){
     this.router = router;
     config.title = '';
@@ -18,7 +17,11 @@ export class App {
     
     config.map([
       { route: '', moduleId: 'timesheet',   title: 'Timesheet', name:'timesheet', nav:true},
-      { route: 'rapporten',  moduleId: 'rapporten', name:'rapporten', nav:true },
+      { route: 'rapporten',  moduleId: 'reports/rapporten', name:'rapporten', nav:true },      
+      { route: 'rapporten/billing',  moduleId: 'reports/billing-detail', name:'billingDetail', nav:true },      
+      { route: 'rapporten/overtime',  moduleId: 'reports/time-difference', name:'overtimeDetail', nav:true },      
+      { route: 'rapporten/undertime',  moduleId: 'reports/time-difference', name:'undertimeDetail', nav:true },      
+      { route: 'rapporten/loggedtime',  moduleId: 'reports/timelog-detail', name:'loggedtimeDetail', nav:true },
       { route: 'consultants',  moduleId: 'consultants/lijst', name:'consultants', nav:true },
       { route: 'consultants/aanmaken',  moduleId: 'consultants/aanmaak-detail', name:'maakConsultant'},
       { route: 'consultants/:id',  moduleId: 'consultants/beheer-detail', name:'consultantDetail', href:'#id', nav:true },
@@ -32,7 +35,7 @@ export class App {
       { route: 'organisaties/aanmaken',  moduleId: 'organisaties/detail', name:'maakOrganisatie'},
       { route: 'organisaties/:id',  moduleId: 'organisaties/detail', name:'organisatieDetail'}
     ]);
-    config.mapUnknownRoutes('notfound');
+
 
   }
 }
