@@ -1,27 +1,27 @@
 <template>
     <div class="main-view base-shadow">
         <h2 class="center">Facturatie ${from} - ${to}</h2>
-        <table class="table table-striped outer-table">
+        <table class="table table-striped table-border">
             <tr><th colspan="3">Organisatie</th></tr>
             <tr repeat.for="organization of report.organizations">
                 <td>${organization.organization.name}</td>
                 <td colspan="2" class="no-padding">
-                    <table class="table table-striped table-nested">
+                    <table class="table table-striped nested-border">
                         <tr><th colspan="3">Dag</th></tr>
                         <tr repeat.for="day of organization.days">
                             <td>${day.day}</td>
                             <td colspan="2" class="no-padding">
-                                <table class="table table-striped table-nested">
+                                <table class="table table-striped nested-border">
                                     <tr><th colspan="3">Project</th></tr>
                                     <tr repeat.for="project of day.projects">
                                         <td>${project.project.name}</td>
                                         <td colspan="2" class="no-padding">
-                                            <table class="table table-striped table-nested">
+                                            <table class="table table-striped nested-border">
                                                 <tr><th colspan="3">Activiteit</th></tr>
                                                 <tr repeat.for="activity of project.activities">
                                                     <td>${activity.activity.name}</td>
                                                     <td colspan="2" class="no-padding">
-                                                        <table table class="table table-striped table-nested">
+                                                        <table table class="table table-striped nested-border">
                                                             <tr><th>Werknemer</th><th>Uren</th><th>Te betalen</th></tr>
                                                             <tr repeat.for="user of activity.users">
                                                                 <td>${user.user.lastName} ${user.user.firstName}</td><td>${user.totalBillableHours} uur</td><td>€ ${user.totalAmountDue}</td>

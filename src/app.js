@@ -1,9 +1,17 @@
 import KeycloakService from './keycloak-service';
 import NotFound from './notfound'
 import {RouterConfiguration, Router} from 'aurelia-router';
+import RestApi from './rest-api';
 
 export class App {
+  constructor(){
+      this.api = new RestApi();
+      this.userName;
+  }
+
   activate(){
+    this.currentUser = KeycloakService.getUser();
+    this.userName = this.currentUser.name;
   }
 
   logout(){
