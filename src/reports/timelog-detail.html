@@ -1,0 +1,50 @@
+<template>
+    <div class="main-view base-shadow">
+        <h2 class="center">${title} ${report.user.lastName} ${report.user.firstName} ${from} - ${to}</h2>
+        <table class="table table-striped outer-table">
+            <tr><th colspan="2">Organisatie</th></tr>
+            <tr repeat.for="organization of report.organizations">
+                <td>${organization.organization.name}</td>
+                <td class="no-padding">
+                    <table class="table table-striped table-nested">
+                        <tr><th>Project</th></tr>
+                        <tr repeat.for="project of organization.projects">
+                            <td>${project.project.name}</td>
+                            <td class="no-padding">
+                                <table class="table table-striped table-nested">
+                                    <tr><th>Activiteit</th><th>Uren</th></tr>
+                                    <tr repeat.for="activity of project.activities">
+                                        <td>${activity.activity.name}</td><td>${activity.totalLoggedMinutes/60}</td>
+                                    </tr>
+                                    <tr><th>Totaal</th><td>${project.totalLoggedMinutes/60} uur</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><th>Totaal</th><td>${organization.totalLoggedMinutes/60} uur</td></tr>
+                    </table>
+                </td>
+            </tr>
+            <tr repeat.for="organization of report.report.organizations">
+                <td>${organization.organization.name}</td>
+                <td class="no-padding">
+                    <table class="table table-striped table-nested">
+                        <tr><th>Project</th></tr>
+                        <tr repeat.for="project of organization.projects">
+                            <td>${project.project.name}</td>
+                            <td class="no-padding">
+                                <table class="table table-striped table-nested">
+                                    <tr><th>Activiteit</th><th>Uren</th></tr>
+                                    <tr repeat.for="activity of project.activities">
+                                        <td>${activity.activity.name}</td><td>${activity.totalLoggedMinutes/60}</td>
+                                    </tr>
+                                    <tr><th>Totaal</th><td>${project.totalLoggedMinutes/60} uur</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><th>Totaal</th><td>${organization.totalLoggedMinutes/60} uur</td></tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</template>

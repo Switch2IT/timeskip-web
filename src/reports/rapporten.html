@@ -1,0 +1,73 @@
+<template>
+    <div class="main-view base-shadow">
+        <h2 class="center">${title}</h2>
+        <form class="form-horizontal form-height center form-width">
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="rapporten">Rapport</label>
+                <div class="col-sm-10">
+                    <select id="rapporten" class="form-control" value.bind="selectedType">
+                        <option>--Selecteer een rapport--</option>
+                        <option repeat.for="type of reportTypes" model.bind="type.value">${type.name}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="organisaties">Organisatie</label>
+                <div class="col-sm-10">
+                    <select id="organisaties" class="form-control" value.bind="params.organization" change.delegate="setProjects(params.organization)">
+                        <option if.bind="selectedType == 'overtime' || selectedType == 'undertime'" value="">--Selecteer een Organisatie--</option>
+                        <option if.bind="!(selectedType == 'overtime' || selectedType == 'undertime')" value="">--Alle Organisaties--</option>
+                        <option repeat.for="organization of organizations" model.bind="organization.id">${organization.name}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="users">Werknemer</label>
+                <div class="col-sm-10">
+                    <select id="users" class="form-control" value.bind="params.user">
+                        <option value="">--Alle Werknemers--</option>
+                        <option repeat.for="user of users" model.bind="user.id">${user.lastName} ${user.firstName}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" if.bind="params.organization">
+                <label class="col-sm-2 control-label" for="projecten">Project</label>
+                <div class="col-sm-10">
+                    <select id="projecten" class="form-control" value.bind="params.project" change.delegate="setActivities(params.organization,params.project)">
+                        <option value="">--Alle Projecten--</option>
+                        <option repeat.for="project of projects" model.bind="project.id">${project.name}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" if.bind="params.project">
+                <label class="col-sm-2 control-label" for="activiteiten">Activiteit</label>
+                <div class="col-sm-10">
+                    <select id="activiteiten" class="form-control" value.bind="params.activity">
+                        <option value="">--Alle Activiteiten--</option>
+                        <option repeat.for="activity of activities" model.bind="activity.id">${activity.name}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="begin">Begin Datum</label>
+                <div class="col-sm-4">
+                    <input type="date" id="begin" class="form-control" required="required" value.bind="params.from"/>
+                </div>
+                <label class="col-sm-2 control-label" for="eind">Eind Datum</label>
+                <div class="col-sm-4">
+                    <input type="date" id="eind" class="form-control" required="required" value.bind="params.to"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-2 control-label" for="pdf">als pdf</label>
+                <input type="checkbox" checked.bind="pdf" id="pdf">
+            </div>
+            <div if.bind="pdf">
+                <button type="button" click.delegate="getPdfReport(selectedType,params)">Download</button>
+            </div>
+            <div if.bind="!pdf">
+                <button type="button" click.delegate="getReport(selectedType,params)">Weergeven</button>
+            </div>
+        </form>
+    </div>
+</template>
