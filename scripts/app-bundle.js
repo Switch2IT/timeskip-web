@@ -99,21 +99,6 @@ define('keycloak-service',["exports"], function (exports) {
   };
   exports.default = KeycloakService;
 });
-define('log',["exports"], function (exports) {
-    "use strict";
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-    let Log = class Log {
-
-        constructor(minutes, logDate) {
-            this.loggedMinutes = minutes;
-            this.day = logDate;
-        }
-    };
-    exports.default = Log;
-});
 define('main',['exports', './environment', './keycloak-service'], function (exports, _environment, _keycloakService) {
   'use strict';
 
@@ -630,12 +615,14 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
             var _this29 = this;
 
             return _asyncToGenerator(function* () {
-                var data = yield _this29.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs"), body);
-                if (data.statusCode < 400) {
-                    return data.response;
-                } else {
-                    alert(data.statusCode.concat(' - ').concat(data.statusText));
-                }
+                try {
+                    var data = yield _this29.postData("/organizations/".concat(organizationId).concat("/projects/").concat(projectId).concat("/activities/").concat(activityId).concat("/worklogs"), body);
+                    if (data.statusCode < 400) {
+                        return data.response;
+                    } else {
+                        alert(data.statusCode.concat(' - ').concat(data.statusText));
+                    }
+                } catch (e) {}
             })();
         }
 
@@ -1437,6 +1424,21 @@ define('resources/index',["exports"], function (exports) {
     //config.globalResources([]);
   }
 });
+define('timesheet/log',["exports"], function (exports) {
+    "use strict";
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    let Log = class Log {
+
+        constructor(minutes, logDate) {
+            this.loggedMinutes = minutes;
+            this.day = logDate;
+        }
+    };
+    exports.default = Log;
+});
 define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'aurelia-router', 'bootstrap'], function (exports, _restApi, _aureliaFramework, _aureliaRouter) {
     'use strict';
 
@@ -1488,18 +1490,17 @@ define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'au
 
         constructor(router) {
             this.title = 'Home';
+            this.api = new _restApi2.default();
+            this.router = router;
             this.minutes = 0;
             this.workDays = [];
             this.logDate = new Date().toISOString().slice(0, 10);
             this.Update = false;
-            this.api = new _restApi2.default();
-            this.router = router;
             this.memberships = [];
             this.organizations = [];
             this.organization;
             this.projects = [];
             this.project;
-            this.allLogs = [];
             this.logs = [];
         }
 
@@ -1545,33 +1546,42 @@ define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'au
             })();
         }
 
-        getCurrentUser() {
+        changeDate() {
             var _this5 = this;
 
             return _asyncToGenerator(function* () {
-                var user = yield _this5.api.getCurrentUser();
-                _this5.user = JSON.parse(user);
-                _this5.hours = parseInt(_this5.user.defaultHoursPerDay);
+
+                yield _this5.getWorklogs();
+            })();
+        }
+
+        getCurrentUser() {
+            var _this6 = this;
+
+            return _asyncToGenerator(function* () {
+                var user = yield _this6.api.getCurrentUser();
+                _this6.user = JSON.parse(user);
+                _this6.hours = parseInt(_this6.user.defaultHoursPerDay);
             })();
         }
 
         getMemberships() {
-            var _this6 = this;
+            var _this7 = this;
 
             return _asyncToGenerator(function* () {
-                var memberships = yield _this6.api.getUserMemberships(_this6.user.id);
-                _this6.memberships = JSON.parse(memberships);
+                var memberships = yield _this7.api.getUserMemberships(_this7.user.id);
+                _this7.memberships = JSON.parse(memberships);
             })();
         }
 
         getOrganisationsWithMembership() {
-            var _this7 = this;
+            var _this8 = this;
 
             return _asyncToGenerator(function* () {
-                var doc = _this7;
+                var doc = _this8;
                 var orgJson = yield doc.api.getOrganizations();
                 var orgs = JSON.parse(orgJson);
-                _this7.organizations = orgs.filter(function (org) {
+                _this8.organizations = orgs.filter(function (org) {
                     for (var i = 0; i < doc.memberships.length; ++i) {
                         if (org.id == doc.memberships[i].organizationId) {
                             return true;
@@ -1580,53 +1590,53 @@ define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'au
                     }
                 });
 
-                _this7.organization = _this7.organizations[0];
-                yield _this7.changeOrganization();
+                _this8.organization = _this8.organizations[0];
+                yield _this8.changeOrganization();
             })();
         }
 
         getOrganization(id) {
-            var _this8 = this;
+            var _this9 = this;
 
             return _asyncToGenerator(function* () {
-                var organizationJson = yield _this8.api.getOrganization(id);
+                var organizationJson = yield _this9.api.getOrganization(id);
                 var organization = JSON.parse(organizationJson);
-                _this8.organization = organization;
-                _this8.clearForm();
+                _this9.organization = organization;
+                _this9.clearForm();
             })();
         }
 
         getProjects() {
-            var _this9 = this;
+            var _this10 = this;
 
             return _asyncToGenerator(function* () {
-                var projects = yield _this9.api.getProjects(_this9.organization.id);
-                _this9.projects = JSON.parse(projects);
-                _this9.project = _this9.projects[0];
-                yield _this9.changeProject();
+                var projects = yield _this10.api.getProjects(_this10.organization.id);
+                _this10.projects = JSON.parse(projects);
+                _this10.project = _this10.projects[0];
+                yield _this10.changeProject();
             })();
         }
 
         getActivities() {
-            var _this10 = this;
-
-            return _asyncToGenerator(function* () {
-                var activities = yield _this10.api.getActivities(_this10.organization.id, _this10.project.id);
-                _this10.activities = JSON.parse(activities);
-                _this10.activity = _this10.activities[0];
-                yield _this10.changeActivity();
-            })();
-        }
-
-        getWorklogs(month) {
             var _this11 = this;
 
             return _asyncToGenerator(function* () {
-                var doc = _this11;
-                var today = new Date();
+                var activities = yield _this11.api.getActivities(_this11.organization.id, _this11.project.id);
+                _this11.activities = JSON.parse(activities);
+                _this11.activity = _this11.activities[0];
+                yield _this11.changeActivity();
+            })();
+        }
+
+        getWorklogs() {
+            var _this12 = this;
+
+            return _asyncToGenerator(function* () {
+                var doc = _this12;
+                var today = new Date(_this12.logDate);
                 var from = new Date(today.getFullYear(), today.getMonth(), 2).toISOString().slice(0, 10);
                 var to = new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString().slice(0, 10);
-                var params = { "user": _this11.user.id, "from": from, "to": to, "organization": _this11.organization.id, "project": _this11.project.id, "activity": _this11.activity.id };
+                var params = { "user": _this12.user.id, "from": from, "to": to, "organization": _this12.organization.id, "project": _this12.project.id, "activity": _this12.activity.id };
                 var logs = yield doc.api.getUserWorklogs(params);
                 logs = JSON.parse(logs);
                 logs = logs.filter(function (log) {
@@ -1639,36 +1649,37 @@ define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'au
                     log.regularDays = day == 6 || day == 0 ? 'outsideRegularDays' : 'regular';
                     return true;
                 });
-                doc.logs = doc.sortLogs(logs);
+                doc.logs = doc.sortLogsDateAsc(logs);
             })();
         }
 
-        addLog() {
-            var _this12 = this;
+        saveLog() {
+            var _this13 = this;
 
             return _asyncToGenerator(function* () {
                 var min = 0;
-                if (_this12.hours > 0 || _this12.minutes > 0) {
-                    min = _this12.hours * 60 + parseInt(_this12.minutes);
+                if (_this13.hours > 0 || _this13.minutes > 0) {
+                    min = _this13.hours * 60 + parseInt(_this13.minutes);
                 } else {
                     alert("Gelieve uren en/of minuten in te vullen.");
                 }
 
                 if (min > 0) {
-                    if (_this12.Update) {
-                        var body = JSON.stringify({ 'id': _this12.log.id, 'userId': _this12.user.id, 'day': _this12.logDate.toString(), 'loggedMinutes': min, 'confirmed': false });
-                        var updated = yield _this12.api.updateWorklog(_this12.organization.id, _this12.project.id, _this12.activity.id, _this12.log.id, body);
+                    if (_this13.Update) {
+                        var body = JSON.stringify({ "id": _this13.log.id, "userId": _this13.user.id, "day": _this13.logDate.toString(), "loggedMinutes": min, "confirmed": true });
+                        var updated = yield _this13.api.updateWorklog(_this13.organization.id, _this13.project.id, _this13.activity.id, _this13.log.id, body);
                     } else {
-                        var body = JSON.stringify({ "day": _this12.logDate.toString(), "loggedMinutes": min, "confirmed": false });
-                        var created = yield _this12.api.createWorklogForCurrentUser(_this12.organization.id, _this12.project.id, _this12.activity.id, body);
+                        var body = JSON.stringify({ "day": _this13.logDate.toString(), "loggedMinutes": min, "confirmed": false, "userId": _this13.user.id });
+                        var created = yield _this13.api.createWorklog(_this13.organization.id, _this13.project.id, _this13.activity.id, body);
+                        //await this.api.createWorklogForCurrentUser(this.organization.id, this.project.id, this.activity.id, body) 
                     }
-                    yield _this12.getWorklogs();
-                    _this12.clearForm();
+                    yield _this13.getWorklogs();
+                    _this13.clearForm();
                 }
             })();
         }
 
-        sortLogs(logs) {
+        sortLogsDateAsc(logs) {
             return logs.sort(function (a, b) {
                 var firstDate = new Date(a.day);
                 var secondDate = new Date(b.day);
@@ -1676,8 +1687,8 @@ define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'au
             });
         }
 
-        editLog(index) {
-            var current = this.logs[index];
+        editLog(log) {
+            var current = log;
             this.log = current;
             this.minutes = parseInt(current.loggedMinutes) % 60;
             this.hours = (parseInt(current.loggedMinutes) - this.minutes) / 60;
@@ -1687,13 +1698,12 @@ define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'au
             document.getElementById("datum").disabled = true;
         }
 
-        deleteLog(index) {
-            var _this13 = this;
+        deleteLog(log) {
+            var _this14 = this;
 
             return _asyncToGenerator(function* () {
-                _this13.log = _this13.logs[index];
-                var deleted = yield _this13.api.deleteWorklog(_this13.organization.id, _this13.project.id, _this13.activity.id, _this13.log.id);
-                yield _this13.getWorklogs();
+                if (confirm("Delete log: " + log.day + "?")) var deleted = yield _this14.api.deleteWorklog(_this14.organization.id, _this14.project.id, _this14.activity.id, log.id);
+                yield _this14.getWorklogs();
             })();
         }
 
@@ -1708,7 +1718,6 @@ define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'au
 
         dateString(log) {
             var string = null;
-            //var log = this.logs[index];
             if (log.day != undefined) {
                 string = new Date(log.day).toLocaleDateString('nl-BE', { year: 'numeric', month: 'short', day: 'numeric' });
             }
@@ -1717,7 +1726,6 @@ define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'au
 
         minuteString(log) {
             var string = null;
-            //var log = this.logs[index];
             if (log.loggedMinutes != undefined) {
                 var time = parseInt(log.loggedMinutes);
                 var mins = time % 60;
@@ -1726,29 +1734,46 @@ define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'au
             return string;
         }
 
+        confirmed(log) {
+            var string = null;
+            if (log.confirmed) {
+                string = "&check;";
+            } else {
+                string = "&chi;";
+            }
+            return string;
+        }
+
+        confirmedcolor(log) {
+            var string = "";
+            if (log.confirmed) {
+                string += "confirmed";
+            } else {
+                string += "notConfirmed";
+            }
+            return string;
+        }
+
         pad2(num) {
             var str = "00" + num;
             return str.slice(-2);
         }
+
+        collapse() {
+            var table = document.getElementById("collapse1");
+            var button = document.getElementById("collapseBtn");
+            table.classList.toggle("in");
+
+            if (table.classList.contains("in")) {
+                button.innerHTML = "&bigwedge;";
+            } else {
+                button.innerHTML = "&bigvee;";
+            }
+        }
     }) || _class);
 });
-define('timesheet/log',["exports"], function (exports) {
-    "use strict";
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-    let Log = class Log {
-
-        constructor(minutes, logDate) {
-            this.loggedMinutes = minutes;
-            this.day = logDate;
-        }
-    };
-    exports.default = Log;
-});
 define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"./styles.css\"></require><require from=\"./sidebar\"></require><nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\"><div class=\"navbar-header\"><a class=\"navbar-brand\" href=\"#\"><img class=\"header-logo\" src=\"src/logo/Canguru-Logo.png\" alt=\"logo\"> <i class=\"fa fa-user\"></i></a></div><div class=\"navbar-header\"><button type=\"button\" click.delegate=\"logout()\">Logout</button></div></nav><div><div class=\"row\"><sidebar class=\"col-md-2\"></sidebar><router-view class=\"col-md-8\"></router-view></div></div></template>"; });
-define('text!styles.css', ['module'], function(module) { module.exports = "body {\r\n    padding-top: 3.5%;\r\n}\r\n\r\nsection {\r\n    margin: 0 20px;\r\n}\r\n\r\na:focus {\r\n    outline: none;\r\n}\r\n\r\n.navbar {\r\n    height: 4%;\r\n    position: fixed !important;\r\n}\r\n\r\n.navbar-brand {\r\n    padding: 0;\r\n}\r\n\r\n.no-selection {\r\n    margin: 20px;\r\n}\r\n\r\n.contact-list {\r\n    overflow-y: auto;\r\n    border: 1px solid #ddd;\r\n    padding: 10px;\r\n}\r\n\r\n.panel {\r\n    margin: 20px;\r\n}\r\n\r\n.button-bar {\r\n    right: 0;\r\n    left: 0;\r\n    bottom: 0;\r\n    border-top: 1px solid #ddd;\r\n    background: white;\r\n}\r\n\r\n    .button-bar > button {\r\n        float: right;\r\n        margin: 20px;\r\n    }\r\n\r\nli.list-group-item {\r\n    list-style: none;\r\n}\r\n\r\n    li.list-group-item > a {\r\n        text-decoration: none;\r\n    }\r\n\r\n    li.list-group-item.active > a {\r\n        color: white;\r\n    }\r\n\r\n.main-view {\r\n    height: 88%;\r\n    width: 80%;\r\n    margin-top: 1%;\r\n    padding: 10px;\r\n    position: fixed !important;\r\n    border: thin solid lightgrey;\r\n}\r\n\r\n.sidebar {\r\n    height: 100%;\r\n    z-index: 1;\r\n    position: fixed !important;\r\n    padding-top: 3%;\r\n    overflow: auto;\r\n    border-right: thin solid lightgrey;\r\n    border-bottom: thin solid lightgrey;\r\n}\r\n\r\n    .sidebar ul {\r\n        padding: 0;\r\n    }\r\n\r\n    .sidebar li {\r\n        list-style: none;\r\n        border-bottom: thin solid lightgrey;\r\n        width: auto;\r\n    }\r\n\r\n.sidebar-item {\r\n    color: gray;\r\n    font-size: 1.5em;\r\n    font-weight: bold;\r\n}\r\n\r\n.sidebar li ul li:first-child {\r\n    list-style: none;\r\n    border-top: thin solid lightgrey;\r\n    border-bottom: thin solid lightgrey;\r\n    width: auto;\r\n}\r\n\r\n.sidebar li ul li {\r\n    list-style: none;\r\n    border-bottom: thin solid lightgrey;\r\n    width: auto;\r\n}\r\n\r\n    .sidebar li ul li:last-child {\r\n        list-style: none;\r\n        width: auto;\r\n    }\r\n\r\n.sidebar-subItem {\r\n    padding-left: 10%;\r\n    color: gray;\r\n    font-size: 1em;\r\n    font-weight: bold;\r\n}\r\n\r\n.col-md-2 {\r\n    margin-right: 1%;\r\n}\r\n\r\n.base-shadow {\r\n    box-shadow: 0 3px 10px 2px lightgrey;\r\n}\r\n\r\n.center {\r\n    text-align: center;\r\n}\r\n\r\n.center-div {\r\n    margin: 0 auto;\r\n    float: none;\r\n}\r\n\r\n.header-logo {\r\n    height: 100%;\r\n    width: auto;\r\n    float: left;\r\n}\r\n\r\n.form-width {\r\n    width: 70%;\r\n    margin-left: 15%;\r\n    margin-right: 15%;\r\n}\r\n\r\n.form-height {\r\n    margin-top: 3vh;\r\n    margin-bottom: 3vh;\r\n}\r\n\r\n.row-seperated {\r\n    margin-bottom: 0.8em;\r\n}\r\n\r\n.table-striped > tbody > tr.outsideRegularDays {\r\n    background-color: #faffc4;\r\n}\r\n\r\n.vert-scroll {    \r\n    overflow-x: hidden;\r\n    overflow-y: scroll;\r\n}\r\n\r\n.group:after {\r\n  content: \"\";\r\n  display: table;\r\n  clear: both;\r\n}\r\n.table-responsive {\r\n    overflow-y: auto;\r\n}\r\n.timesheet-div {\r\n   width: 70%;   \r\n   margin: 0 15%;\r\n}\r\n.table-div {\r\n   overflow-y: scroll;\r\n   max-height: 20vh;\r\n   margin: 3vh 0 3vh;\r\n}"; });
+define('text!styles.css', ['module'], function(module) { module.exports = "body {\r\n    padding-top: 3.5%;\r\n}\r\n\r\nsection {\r\n    margin: 0 20px;\r\n}\r\n\r\na:focus {\r\n    outline: none;\r\n}\r\n\r\n.navbar {\r\n    height: 4%;\r\n    position: fixed !important;\r\n}\r\n\r\n.navbar-brand {\r\n    padding: 0;\r\n}\r\n\r\n.no-selection {\r\n    margin: 20px;\r\n}\r\n\r\n.contact-list {\r\n    overflow-y: auto;\r\n    border: 1px solid #ddd;\r\n    padding: 10px;\r\n}\r\n\r\n.panel {\r\n    margin: 20px;\r\n}\r\n\r\n.button-bar {\r\n    right: 0;\r\n    left: 0;\r\n    bottom: 0;\r\n    border-top: 1px solid #ddd;\r\n    background: white;\r\n}\r\n\r\n    .button-bar > button {\r\n        float: right;\r\n        margin: 20px;\r\n    }\r\n\r\nli.list-group-item {\r\n    list-style: none;\r\n}\r\n\r\n    li.list-group-item > a {\r\n        text-decoration: none;\r\n    }\r\n\r\n    li.list-group-item.active > a {\r\n        color: white;\r\n    }\r\n\r\n.main-view {\r\n    height: 88%;\r\n    width: 80%;\r\n    margin-top: 1%;\r\n    padding: 10px;\r\n    position: fixed !important;\r\n    border: thin solid lightgrey;\r\n}\r\n\r\n.sidebar {\r\n    height: 100%;\r\n    z-index: 1;\r\n    position: fixed !important;\r\n    padding-top: 3%;\r\n    overflow: auto;\r\n    border-right: thin solid lightgrey;\r\n    border-bottom: thin solid lightgrey;\r\n}\r\n\r\n    .sidebar ul {\r\n        padding: 0;\r\n    }\r\n\r\n    .sidebar li {\r\n        list-style: none;\r\n        border-bottom: thin solid lightgrey;\r\n        width: auto;\r\n    }\r\n\r\n.sidebar-item {\r\n    color: gray;\r\n    font-size: 1.5em;\r\n    font-weight: bold;\r\n}\r\n\r\n.sidebar li ul li:first-child {\r\n    list-style: none;\r\n    border-top: thin solid lightgrey;\r\n    border-bottom: thin solid lightgrey;\r\n    width: auto;\r\n}\r\n\r\n.sidebar li ul li {\r\n    list-style: none;\r\n    border-bottom: thin solid lightgrey;\r\n    width: auto;\r\n}\r\n\r\n    .sidebar li ul li:last-child {\r\n        list-style: none;\r\n        width: auto;\r\n    }\r\n\r\n.sidebar-subItem {\r\n    padding-left: 10%;\r\n    color: gray;\r\n    font-size: 1em;\r\n    font-weight: bold;\r\n}\r\n\r\n.col-md-2 {\r\n    margin-right: 1%;\r\n}\r\n\r\n.base-shadow {\r\n    box-shadow: 0 3px 10px 2px lightgrey;\r\n}\r\n\r\n.center {\r\n    text-align: center;\r\n}\r\n\r\n.center-div {\r\n    margin: 0 auto;\r\n    float: none;\r\n}\r\n\r\n.header-logo {\r\n    height: 100%;\r\n    width: auto;\r\n    float: left;\r\n}\r\n\r\n.form-width {\r\n    width: 70%;\r\n    margin-left: 15%;\r\n    margin-right: 15%;\r\n}\r\n\r\n.form-height {\r\n    margin-top: 3vh;\r\n    margin-bottom: 3vh;\r\n}\r\n\r\n.row-seperated {\r\n    margin-bottom: 0.8em;\r\n}\r\n\r\n.table-striped > tbody > tr.outsideRegularDays {\r\n    background-color: #faffc4;\r\n}\r\n\r\n.vert-scroll {    \r\n    overflow-x: hidden;\r\n    overflow-y: scroll;\r\n}\r\n\r\n.group:after {\r\n  content: \"\";\r\n  display: table;\r\n  clear: both;\r\n}\r\n.table-responsive {\r\n    overflow-y: auto;\r\n}\r\n.timesheet-div {\r\n   width: 70%;   \r\n   margin: 0 15%;\r\n}\r\n.table-div {\r\n   overflow-y: scroll;\r\n   max-height: 20vh;\r\n   margin: 3vh 0 3vh;\r\n}\r\n\r\n.confirmed {\r\n    font-weight: bold;\r\n    color: green;\r\n}\r\n.button.confirmed{\r\n    font-weight:normal;\r\n    color: GrayText;\r\n}\r\n.notConfirmed {\r\n    font-weight: bold;\r\n    color: red;\r\n}\r\n.button.notConfirmed{\r\n    font-weight:normal;\r\n    color: ButtonText;\r\n}"; });
 define('text!notfound.html', ['module'], function(module) { module.exports = "<template><h1>404 suck it</h1></template>"; });
 define('text!sidebar.html', ['module'], function(module) { module.exports = "<template><div class=\"sidebar col-md-2 base-shadow\"><ul><li repeat.for=\"item of items\" class=\"${item.isActive ? 'active' : ''}\"><a class=\"sidebar-item\" route-href=\"route.bind: item.route\">${item.value}</a></li></ul></div></template>"; });
 define('text!activiteiten/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
@@ -1756,7 +1781,7 @@ define('text!consultants/aanmaak-detail.html', ['module'], function(module) { mo
 define('text!consultants/beheer-detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\" submit.trigger=\"updateConsultant()\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"email\">E-mail</label><div class=\"col-sm-6\"><input type=\"text\" id=\"email\" class=\"form-control\" value.two-way=\"email\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"voornaam\">Voornaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"voornaam\" class=\"form-control\" value.two-way=\"firstName\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"familienaam\">Familienaam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"familienaam\" class=\"form-control\" value.two-way=\"lastName\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"rol\">Rol</label><div class=\"col-sm-6\"><select id=\"rol\"><option>-Selecteer een rol-</option></select></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });
 define('text!consultants/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form><button>Niewe Consultant</button></form><div><table class=\"table table-striped\"><thead><tr><th>voornaam</th><th>familienaam</th><th>e-mail</th></tr></thead><tbody><tr repeat.for=\"consultant of consultants\"><td>${consultant.firstName}</td><td>${consultant.lastName}</td><td>${consultant.email}</td><td><button type=\"button\" click.delegate=\"editConsultant(consultant.id)\">Wijzigen</button></td></tr></tbody></table></div></div></template>"; });
 define('text!organisaties/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
-define('text!projecten/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
 define('text!raporten/rapporten.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2><form class=\"form-horizontal form-height center form-width\"><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"rapporten\">Rapport</label><div class=\"col-sm-10\"><select id=\"rapporten\" class=\"form-control\"><option repeat.for=\"type of reportTypes\" value.bind=\"type\">${type}</option></select></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"begin\">Begin Datum</label><div class=\"col-sm-10\"><input type=\"date\" id=\"begin\" class=\"form-control\"></div></div><div class=\"form-group\"><label class=\"col-sm-2 control-label\" for=\"eind\">Eind Datum</label><div class=\"col-sm-10\"><input type=\"date\" id=\"eind\" class=\"form-control\"></div></div><input type=\"submit\" value=\"Download\"></form></div></template>"; });
-define('text!timesheet/timesheet.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow group\"><h2 class=\"center\">${title}</h2><form form class=\"form-horizontal form-height center form-width\" submit.trigger=\"addLog()\"><div class=\"form-group\"><h3>${user.firstName + ' ' + user.lastName}</h3><br><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"organizations\">Organisatie</label><div class=\"col-sm-6\"><select class=\"form-control\" name=\"organizations\" value.bind=\"organization\" change.delegate=\"changeOrganization()\"><option repeat.for=\"organization of organizations\" model.bind=\"organization\" innerhtml.bind=\"organization.name\"></option></select></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"projects\">Project</label><div class=\"col-sm-6\"><select class=\"form-control\" name=\"projects\" value.bind=\"project\" change.delegate=\"changeProject()\"><option repeat.for=\"project of projects\" model.bind=\"project\" innerhtml.bind=\"project.name\"></option></select></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"activities\">Activiteit</label><div class=\"col-sm-6\"><select class=\"form-control\" name=\"activities\" value.bind=\"activity\" change.delegate=\"changeActivity()\"><option repeat.for=\"activity of activities\" model.bind=\"activity\" innerhtml.bind=\"activity.name\"></option></select></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"hours\">Uren</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"hours\" min=\"0\" max=\"12\" step=\"1\"></div><label class=\"col-sm-offset-0 col-sm-2 control-label\" for=\"minutes\">Minuten</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"minutes\" min=\"0\" max=\"59\" step=\"5\"></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"datum\">Datum</label><div class=\"col-sm-6\"><input type=\"date\" id=\"datum\" class=\"form-control\" value.two-way=\"logDate\"></div></div><div class=\"row row-seperated\"><div class=\"col-sm-offset-4 col-sm-8\"><button type=\"submit\" class=\"col-sm-4\" id=\"submitBtn\">Opslaan</button></div></div></div></form><div class=\"timesheet-div\"><h3 class=\"center\"><span innerhtml.bind=\"organization.name + ' / ' + project.name + ' / ' + activity.name\"></span> <button type=\"button\" data-toggle=\"collapse\" href=\"#collapse1\" class=\"close\">&times;</button></h3><div id=\"collapse1\" class=\"panel-table collapse in table-div\"><table class=\"table table-striped\"><thead><tr><th>Dag</th><th>Datum</th><th>Tijd gelogd</th></tr></thead><tbody><tr repeat.for=\"log of logs\" class=\"${log.regularDays}\"><td innerhtml.bind=\"$parent.logs[$index].weekday\"></td><td innerhtml.bind=\"dateString($parent.logs[$index])\"></td><td innerhtml.bind=\"minuteString($parent.logs[$index])\"></td><td><button type=\"button\" class=\"button\" click.delegate=\"editLog($index)\">Aanpassen</button></td><td><button type=\"button\" class=\"button\" click.delegate=\"deleteLog($index)\">Verwijderen</button></td></tr></tbody></table></div></div></div></template>"; });
+define('text!projecten/lijst.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 class=\"center\">${title}</h2></div></template>"; });
+define('text!timesheet/timesheet.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow group\"><h2 class=\"center\">${title}</h2><form form class=\"form-horizontal form-height center form-width\" submit.trigger=\"saveLog()\"><div class=\"form-group\"><h3>${user.firstName + ' ' + user.lastName}</h3><br><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"organizations\">Organisatie</label><div class=\"col-sm-6\"><select class=\"form-control\" name=\"organizations\" value.bind=\"organization\" change.delegate=\"changeOrganization()\"><option repeat.for=\"organization of organizations\" model.bind=\"organization\" innerhtml.bind=\"organization.name\"></option></select></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"projects\">Project</label><div class=\"col-sm-6\"><select class=\"form-control\" name=\"projects\" value.bind=\"project\" change.delegate=\"changeProject()\"><option repeat.for=\"project of projects\" model.bind=\"project\" innerhtml.bind=\"project.name\"></option></select></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"activities\">Activiteit</label><div class=\"col-sm-6\"><select class=\"form-control\" name=\"activities\" value.bind=\"activity\" change.delegate=\"changeActivity()\"><option repeat.for=\"activity of activities\" model.bind=\"activity\" innerhtml.bind=\"activity.name\"></option></select></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"hours\">Uren</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"hours\" min=\"0\" max=\"12\" step=\"1\"></div><label class=\"col-sm-offset-0 col-sm-2 control-label\" for=\"minutes\">Minuten</label><div class=\"col-sm-2\"><input id=\"minutes\" type=\"number\" class=\"form-control\" value.bind=\"minutes\" min=\"0\" max=\"59\" step=\"5\"></div></div><div class=\"row row-seperated\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"datum\">Datum</label><div class=\"col-sm-6\"><input type=\"date\" id=\"datum\" class=\"form-control\" value.two-way=\"logDate\" change.delegate=\"changeDate()\"></div></div><div class=\"row row-seperated\"><div class=\"col-sm-offset-4 col-sm-8\"><button type=\"submit\" class=\"col-sm-4\" id=\"submitBtn\">Opslaan</button></div></div></div></form><div class=\"timesheet-div\"><h3 class=\"center\"><span innerhtml.bind=\"organization.name + ' / ' + project.name + ' / ' + activity.name\"></span> <button type=\"button\" id=\"collapseBtn\" click.delegate=\"collapse()\" class=\"close\">&bigwedge;</button></h3><div id=\"collapse1\" class=\"panel-table collapse in table-div\"><table class=\"table table-striped\"><thead><tr><th>Dag</th><th>Datum</th><th>Tijd gelogd</th><th>Bevestigd</th></tr></thead><tbody><tr repeat.for=\"log of logs\" class=\"${log.regularDays}\"><td innerhtml.bind=\"$parent.logs[$index].weekday\"></td><td innerhtml.bind=\"dateString($parent.logs[$index])\"></td><td innerhtml.bind=\"minuteString($parent.logs[$index])\"></td><td><span innerhtml.bind=\"confirmed($parent.logs[$index])\" class.bind=\"confirmedcolor(log)\"></span></td><td><button type=\"button\" class=\"button\" class.bind=\"confirmedcolor(log)\" click.delegate=\"editLog($parent.logs[$index])\" disabled.bind=\"log.confirmed\">Aanpassen</button></td><td><button type=\"button\" class=\"button\" class.bind=\"confirmedcolor(log)\" click.delegate=\"deleteLog($parent.logs[$index])\" disabled.bind=\"log.confirmed\">Verwijderen</button></td></tr></tbody></table></div></div></div></template>"; });
 //# sourceMappingURL=app-bundle.js.map

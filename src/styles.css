@@ -182,3 +182,20 @@ li.list-group-item {
    max-height: 20vh;
    margin: 3vh 0 3vh;
 }
+
+.confirmed {
+    font-weight: bold;
+    color: green;
+}
+.button.confirmed{
+    font-weight:normal;
+    color: GrayText;
+}
+.notConfirmed {
+    font-weight: bold;
+    color: red;
+}
+.button.notConfirmed{
+    font-weight:normal;
+    color: ButtonText;
+}

@@ -279,11 +279,19 @@ export default class RestApi {
     }
 
     async createWorklog(organizationId, projectId, activityId, body) {
-        var data = await this.postData("/organizations/".concat(organizationId)
-            .concat("/projects/").concat(projectId)
-            .concat("/activities/").concat(activityId)
-            .concat("/worklogs"), body);
-        if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
+        try {
+            var data = await this.postData("/organizations/".concat(organizationId)
+                   .concat("/projects/").concat(projectId)
+                   .concat("/activities/").concat(activityId)
+                   .concat("/worklogs"), body);
+            if (data.statusCode < 400) {
+                return data.response; 
+            } else {
+                alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+            }
+        } catch (e) {
+    
+        }            
     }
 
     async createWorklogForCurrentUser(organizationId, projectId, activityId, body) {

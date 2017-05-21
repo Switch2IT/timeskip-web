@@ -8,18 +8,17 @@ export class Home{
    
     constructor(router){
         this.title = 'Home';
+        this.api = new RestApi();
+        this.router = router;
         this.minutes = 0;
         this.workDays = [];
         this.logDate = (new Date).toISOString().slice(0,10);
         this.Update = false;
-        this.api = new RestApi();
-        this.router = router;
         this.memberships =[];
         this.organizations = [];
         this.organization;
         this.projects = [];
         this.project;
-        this.allLogs = [];
         this.logs = [];
     }
 
@@ -47,6 +46,11 @@ export class Home{
     }
 
     async changeActivity(){
+        await this.getWorklogs();
+    }
+
+    async changeDate(){
+        
         await this.getWorklogs();
     }
 
@@ -83,10 +87,8 @@ export class Home{
         var organization = JSON.parse(organizationJson);
         this.organization = organization;
         this.clearForm();
-
     }
-
-
+    
     async getProjects(){
         var projects = await this.api.getProjects(this.organization.id);
         this.projects = JSON.parse(projects);
@@ -101,11 +103,11 @@ export class Home{
         await this.changeActivity();
     }
 
-    async getWorklogs(month){
+    async getWorklogs(){
         var doc = this;
-        var today = new Date();
-        var from = new Date(today.getFullYear(), today.getMonth() , 2).toISOString().slice(0,10);
-        var to = new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString().slice(0,10);
+        var today = new Date(this.logDate);
+        var  from = new Date(today.getFullYear(), today.getMonth() , 2).toISOString().slice(0,10);
+        var to = new Date(today.getFullYear(), today.getMonth() + 1, 1).toISOString().slice(0,10);   
         var params = {"user":this.user.id, "from":from,"to":to,"organization": this.organization.id,"project":this.project.id,"activity":this.activity.id};
         var logs = await doc.api.getUserWorklogs(params);
         logs = JSON.parse(logs);
@@ -119,10 +121,10 @@ export class Home{
             log.regularDays = (day == 6 || day == 0) ? 'outsideRegularDays' : 'regular';
             return true;
         });
-        doc.logs = doc.sortLogs(logs);
+        doc.logs = doc.sortLogsDateAsc(logs);
     }
 
-    async addLog() {
+    async saveLog() {
         var min = 0
         if (this.hours > 0 || this.minutes > 0){
             min = (this.hours * 60) + parseInt(this.minutes);
@@ -133,29 +135,30 @@ export class Home{
 
         if (min > 0){
             if (this.Update){        
-                var body = JSON.stringify({'id': this.log.id, 'userId': this.user.id, 'day': this.logDate.toString(), 'loggedMinutes': min, 'confirmed': false });
+                var body = JSON.stringify({"id": this.log.id, "userId": this.user.id, "day": this.logDate.toString(), "loggedMinutes": min, "confirmed": true });
                 var updated = await this.api.updateWorklog(this.organization.id, this.project.id, this.activity.id, this.log.id, body)
-               }
+            }
             else{   
-                var body = JSON.stringify({"day": this.logDate.toString(), "loggedMinutes": min, "confirmed": false});
-                var created = await this.api.createWorklogForCurrentUser(this.organization.id, this.project.id, this.activity.id, body) 
+                var body = JSON.stringify({"day": this.logDate.toString(), "loggedMinutes": min, "confirmed": false, "userId":this.user.id});
+                var created = await this.api.createWorklog(this.organization.id, this.project.id, this.activity.id, body)
+                    //await this.api.createWorklogForCurrentUser(this.organization.id, this.project.id, this.activity.id, body) 
             }
             await this.getWorklogs();
             this.clearForm();
         }
     }        
 
-    sortLogs(logs){
+    sortLogsDateAsc(logs){
         return logs.sort(function(a,b){
             var firstDate = new Date(a.day);
             var secondDate = new Date(b.day);
-            return firstDate -secondDate
+            return firstDate -secondDate;
         } )
     }
 
-    editLog(index){
-        var current = this.logs[index]
-        this.log = current
+    editLog(log){
+        var current = log;
+        this.log = current;
         this.minutes = parseInt(current.loggedMinutes) % 60;
         this.hours =  (parseInt(current.loggedMinutes)-this.minutes)/60;
         this.logDate = (new Date(current.day)).toISOString().slice(0,10);
@@ -164,9 +167,9 @@ export class Home{
         document.getElementById("datum").disabled= true;
     }
   
-    async deleteLog(index){
-        this.log = this.logs[index];
-        var deleted = await this.api.deleteWorklog(this.organization.id, this.project.id, this.activity.id, this.log.id);
+    async deleteLog(log){
+        if (confirm("Delete log: " + log.day + "?"))
+            var deleted = await this.api.deleteWorklog(this.organization.id, this.project.id, this.activity.id, log.id);
         await this.getWorklogs();
     }
    
@@ -181,7 +184,6 @@ export class Home{
 
     dateString(log){
         var string = null;
-        //var log = this.logs[index];
         if (log.day != undefined){
             string = (new Date(log.day)).toLocaleDateString('nl-BE', {year: 'numeric', month: 'short', day: 'numeric' });
         }
@@ -190,7 +192,6 @@ export class Home{
    
     minuteString(log){
         var string = null;
-        //var log = this.logs[index];
         if (log.loggedMinutes != undefined){
             var time = parseInt(log.loggedMinutes);
             var mins= time%60;
@@ -198,9 +199,42 @@ export class Home{
         }
         return string;
     }
+
+    confirmed(log){
+        var string = null;
+        if (log.confirmed){
+            string = "&check;";
+        }else{
+            string = "&chi;";
+        }
+        return string;
+    }
+
+   confirmedcolor(log){
+        var string = "";
+        if (log.confirmed){
+            string += "confirmed";
+        }else{
+            string += "notConfirmed";
+        }
+        return string;
+    }
    
     pad2(num){
         var str = "00" + num
         return str.slice(-2);
+    }
+
+    collapse(){
+        var table = document.getElementById("collapse1");
+        var button = document.getElementById("collapseBtn")
+        table.classList.toggle("in");
+
+        if (table.classList.contains("in")){
+            button.innerHTML="&bigwedge;";
+        }else{
+            button.innerHTML="&bigvee;";
+        }
+            
     }
 }
