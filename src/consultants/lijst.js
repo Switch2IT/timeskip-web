@@ -90,11 +90,12 @@ export class Lijst{
     makeUser(){
         this.router.navigate('consultants/aanmaken');
     }
-    async deleteUser(user){
-        if (confirm("Delete "+ this.selectedRole.name +": " + user.firstname + " " + user.lastname + "?"))
-            var deleted = await this.api.deleteUser(user.id);
-        await this.getUsersForRole(this.selectedRole);
-    }
+    //async deleteUser(id){
+    //    var user = this.users.find( x => x.id ==id);
+    //    if (confirm("Delete "+ this.selectedRole.name +": " + user.firstName + " " + user.lastName + "?"))
+    //        var deleted = await this.api.deleteUser(id);
+    //    await this.getUsers();
+    //}
 
     /*Helper functions*/
     admin(user){
