@@ -2,14 +2,16 @@ import RestApi from '../rest-api';
 import {inject} from 'aurelia-framework';
 import {Router} from 'aurelia-router';
 
+@inject(Router)
 export class OrganizationDetail{
-    constructor(){
+    constructor(router){
         this.api = new RestApi();
         this.organization;
         this.title;
         this.description;
         this.projects;
         this.name;
+        this.router = router;
     }
 
     async activate(params){
@@ -46,15 +48,18 @@ export class OrganizationDetail{
     }
 
     async updateOrganization(){
-        var body = {'name':this.title,
+        var body = {'name':this.name,
             'description':this.description
         };
         if(this.organization){
             this.api.updateOrganization(this.organization.id, body) 
         }else{
-            this.organization = await this.api.createOrganization(body)
+            var result = JSON.parse(await this.api.createOrganization(body));
+            this.router.navigate('organisaties/'.concat(result.id));
         }
     }
-
-
+    
+    backToList(){
+        this.router.navigate('organisaties');
+    }
 }

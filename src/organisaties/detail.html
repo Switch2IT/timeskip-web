@@ -2,6 +2,7 @@
     <div class="main-view base-shadow">
         <h2 if.bind="!name" class="center">${title}</h2>
         <h2 if.bind="name" class="center">${name}</h2>
+        <button type="button" click.delegate="backToList()">Terug</button>
         <form class="form-horizontal form-height center form-width" submit.trigger="updateOrganization()">
             <div class="form-group">
                 <label class="col-sm-offset-2 col-sm-2 control-label" for="naam">Naam</label>
