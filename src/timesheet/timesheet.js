@@ -23,6 +23,7 @@ export class Home{
     }
 
     async activate(params, routeConfig) {
+        console.log(params)
         this.routeConfig = routeConfig;
         this.routeConfig.navModel.setTitle('Log tijden');
         
@@ -31,9 +32,7 @@ export class Home{
         
         await this.getMemberships();        
         await this.getOrganisationsWithMembership();
-        //await this.getProjects();
-        //await this.getActivities();
-        //await this.getWorklogs()       
+         
     }
 
 

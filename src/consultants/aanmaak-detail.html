@@ -1,36 +1,102 @@
 <template>
     <div class="main-view base-shadow">
         <h2 class="center">${title}</h2>
-        <form class="form-horizontal form-height center form-width" submit.trigger="saveConsultant()">
+        <form class="form-horizontal form-height form-width" submit.trigger="saveUser()">
             <div class="form-group">
-                <label class="col-sm-offset-2 col-sm-2 control-label" for="email">E-mail</label>
-                <div class="col-sm-6">
-                    <input type="text" id="email" class="form-control" />
+                <label class="col-sm-4 control-label" for="email">E-mail</label>
+                <div class="col-sm-8">
+                    <input type="text" id="email" class="form-control" value.bind="email" required />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-offset-2 col-sm-2 control-label" for="voornaam">Voornaam</label>
-                <div class="col-sm-6">
-                    <input type="text" id="voornaam" class="form-control" />
+                <label class="col-sm-4 control-label" for="voornaam">Voornaam</label>
+                <div class="col-sm-8">
+                    <input type="text" id="voornaam" class="form-control" value.bind="firstname" required />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-offset-2 col-sm-2 control-label" for="familienaam">Familienaam</label>
-                <div class="col-sm-6">
-                    <input type="text" id="familienaam" class="form-control" />
+                <label class="col-sm-4 control-label" for="familienaam">Familienaam</label>
+                <div class="col-sm-8">
+                    <input type="text" id="familienaam" class="form-control" value.bind="lastname" required />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-offset-2 col-sm-2 control-label" for="rol">Rol</label>
-                <div class="col-sm-6">
-                    <select id="rol">
-                        <option>-Selecteer een rol-</option>
+                <label class="col-sm-4 control-label" for="roles">Rol</label>
+                <div class="col-sm-8">
+                    <select id="roles" class="form-control" name="roles" value.bind="role">
+                        <option repeat.for="role of roles" model.bind="role" innerHtml.bind="role.name"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="organizations">Organisatie</label>
+                <div class="col-sm-8">
+                    <select id="organizations" class="form-control" name="organizations" value.bind="organization" change.delegate="changeOrganization()">
+                        <option repeat.for="organization of organizations" model.bind="organization" innerHtml.bind="organization.name"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="projects">Project</label>
+                <div class="col-sm-8">
+                    <select class="form-control" name="projects" value.bind="project" change.delegate="changeProject()">
+                        <option repeat.for="project of projects" model.bind="project" innerHtml.bind="project.name"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="activities">Default activiteit</label>
+                <div class="col-sm-8">
+                    <select class="form-control" name="activities" value.bind="activity">
+                        <option repeat.for="activity of activities" model.bind="activity" innerHtml.bind="activity.name"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-4 control-label" for="paygrades">Paygrade</label>
+                <div class="col-sm-8">
+                    <select id="paygrades" class="form-control" name="paygrades" value.bind="paygrade">
+                        <option value="null">--Selecteer een paygrade--</option>
+                        <option repeat.for="paygrade of paygrades" model.bind="paygrade" innerHtml.bind="paygrade.name"></option>
                     </select>
                 </div>
             </div>
             <div class="form-group">
-                <input type="submit" value="Opslaan" />
+                <label class="col-sm-4 control-label" for="hours">Default uren</label>
+                <div class="col-sm-8">
+                    <input id="hours" type="number" class="form-control" value.bind="hours" min="0" max="23" step="0.5" />
+                </div>
             </div>
+
+            <div class="form-group">
+                    <label class="control-label col-sm-4" for="admin">Admin</label>
+                <div class="checkbox">
+                    <div class="col-sm-8">
+                        <label><input type="checkbox" id="admin" checked.bind="admin" />Admin</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                    <label class="control-label col-sm-4" for="workdays">Werkdagen</label>
+                <div class="col-sm-8">
+                    <label class="checkbox-inline" repeat.for="workday of workdays">
+                        <input type="checkbox" id="workday" model.bind="workday.name" checked.bind="selectedWorkDays" />
+                        ${workday.id}
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-8 col-sm-offset-4">
+                    <input type="submit" class="btn btn-default"  value="Opslaan" />
+                </div>
+            </div>
+
         </form>
     </div>
 </template>

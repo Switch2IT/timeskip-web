@@ -45,7 +45,7 @@ export default class RestApi {
     }
 
     async createUser(body) {
-        var data = await this.postData("/users");
+        var data = await this.postData("/users",body);
         if (data.statusCode < 400) {
             return data.response;
         } else {
@@ -385,7 +385,7 @@ export default class RestApi {
     }
 
     async getPaygrades() {
-        var data = await this.getData("/configuration/paygrades");
+        var data = await this.getData("/configuration/mail/paygrades");
         if (data.statusCode < 400) {
             return data.response;
         } else {
