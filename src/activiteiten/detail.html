@@ -1,0 +1,31 @@
+<template>
+    <div class="main-view base-shadow">
+        <h2 if.bind="!name" class="center">${title}</h2>
+        <h2 if.bind="name" class="center">${name}</h2>
+        <button type="button" click.delegate="backToList()">Terug</button>
+        <form class="form-horizontal form-height center form-width" submit.trigger="updateActivity()">
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="naam">Naam</label>
+                <div class="col-sm-6">
+                    <input type="text" id="naam" class="form-control" value.two-way="name" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="beschrijving">Beschrijving</label>
+                <div class="col-sm-6">
+                    <textarea id="beschrijving" class="form-control" cols="50" rows="7" value.two-way="description">
+                    </textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="factureerbaar">Factureerbaar</label>
+                <div class="col-sm-6">
+                    <input id="factureerbaar" type="checkbox" class="form-control" cols="50" rows="7" value.two-way="billable"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Opslaan" />
+            </div>
+        </form>
+    </div>
+</template>

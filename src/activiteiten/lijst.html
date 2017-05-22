@@ -1,5 +1,64 @@
 <template>
     <div class="main-view base-shadow">
         <h2 class="center">${title}</h2>
+        <div class="row row-seperated">
+            <label class="col-sm-offset-2 col-sm-2 control-label" for="organizations">Organisatie</label>
+            <div class="col-sm-6">
+                <select class="form-control" name="organizations" value.bind="organization" change.delegate="changeOrganization()">
+                    <option repeat.for="organization of organizations" model.bind="organization" innerHtml.bind="organization.name"></option>
+                </select>
+            </div>
+        </div>
+        <div class="row row-seperated">
+            <label class="col-sm-offset-2 col-sm-2 control-label" for="projects">Project</label>
+            <div class="col-sm-6">
+                <select class="form-control" name="projects" value.bind="project" change.delegate="changeProject()">
+                    <option repeat.for="project of projects" model.bind="project" innerHtml.bind="project.name"></option>
+                </select>
+            </div>
+        </div>
+        <form class="form-horizontal form-height center form-width" submit.trigger="createOrUpdateActivity()">
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="naam">Naam</label>
+                <div class="col-sm-6">
+                    <input type="text" id="naam" class="form-control" value.two-way="name" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="beschrijving">Beschrijving</label>
+                <div class="col-sm-6">
+                    <textarea id="beschrijving" class="form-control" cols="50" rows="7" value.two-way="description">
+                    </textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="billable">Factureerbaar</label>
+                <div class="col-sm-6">
+                    <input type="checkbox" checked.bind="billable" id="billable" class="form-control" cols="50" rows="7"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="submit" id="submitBtn">Opslaan</button>
+            </div>
+        <div>
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Naam</th>
+                    <th>Beschrijving</th>
+                    <th>Factureerbaar</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr repeat.for="activity of activities">
+                    <td>${activity.name}</td>
+                    <td>${activity.description}</td>
+                    <td><span innerhtml.bind="isBillable($parent.activities[$index])" class.bind="isBillableColor(activity)"></span></td>
+                    <td>${activity.billable ? "" : ""}</td>
+                    <td><button type="button" click.delegate="editActivity(activity)">Wijzigen</button></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
