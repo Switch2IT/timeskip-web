@@ -1,0 +1,47 @@
+<template>
+    <div class="main-view base-shadow">
+        <h2 if.bind="!name" class="center">${title}</h2>
+        <h2 if.bind="name" class="center">${name}</h2>
+        <form class="form-horizontal form-height center form-width" submit.trigger="updateOrganization()">
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="naam">Naam</label>
+                <div class="col-sm-6">
+                    <input type="text" id="naam" class="form-control" value.two-way="name" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="beschrijving">Beschrijving</label>
+                <div class="col-sm-6">
+                    <textarea id="beschrijving" class="form-control" cols="50" rows="7" value.two-way="description">
+                    </textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Opslaan" />
+            </div>
+        </form>
+        <div if.bind="projects">
+            <h3 class="center">Projecten</h3>
+            <button type="button" click.delegate="createProject(organization.id)">Nieuw Project</button>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Naam</th>
+                        <th>Beschrijving</th>
+                        <th>Overuren Toegestaan</th>
+                        <th>Overuren Aanrekenen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr repeat.for="project of projects">
+                        <td>${project.name}</td>
+                        <td>${project.description}</td>
+                       <td><span innerhtml.bind="confirmed(project.allowOvertime)" class.bind="confirmedcolor(project.allowOvertime)"></span></td>
+                        <td><span innerhtml.bind="confirmed(project.billOvertime)" class.bind="confirmedcolor(project.billOvertime)"></span></td>
+                        <td><button type="button" click.delegate="editProject(project.id)">Wijzigen</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>

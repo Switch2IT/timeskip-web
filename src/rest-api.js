@@ -160,7 +160,7 @@ export default class RestApi {
     }
 
     async updateOrganization(id, body) {
-        var data = await this.patchData("/organizations".concat(id), body);
+        var data = await this.patchData("/organizations/".concat(id), body);
         if (data.statusCode < 400) {
             return data.response;
         } else {

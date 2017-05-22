@@ -1,5 +1,25 @@
 <template>
     <div class="main-view base-shadow">
         <h2 class="center">${title}</h2>
+        <form>
+            <button type="button" click.delegate="makeOrganization()">Niewe Organisatie</button>
+        </form>
+        <div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Naam</th>
+                        <th>Beschrijving</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr repeat.for="organization of organizations">
+                        <td>${organization.name}</td>
+                        <td>${organization.description}</td>
+                        <td><button type="button" click.delegate="editOrganization(organization.id)">Wijzigen</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
