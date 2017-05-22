@@ -269,17 +269,17 @@ export default class RestApi {
             .concat("/projects/").concat(projectId)
             .concat("/activities/").concat(activityId)
             .concat("/worklogs"));
-       
+
         if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
     }
 
     async getWorklog(organizationId, projectId, activityId, worklogId) {
         var str = "/organizations/".concat(organizationId)
-             .concat("/projects/").concat(projectId)
-             .concat("/activities/").concat(activityId)
-             .concat("/worklogs/")       
-             .concat(worklogId);
-            
+            .concat("/projects/").concat(projectId)
+            .concat("/activities/").concat(activityId)
+            .concat("/worklogs/")
+            .concat(worklogId);
+
         var data = await this.getData(str);
         if (data.statusCode < 400) { return data.response; } else { alert(data.statusCode.concat(' - ').concat(data.statusText)); }
     }
@@ -287,25 +287,25 @@ export default class RestApi {
     async createWorklog(organizationId, projectId, activityId, body) {
         try {
             var data = await this.postData("/organizations/".concat(organizationId)
-                   .concat("/projects/").concat(projectId)
-                   .concat("/activities/").concat(activityId)
-                   .concat("/worklogs"), body);
+                .concat("/projects/").concat(projectId)
+                .concat("/activities/").concat(activityId)
+                .concat("/worklogs"), body);
             if (data.statusCode < 400) {
-                return data.response; 
+                return data.response;
             } else {
-                alert(data.statusCode.concat(' - ').concat(data.statusText)); 
+                alert(data.statusCode.concat(' - ').concat(data.statusText));
             }
         } catch (e) {
-    
-        }            
+
+        }
     }
 
     async createWorklogForCurrentUser(organizationId, projectId, activityId, body) {
         try {
             var data = await this.postData("/organizations/".concat(organizationId)
-            .concat("/projects/").concat(projectId)
-            .concat("/activities/").concat(activityId)
-            .concat("/worklogs").concat("/currentuser"), body);
+                .concat("/projects/").concat(projectId)
+                .concat("/activities/").concat(activityId)
+                .concat("/worklogs").concat("/currentuser"), body);
             if (data.statusCode < 400) { return data.response; }
         } catch (e) {
             alert(data.statusCode.concat(' - ').concat(data.statusText));
@@ -333,24 +333,24 @@ export default class RestApi {
         }
     }
 
-    async getUserWorklogs(params){
-        var parameters = params;   
+    async getUserWorklogs(params) {
+        var parameters = params;
         try {
             var data = await this.getDataWithParams("/users/worklogs/", parameters)
             return data.response;
         } catch (e) {
             return null;
-        }        
+        }
     }
 
-    async getCurrentUserWorklogs(params){
-        var parameters = params;   
+    async getCurrentUserWorklogs(params) {
+        var parameters = params;
         try {
             var data = await this.getDataWithParams("/users/current/worklogs/", parameters)
             return data.response;
         } catch (e) {
             return null;
-        }        
+        }
     }
 
     /**
@@ -484,21 +484,19 @@ export default class RestApi {
 
     async getBillingReport(params) {
         var data = await this.getDataWithParams("/reports/billing", params);
-        console.log(params);
         if (data.statusCode < 400) {
             return data.response;
         } else {
-            alert(data.statusCode.concat(' - ').concat(data.statusText));
+            window.alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
     async getBillingReportAsPdf(params) {
         var data = await this.getPdfDataWithParams("/reports/billing/pdf", params);
-        console.log(data);
         if (data.statusCode < 400) {
             return data.content;
         } else {
-            alert(data.statusCode.concat(' - ').concat(data.statusText));
+            window.alert(data.statusCode.concat(' - ').concat(data.statusText));
         }
     }
 
@@ -640,7 +638,6 @@ export default class RestApi {
     }
 
     getDataWithParams(location, params) {
-        console.log(params);
         return this.http.createRequest(location)
             .asGet()
             .withParams(params)

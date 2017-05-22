@@ -6,7 +6,6 @@ export default class ReportType{
     }
 
     showForRole(role) {
-        console.log(role);
         var a = this.roles;
         for (var i = 0; i < a.length; i++) {
             if (a[i] === role) {

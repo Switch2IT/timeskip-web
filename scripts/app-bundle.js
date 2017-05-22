@@ -58,7 +58,6 @@ define('app',['exports', './keycloak-service', './notfound', 'aurelia-router', '
 
       return _asyncToGenerator(function* () {
         var currentUser = JSON.parse((yield _this.api.getCurrentUser()));
-        console.log(currentUser);
         _this.userName = currentUser.firstName.concat(" ").concat(currentUser.lastName);
       })();
     }
@@ -975,11 +974,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
 
             return _asyncToGenerator(function* () {
                 var data = yield _this48.getDataWithParams("/reports/billing", params);
-                console.log(params);
                 if (data.statusCode < 400) {
                     return data.response;
                 } else {
-                    alert(data.statusCode.concat(' - ').concat(data.statusText));
+                    window.alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
             })();
         }
@@ -989,11 +987,10 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
 
             return _asyncToGenerator(function* () {
                 var data = yield _this49.getPdfDataWithParams("/reports/billing/pdf", params);
-                console.log(data);
                 if (data.statusCode < 400) {
                     return data.content;
                 } else {
-                    alert(data.statusCode.concat(' - ').concat(data.statusText));
+                    window.alert(data.statusCode.concat(' - ').concat(data.statusText));
                 }
             })();
         }
@@ -1157,7 +1154,6 @@ define('rest-api',['exports', 'aurelia-http-client', './keycloak-service'], func
         }
 
         getDataWithParams(location, params) {
-            console.log(params);
             return this.http.createRequest(location).asGet().withParams(params).send();
         }
 
@@ -1775,7 +1771,6 @@ define('reports/report-type',["exports"], function (exports) {
         }
 
         showForRole(role) {
-            console.log(role);
             var a = this.roles;
             for (var i = 0; i < a.length; i++) {
                 if (a[i] === role) {

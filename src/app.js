@@ -11,7 +11,6 @@ export class App {
 
   async activate(){
     var currentUser = JSON.parse(await this.api.getCurrentUser());
-    console.log(currentUser);
     this.userName = currentUser.firstName.concat(" ").concat(currentUser.lastName);
   }
 
@@ -55,7 +54,7 @@ export class AuthorizeStep
      constructor(){
        this.api = new RestApi();
      }
-     
+
      async run(navigationInstruction,next)
      {  
          var currentUser = JSON.parse(await this.api.getCurrentUser());
