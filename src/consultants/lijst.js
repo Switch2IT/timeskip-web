@@ -90,13 +90,7 @@ export class Lijst{
     makeUser(){
         this.router.navigate('consultants/aanmaken');
     }
-    //async deleteUser(id){
-    //    var user = this.users.find( x => x.id ==id);
-    //    if (confirm("Delete "+ this.selectedRole.name +": " + user.firstName + " " + user.lastName + "?"))
-    //        var deleted = await this.api.deleteUser(id);
-    //    await this.getUsers();
-    //}
-
+    
     /*Helper functions*/
     admin(user){
         var string = null;

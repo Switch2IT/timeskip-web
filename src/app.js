@@ -35,7 +35,7 @@ export class App {
       { route: 'consultants/:id',  moduleId: 'consultants/beheer-detail', name:'consultantDetail', href:'#id', nav:true },
       { route: 'projecten',  moduleId: 'projecten/lijst', name:'projecten', nav:true },
       { route: 'projecten/aanmaken',  moduleId: 'projecten/detail', name:'maakProject'},
-      { route: 'projecten/:id',  moduleId: 'projecten/detail', name:'projectDetail'},
+      { route: 'projecten/:id',  moduleId: 'projecten/beheer-detail', name:'projectDetail'},
       { route: 'activiteiten',  moduleId: 'activiteiten/lijst', name:'activiteiten', nav:true },
       { route: 'activiteiten/aanmaken',  moduleId: 'activiteiten/detail', name:'maakActiviteit'},
       { route: 'activiteiten/:id',  moduleId: 'activiteiten/detail', name:'activiteitDetail'},

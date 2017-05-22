@@ -1,5 +1,49 @@
 <template>
     <div class="main-view base-shadow">
         <h2 class="center">${title}</h2>
+        <form class="form-horizontal form-height center form-width">
+
+            <div class="form-group">
+                <label class="col-sm-offset-2 col-sm-2 control-label" for="organizations">Organisatie</label>
+                <div class="col-sm-6">
+                    <select id="organizations" class="form-control" name="organizations" value.bind="organization" change.delegate="changeOrganization()">
+                        <option value="null">--Selecteer een organisatie--</option>
+                        <option repeat.for="organization of organizations" model.bind="organization" innerHtml.bind="organization.name"></option>
+                    </select>
+                </div>
+            </div>
+            <hr />
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-8">
+                    <button type="button" click.delegate="makeProject()">Niew project</button>
+                </div>
+            </div>
+            <div class="table-div">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Naam</th>
+                            <th class="center">Omschrijving</th>
+                            <th>Overuren toegelaten</th>
+                            <th>Overuren billable</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr repeat.for="project of projects">
+                            <td innerhtml.bind="$parent.projects[$index].name"></td>
+                            <td innerhtml.bind="$parent.projects[$index].description"></td>
+                            <td><span innerhtml.bind="allowed($parent.projects[$index])"  class.bind="allowedColor(project)"></span></td>
+                            <td><span innerhtml.bind="billable($parent.projects[$index])" class.bind="billableColor(project)"></span></td>
+                            <td><button type="button" click.delegate="editProject($parent.projects[$index].id)" >Wijzigen</button></td>
+                            <!--<td value.bind="$parent.projects[$index].email"></td>
+                            <td><span innerhtml.bind="" class.bind=""></span></td>
+                            <td><button type="button" click.delegate="editUser($parent.users[$index].id)">Wijzigen</button></td>
+                            <td><button type="button" click.delegate="deleteUser($parent.users[$index].id)">Verwijderen</button></td>-->
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </form>
     </div>
+
 </template>

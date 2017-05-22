@@ -66,9 +66,9 @@
                 <tbody>
                     <tr repeat.for="user of users">
                         <td innerHtml.bind="$parent.users[$index].firstName"></td>
-                        <td innerHtml.bind="$parent.users[$index].lastName">></td>
-                        <td innerHtml.bind="$parent.users[$index].email">></td>
-                        <td><span innerhtml.bind="admin($parent.users[$index])" class.bind="admin(users)"></span></td>
+                        <td innerHtml.bind="$parent.users[$index].lastName"></td>
+                        <td innerHtml.bind="$parent.users[$index].email"></td>
+                        <td><span innerhtml.bind="admin($parent.users[$index])" class.bind="adminColor(user)"></span></td>
                         <td><button type="button" click.delegate="editUser($parent.users[$index].id)">Wijzigen</button></td>
                         <!--<td><button type="button" click.delegate="deleteUser($parent.users[$index].id)">Verwijderen</button></td>-->
                     </tr>
