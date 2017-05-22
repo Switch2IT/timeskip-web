@@ -7,11 +7,11 @@
                 <div class="col-sm-10">
                     <select id="rapporten" class="form-control" value.bind="selectedType">
                         <option>--Selecteer een rapport--</option>
-                        <option repeat.for="type of reportTypes" model.bind="type.value">${type.name}</option>
+                        <option repeat.for="type of reportTypes" if.bind="type.showForRole(role)" model.bind="type.value">${type.name}</option>
                     </select>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" if.bind="selectedType">
                 <label class="col-sm-2 control-label" for="organisaties">Organisatie</label>
                 <div class="col-sm-10">
                     <select id="organisaties" class="form-control" value.bind="params.organization" change.delegate="setProjects(params.organization)">
@@ -21,7 +21,7 @@
                     </select>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group" if.bind="selectedType">
                 <label class="col-sm-2 control-label" for="users">Werknemer</label>
                 <div class="col-sm-10">
                     <select id="users" class="form-control" value.bind="params.user">
