@@ -4,6 +4,7 @@ import {inject} from 'aurelia-framework';
 import {Router} from 'aurelia-router';
 import $ from 'jquery';
 
+
 @inject(Router)
 export class Lijst{
     constructor(router){

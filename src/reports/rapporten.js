@@ -15,18 +15,21 @@ export class Report {
         this.users;
         this.activities;
         this.projects;
+        this.role;
     }
 
     async activate(params, routeConfig) {
         this.routeConfig = routeConfig;
         this.routeConfig.navModel.setTitle('Reports');
-        this.reportTypes = [new ReportType('Facturatie', 'billing'),
-        new ReportType('Overuren', 'overtime'), new ReportType('Onderuren', 'undertime'),
-        new ReportType('Uurlog', 'loggedTime'),new ReportType('Persoonlijk Uurlog', 'personalLoggedTime'),
-        new ReportType('Gebruikers Uurlog', 'userLoggedTime')]
+        this.reportTypes = [new ReportType('Facturatie', 'billing',["manager"]),
+        new ReportType('Overuren', 'overtime',["manager","HR"]), new ReportType('Onderuren', 'undertime',["manager","HR"]),
+        new ReportType('Uurlog', 'loggedTime',["manager","HR"]),new ReportType('Persoonlijk Uurlog', 'personalLoggedTime',["manager","HR","consultant"]),
+        new ReportType('Gebruikers Uurlog', 'userLoggedTime',["manager","HR"])]
         this.api = new RestApi();
         this.organizations = JSON.parse(await this.api.getOrganizations());
         this.users = JSON.parse(await this.api.getUsers())
+        var currentUser = JSON.parse(await this.api.getCurrentUser());
+        this.role = currentUser.memberships[0].role;
     }
 
     async setProjects(organizationId){
