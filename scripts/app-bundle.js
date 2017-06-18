@@ -2272,261 +2272,6 @@ define('organisaties/lijst',['exports', '../rest-api', 'aurelia-framework', 'aur
         }
     }) || _class);
 });
-define('projecten/beheer-detail',['exports', '../rest-api', 'aurelia-framework', 'aurelia-router'], function (exports, _restApi, _aureliaFramework, _aureliaRouter) {
-    'use strict';
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-    exports.Lijst = undefined;
-
-    var _restApi2 = _interopRequireDefault(_restApi);
-
-    function _interopRequireDefault(obj) {
-        return obj && obj.__esModule ? obj : {
-            default: obj
-        };
-    }
-
-    function _asyncToGenerator(fn) {
-        return function () {
-            var gen = fn.apply(this, arguments);
-            return new Promise(function (resolve, reject) {
-                function step(key, arg) {
-                    try {
-                        var info = gen[key](arg);
-                        var value = info.value;
-                    } catch (error) {
-                        reject(error);
-                        return;
-                    }
-
-                    if (info.done) {
-                        resolve(value);
-                    } else {
-                        return Promise.resolve(value).then(function (value) {
-                            step("next", value);
-                        }, function (err) {
-                            step("throw", err);
-                        });
-                    }
-                }
-
-                return step("next");
-            });
-        };
-    }
-
-    var _dec, _class;
-
-    let Lijst = exports.Lijst = (_dec = (0, _aureliaFramework.inject)(_aureliaRouter.Router), _dec(_class = class Lijst {
-        constructor(router) {
-            this.router = router;
-            this.title = 'Project Beheren';
-            this.api = new _restApi2.default();
-            this.project;
-            this.organization;
-        }
-
-        activate(params, routeConfig) {
-            var _this = this;
-
-            return _asyncToGenerator(function* () {
-
-                _this.routeConfig = routeConfig;
-                _this.routeConfig.navModel.setTitle('Project Beheren');
-                var organizationId = _this.routeConfig.organizationId;
-                var projectId = _this.routeConfig.projectId;
-
-                var response = yield _this.api.getProject(organizationId, projectId);
-                var project = JSON.parse(response);
-
-                if (project !== undefined && project != null) {
-                    yield _this.fillForm(project);
-                }
-            })();
-        }
-
-        fillForm(project) {
-            this.projectId = project.id;
-            this.name = project.name;
-            this.description = project.description;
-            this.allowOvertime = project.allowOvertime;
-            this.billOvertime = project.billOvertime;
-            this.organization = project.organization;
-        }
-
-        updateProject() {
-            var _this2 = this;
-
-            return _asyncToGenerator(function* () {
-                var project = {};
-                project.id = _this2.projectId;
-                project.name = _this2.name;
-                project.description = _this2.description;
-                project.allowOvertime = _this2.allowOvertime;
-                project.billOvertime = _this2.billOvertime;
-                project.organization = _this2.organization;
-
-                var updated = yield _this2.api.updateProject(_this2.organization.id, _this2.projectId, JSON.stringify(project));
-                _this2.router.navigate('projecten/');
-            })();
-        }
-    }) || _class);
-});
-define('projecten/lijst',['exports', '../rest-api', 'aurelia-framework', 'aurelia-router'], function (exports, _restApi, _aureliaFramework, _aureliaRouter) {
-    'use strict';
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-    exports.Lijst = undefined;
-
-    var _restApi2 = _interopRequireDefault(_restApi);
-
-    function _interopRequireDefault(obj) {
-        return obj && obj.__esModule ? obj : {
-            default: obj
-        };
-    }
-
-    function _asyncToGenerator(fn) {
-        return function () {
-            var gen = fn.apply(this, arguments);
-            return new Promise(function (resolve, reject) {
-                function step(key, arg) {
-                    try {
-                        var info = gen[key](arg);
-                        var value = info.value;
-                    } catch (error) {
-                        reject(error);
-                        return;
-                    }
-
-                    if (info.done) {
-                        resolve(value);
-                    } else {
-                        return Promise.resolve(value).then(function (value) {
-                            step("next", value);
-                        }, function (err) {
-                            step("throw", err);
-                        });
-                    }
-                }
-
-                return step("next");
-            });
-        };
-    }
-
-    var _dec, _class;
-
-    let Lijst = exports.Lijst = (_dec = (0, _aureliaFramework.inject)(_aureliaRouter.Router), _dec(_class = class Lijst {
-        constructor(router) {
-            this.router = router;
-            this.title = 'Projecten';
-            this.api = new _restApi2.default();
-            this.organizations = [];
-            this.organization;
-            this.projects = [];
-            this.project;
-        }
-
-        activate(params, routeConfig) {
-            var _this = this;
-
-            return _asyncToGenerator(function* () {
-                _this.routeConfig = routeConfig;
-                _this.routeConfig.navModel.setTitle('Projecten');
-                yield _this.getOrganizations();
-            })();
-        }
-
-        getOrganizations() {
-            var _this2 = this;
-
-            return _asyncToGenerator(function* () {
-                var orgs = yield _this2.api.getOrganizations();
-                _this2.organizations = JSON.parse(orgs);
-            })();
-        }
-
-        getProjects(id) {
-            var _this3 = this;
-
-            return _asyncToGenerator(function* () {
-                var projects = yield _this3.api.getProjects(id);
-                _this3.projects = JSON.parse(projects);
-            })();
-        }
-
-        changeOrganization() {
-            var _this4 = this;
-
-            return _asyncToGenerator(function* () {
-                yield _this4.getProjects(_this4.organization.id);
-            })();
-        }
-
-        editProject(orgId, id) {
-            this.router.navigate('projecten/'.concat(orgId).concat('/').concat(id));
-        }
-
-        makeProject() {
-            this.router.navigate('projecten/aanmaken');
-        }
-
-        allowed(project) {
-            var string = null;
-            if (project.allowOvertime) {
-                string = "&check;";
-            } else {
-                string = "&chi;";
-            }
-            return string;
-        }
-
-        allowedColor(project) {
-            var string = "";
-            if (project.allowOvertime) {
-                string += "confirmed";
-            } else {
-                string += "notConfirmed";
-            }
-            return string;
-        }
-        billable(project) {
-            var string = null;
-            if (project.billOvertime) {
-                string = "&check;";
-            } else {
-                string = "&chi;";
-            }
-            return string;
-        }
-
-        billableColor(project) {
-            var string = "";
-            if (project.billOvertime) {
-                string += "confirmed";
-            } else {
-                string += "notConfirmed";
-            }
-            return string;
-        }
-    }) || _class);
-});
-define('resources/index',["exports"], function (exports) {
-  "use strict";
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.configure = configure;
-  function configure(config) {
-    //config.globalResources([]);
-  }
-});
 define('reports/billing-detail',["exports", "../rest-api"], function (exports, _restApi) {
     "use strict";
 
@@ -2933,6 +2678,261 @@ define('reports/timelog-detail',["exports", "../rest-api"], function (exports, _
         }
     };
     exports.default = TimelogDetail;
+});
+define('projecten/beheer-detail',['exports', '../rest-api', 'aurelia-framework', 'aurelia-router'], function (exports, _restApi, _aureliaFramework, _aureliaRouter) {
+    'use strict';
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.Lijst = undefined;
+
+    var _restApi2 = _interopRequireDefault(_restApi);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    function _asyncToGenerator(fn) {
+        return function () {
+            var gen = fn.apply(this, arguments);
+            return new Promise(function (resolve, reject) {
+                function step(key, arg) {
+                    try {
+                        var info = gen[key](arg);
+                        var value = info.value;
+                    } catch (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    if (info.done) {
+                        resolve(value);
+                    } else {
+                        return Promise.resolve(value).then(function (value) {
+                            step("next", value);
+                        }, function (err) {
+                            step("throw", err);
+                        });
+                    }
+                }
+
+                return step("next");
+            });
+        };
+    }
+
+    var _dec, _class;
+
+    let Lijst = exports.Lijst = (_dec = (0, _aureliaFramework.inject)(_aureliaRouter.Router), _dec(_class = class Lijst {
+        constructor(router) {
+            this.router = router;
+            this.title = 'Project Beheren';
+            this.api = new _restApi2.default();
+            this.project;
+            this.organization;
+        }
+
+        activate(params, routeConfig) {
+            var _this = this;
+
+            return _asyncToGenerator(function* () {
+
+                _this.routeConfig = routeConfig;
+                _this.routeConfig.navModel.setTitle('Project Beheren');
+                var organizationId = _this.routeConfig.organizationId;
+                var projectId = _this.routeConfig.projectId;
+
+                var response = yield _this.api.getProject(organizationId, projectId);
+                var project = JSON.parse(response);
+
+                if (project !== undefined && project != null) {
+                    yield _this.fillForm(project);
+                }
+            })();
+        }
+
+        fillForm(project) {
+            this.projectId = project.id;
+            this.name = project.name;
+            this.description = project.description;
+            this.allowOvertime = project.allowOvertime;
+            this.billOvertime = project.billOvertime;
+            this.organization = project.organization;
+        }
+
+        updateProject() {
+            var _this2 = this;
+
+            return _asyncToGenerator(function* () {
+                var project = {};
+                project.id = _this2.projectId;
+                project.name = _this2.name;
+                project.description = _this2.description;
+                project.allowOvertime = _this2.allowOvertime;
+                project.billOvertime = _this2.billOvertime;
+                project.organization = _this2.organization;
+
+                var updated = yield _this2.api.updateProject(_this2.organization.id, _this2.projectId, JSON.stringify(project));
+                _this2.router.navigate('projecten/');
+            })();
+        }
+    }) || _class);
+});
+define('projecten/lijst',['exports', '../rest-api', 'aurelia-framework', 'aurelia-router'], function (exports, _restApi, _aureliaFramework, _aureliaRouter) {
+    'use strict';
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.Lijst = undefined;
+
+    var _restApi2 = _interopRequireDefault(_restApi);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    function _asyncToGenerator(fn) {
+        return function () {
+            var gen = fn.apply(this, arguments);
+            return new Promise(function (resolve, reject) {
+                function step(key, arg) {
+                    try {
+                        var info = gen[key](arg);
+                        var value = info.value;
+                    } catch (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    if (info.done) {
+                        resolve(value);
+                    } else {
+                        return Promise.resolve(value).then(function (value) {
+                            step("next", value);
+                        }, function (err) {
+                            step("throw", err);
+                        });
+                    }
+                }
+
+                return step("next");
+            });
+        };
+    }
+
+    var _dec, _class;
+
+    let Lijst = exports.Lijst = (_dec = (0, _aureliaFramework.inject)(_aureliaRouter.Router), _dec(_class = class Lijst {
+        constructor(router) {
+            this.router = router;
+            this.title = 'Projecten';
+            this.api = new _restApi2.default();
+            this.organizations = [];
+            this.organization;
+            this.projects = [];
+            this.project;
+        }
+
+        activate(params, routeConfig) {
+            var _this = this;
+
+            return _asyncToGenerator(function* () {
+                _this.routeConfig = routeConfig;
+                _this.routeConfig.navModel.setTitle('Projecten');
+                yield _this.getOrganizations();
+            })();
+        }
+
+        getOrganizations() {
+            var _this2 = this;
+
+            return _asyncToGenerator(function* () {
+                var orgs = yield _this2.api.getOrganizations();
+                _this2.organizations = JSON.parse(orgs);
+            })();
+        }
+
+        getProjects(id) {
+            var _this3 = this;
+
+            return _asyncToGenerator(function* () {
+                var projects = yield _this3.api.getProjects(id);
+                _this3.projects = JSON.parse(projects);
+            })();
+        }
+
+        changeOrganization() {
+            var _this4 = this;
+
+            return _asyncToGenerator(function* () {
+                yield _this4.getProjects(_this4.organization.id);
+            })();
+        }
+
+        editProject(orgId, id) {
+            this.router.navigate('projecten/'.concat(orgId).concat('/').concat(id));
+        }
+
+        makeProject() {
+            this.router.navigate('projecten/aanmaken');
+        }
+
+        allowed(project) {
+            var string = null;
+            if (project.allowOvertime) {
+                string = "&check;";
+            } else {
+                string = "&chi;";
+            }
+            return string;
+        }
+
+        allowedColor(project) {
+            var string = "";
+            if (project.allowOvertime) {
+                string += "confirmed";
+            } else {
+                string += "notConfirmed";
+            }
+            return string;
+        }
+        billable(project) {
+            var string = null;
+            if (project.billOvertime) {
+                string = "&check;";
+            } else {
+                string = "&chi;";
+            }
+            return string;
+        }
+
+        billableColor(project) {
+            var string = "";
+            if (project.billOvertime) {
+                string += "confirmed";
+            } else {
+                string += "notConfirmed";
+            }
+            return string;
+        }
+    }) || _class);
+});
+define('resources/index',["exports"], function (exports) {
+  "use strict";
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.configure = configure;
+  function configure(config) {
+    //config.globalResources([]);
+  }
 });
 define('rollen/rol',["exports"], function (exports) {
     "use strict";
