@@ -34,7 +34,7 @@
                             <td innerhtml.bind="$parent.projects[$index].description"></td>
                             <td><span innerhtml.bind="allowed($parent.projects[$index])"  class.bind="allowedColor(project)"></span></td>
                             <td><span innerhtml.bind="billable($parent.projects[$index])" class.bind="billableColor(project)"></span></td>
-                            <td><button type="button" click.delegate="editProject($parent.projects[$index].id)" >Wijzigen</button></td>
+                            <td><button type="button" click.delegate="editProject($parent.projects[$index].organization.id,$parent.projects[$index].id)" >Wijzigen</button></td>
                             <!--<td value.bind="$parent.projects[$index].email"></td>
                             <td><span innerhtml.bind="" class.bind=""></span></td>
                             <td><button type="button" click.delegate="editUser($parent.users[$index].id)">Wijzigen</button></td>

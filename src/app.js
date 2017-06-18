@@ -10,8 +10,8 @@ export class App {
   }
 
   async activate(){
-    var currentUser = JSON.parse(await this.api.getCurrentUser());
-    this.userName = currentUser.firstName.concat(" ").concat(currentUser.lastName);
+    //var currentUser = JSON.parse(await this.api.getCurrentUser());
+    //this.userName = currentUser.firstName.concat(" ").concat(currentUser.lastName);
   }
 
   logout(){
@@ -35,8 +35,8 @@ export class App {
       { route: 'consultants/aanmaken',  moduleId: 'consultants/aanmaak-detail', name:'maakConsultant', settings:{roles:["manager","HR"]}},
       { route: 'consultants/:id',  moduleId: 'consultants/beheer-detail', name:'consultantDetail', href:'#id', nav:true, settings:{roles:["manager","HR"]} },
       { route: 'projecten',  moduleId: 'projecten/lijst', name:'projecten', nav:true, settings:{roles:["manager","HR"]} },
-      { route: 'projecten/aanmaken',  moduleId: 'projecten/detail', name:'maakProject', settings:{roles:["manager","HR"]}},
-      { route: 'projecten/:id',  moduleId: 'projecten/detail', name:'projectDetail', settings:{roles:["manager","HR"]}},
+      { route: 'projecten/aanmaken',  moduleId: 'projecten/beheer-detail', name:'maakProject', settings:{roles:["manager","HR"]}},
+      { route: 'projecten/:orgId/:id',  moduleId: 'projecten/beheer-detail', name:'projectDetail', settings:{roles:["manager","HR"]}},
       { route: 'activiteiten',  moduleId: 'activiteiten/lijst', name:'activiteiten', nav:true, settings:{roles:["manager","HR"]} },
       { route: 'activiteiten/aanmaken',  moduleId: 'activiteiten/detail', name:'maakActiviteit', settings:{roles:["manager","HR"]}},
       { route: 'activiteiten/:id',  moduleId: 'activiteiten/detail', name:'activiteitDetail', settings:{roles:["manager","HR"]}},

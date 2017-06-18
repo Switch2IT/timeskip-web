@@ -13,8 +13,9 @@ export class Lijst{
     }
 
     async activate(params, routeConfig) {
+        
         this.routeConfig = routeConfig;
-        this.routeConfig.navModel.setTitle('Project Bheren')
+        this.routeConfig.navModel.setTitle('Project Beheren')
         var organizationId = this.routeConfig.organizationId;
         var projectId = this.routeConfig.projectId;
 

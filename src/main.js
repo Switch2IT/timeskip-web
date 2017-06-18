@@ -1,7 +1,6 @@
 import environment from './environment';
 import KeycloakService from './keycloak-service';
 
-//Configure Bluebird Promises.
 Promise.config({
   warnings: {
     wForgottenReturn: false

@@ -39,16 +39,12 @@ export class Lijst{
         await this.getProjects(this.organization.id);
     }
 
-    editProject(id){        
-        var route = this.router.routes.find(x => x.name === 'projectDetail');
-        route.organizationId = this.organization.id;
-        route.projectId = id;
-        this.router.navigate(route.route, id);
+    editProject(orgId, id){      
+        this.router.navigate('projecten/'.concat(orgId).concat('/').concat(id));
     }
     
     makeProject(){
-        var route = this.router.routes.find(x => x.name === 'maakProject');
-        this.router.navigate(route.route);
+        this.router.navigate('projecten/aanmaken');
     }
 
 
