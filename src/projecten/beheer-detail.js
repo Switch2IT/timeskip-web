@@ -18,13 +18,15 @@ export class Lijst{
         this.routeConfig.navModel.setTitle('Project Beheren')
         var organizationId = this.routeConfig.organizationId;
         var projectId = this.routeConfig.projectId;
-
+        
+        if(this.organizationId !== undefined && projectId !== undefined){
         var response =  await this.api.getProject(organizationId,projectId);
         var project = JSON.parse(response);
         
         
         if (project !== undefined && project != null){
             await this.fillForm(project);
+        }
         }
     }
 

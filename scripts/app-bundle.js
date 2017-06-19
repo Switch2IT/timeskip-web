@@ -1655,7 +1655,7 @@ define('consultants/aanmaak-detail',['exports', '../rest-api', 'aurelia-framewor
             return _asyncToGenerator(function* () {
                 var orgs = yield _this3.api.getOrganizations();
                 _this3.organizations = JSON.parse(orgs);
-                _this3.organization = _this3.organizations[0];
+                _this3.organization = _this3.organizations[1];
                 yield _this3.changeOrganization();
             })();
         }
@@ -2272,6 +2272,252 @@ define('organisaties/lijst',['exports', '../rest-api', 'aurelia-framework', 'aur
         }
     }) || _class);
 });
+define('projecten/beheer-detail',['exports', '../rest-api', 'aurelia-framework', 'aurelia-router'], function (exports, _restApi, _aureliaFramework, _aureliaRouter) {
+    'use strict';
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.Lijst = undefined;
+
+    var _restApi2 = _interopRequireDefault(_restApi);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    function _asyncToGenerator(fn) {
+        return function () {
+            var gen = fn.apply(this, arguments);
+            return new Promise(function (resolve, reject) {
+                function step(key, arg) {
+                    try {
+                        var info = gen[key](arg);
+                        var value = info.value;
+                    } catch (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    if (info.done) {
+                        resolve(value);
+                    } else {
+                        return Promise.resolve(value).then(function (value) {
+                            step("next", value);
+                        }, function (err) {
+                            step("throw", err);
+                        });
+                    }
+                }
+
+                return step("next");
+            });
+        };
+    }
+
+    var _dec, _class;
+
+    let Lijst = exports.Lijst = (_dec = (0, _aureliaFramework.inject)(_aureliaRouter.Router), _dec(_class = class Lijst {
+        constructor(router) {
+            this.router = router;
+            this.title = 'Project Beheren';
+            this.api = new _restApi2.default();
+            this.project;
+            this.organization;
+        }
+
+        activate(params, routeConfig) {
+            var _this = this;
+
+            return _asyncToGenerator(function* () {
+
+                _this.routeConfig = routeConfig;
+                _this.routeConfig.navModel.setTitle('Project Beheren');
+                var organizationId = _this.routeConfig.organizationId;
+                var projectId = _this.routeConfig.projectId;
+
+                if (_this.organizationId !== undefined && projectId !== undefined) {
+                    var response = yield _this.api.getProject(organizationId, projectId);
+                    var project = JSON.parse(response);
+
+                    if (project !== undefined && project != null) {
+                        yield _this.fillForm(project);
+                    }
+                }
+            })();
+        }
+
+        fillForm(project) {
+            this.projectId = project.id;
+            this.name = project.name;
+            this.description = project.description;
+            this.allowOvertime = project.allowOvertime;
+            this.billOvertime = project.billOvertime;
+            this.organization = project.organization;
+        }
+
+        updateProject() {
+            var _this2 = this;
+
+            return _asyncToGenerator(function* () {
+                var project = {};
+                project.id = _this2.projectId;
+                project.name = _this2.name;
+                project.description = _this2.description;
+                project.allowOvertime = _this2.allowOvertime;
+                project.billOvertime = _this2.billOvertime;
+                project.organization = _this2.organization;
+
+                var updated = yield _this2.api.updateProject(_this2.organization.id, _this2.projectId, JSON.stringify(project));
+                _this2.router.navigate('projecten/');
+            })();
+        }
+    }) || _class);
+});
+define('projecten/lijst',['exports', '../rest-api', 'aurelia-framework', 'aurelia-router'], function (exports, _restApi, _aureliaFramework, _aureliaRouter) {
+    'use strict';
+
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+    exports.Lijst = undefined;
+
+    var _restApi2 = _interopRequireDefault(_restApi);
+
+    function _interopRequireDefault(obj) {
+        return obj && obj.__esModule ? obj : {
+            default: obj
+        };
+    }
+
+    function _asyncToGenerator(fn) {
+        return function () {
+            var gen = fn.apply(this, arguments);
+            return new Promise(function (resolve, reject) {
+                function step(key, arg) {
+                    try {
+                        var info = gen[key](arg);
+                        var value = info.value;
+                    } catch (error) {
+                        reject(error);
+                        return;
+                    }
+
+                    if (info.done) {
+                        resolve(value);
+                    } else {
+                        return Promise.resolve(value).then(function (value) {
+                            step("next", value);
+                        }, function (err) {
+                            step("throw", err);
+                        });
+                    }
+                }
+
+                return step("next");
+            });
+        };
+    }
+
+    var _dec, _class;
+
+    let Lijst = exports.Lijst = (_dec = (0, _aureliaFramework.inject)(_aureliaRouter.Router), _dec(_class = class Lijst {
+        constructor(router) {
+            this.router = router;
+            this.title = 'Projecten';
+            this.api = new _restApi2.default();
+            this.organizations = [];
+            this.organization;
+            this.projects = [];
+            this.project;
+        }
+
+        activate(params, routeConfig) {
+            var _this = this;
+
+            return _asyncToGenerator(function* () {
+                _this.routeConfig = routeConfig;
+                _this.routeConfig.navModel.setTitle('Projecten');
+                yield _this.getOrganizations();
+            })();
+        }
+
+        getOrganizations() {
+            var _this2 = this;
+
+            return _asyncToGenerator(function* () {
+                var orgs = yield _this2.api.getOrganizations();
+                _this2.organizations = JSON.parse(orgs);
+            })();
+        }
+
+        getProjects(id) {
+            var _this3 = this;
+
+            return _asyncToGenerator(function* () {
+                var projects = yield _this3.api.getProjects(id);
+                _this3.projects = JSON.parse(projects);
+            })();
+        }
+
+        changeOrganization() {
+            var _this4 = this;
+
+            return _asyncToGenerator(function* () {
+                yield _this4.getProjects(_this4.organization.id);
+            })();
+        }
+
+        editProject(orgId, id) {
+            this.router.navigate('projecten/'.concat(orgId).concat('/').concat(id));
+        }
+
+        makeProject() {
+            this.router.navigate('projecten/aanmaken');
+        }
+
+        allowed(project) {
+            var string = null;
+            if (project.allowOvertime) {
+                string = "&check;";
+            } else {
+                string = "&chi;";
+            }
+            return string;
+        }
+
+        allowedColor(project) {
+            var string = "";
+            if (project.allowOvertime) {
+                string += "confirmed";
+            } else {
+                string += "notConfirmed";
+            }
+            return string;
+        }
+        billable(project) {
+            var string = null;
+            if (project.billOvertime) {
+                string = "&check;";
+            } else {
+                string = "&chi;";
+            }
+            return string;
+        }
+
+        billableColor(project) {
+            var string = "";
+            if (project.billOvertime) {
+                string += "confirmed";
+            } else {
+                string += "notConfirmed";
+            }
+            return string;
+        }
+    }) || _class);
+});
 define('reports/billing-detail',["exports", "../rest-api"], function (exports, _restApi) {
     "use strict";
 
@@ -2679,250 +2925,6 @@ define('reports/timelog-detail',["exports", "../rest-api"], function (exports, _
     };
     exports.default = TimelogDetail;
 });
-define('projecten/beheer-detail',['exports', '../rest-api', 'aurelia-framework', 'aurelia-router'], function (exports, _restApi, _aureliaFramework, _aureliaRouter) {
-    'use strict';
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-    exports.Lijst = undefined;
-
-    var _restApi2 = _interopRequireDefault(_restApi);
-
-    function _interopRequireDefault(obj) {
-        return obj && obj.__esModule ? obj : {
-            default: obj
-        };
-    }
-
-    function _asyncToGenerator(fn) {
-        return function () {
-            var gen = fn.apply(this, arguments);
-            return new Promise(function (resolve, reject) {
-                function step(key, arg) {
-                    try {
-                        var info = gen[key](arg);
-                        var value = info.value;
-                    } catch (error) {
-                        reject(error);
-                        return;
-                    }
-
-                    if (info.done) {
-                        resolve(value);
-                    } else {
-                        return Promise.resolve(value).then(function (value) {
-                            step("next", value);
-                        }, function (err) {
-                            step("throw", err);
-                        });
-                    }
-                }
-
-                return step("next");
-            });
-        };
-    }
-
-    var _dec, _class;
-
-    let Lijst = exports.Lijst = (_dec = (0, _aureliaFramework.inject)(_aureliaRouter.Router), _dec(_class = class Lijst {
-        constructor(router) {
-            this.router = router;
-            this.title = 'Project Beheren';
-            this.api = new _restApi2.default();
-            this.project;
-            this.organization;
-        }
-
-        activate(params, routeConfig) {
-            var _this = this;
-
-            return _asyncToGenerator(function* () {
-
-                _this.routeConfig = routeConfig;
-                _this.routeConfig.navModel.setTitle('Project Beheren');
-                var organizationId = _this.routeConfig.organizationId;
-                var projectId = _this.routeConfig.projectId;
-
-                var response = yield _this.api.getProject(organizationId, projectId);
-                var project = JSON.parse(response);
-
-                if (project !== undefined && project != null) {
-                    yield _this.fillForm(project);
-                }
-            })();
-        }
-
-        fillForm(project) {
-            this.projectId = project.id;
-            this.name = project.name;
-            this.description = project.description;
-            this.allowOvertime = project.allowOvertime;
-            this.billOvertime = project.billOvertime;
-            this.organization = project.organization;
-        }
-
-        updateProject() {
-            var _this2 = this;
-
-            return _asyncToGenerator(function* () {
-                var project = {};
-                project.id = _this2.projectId;
-                project.name = _this2.name;
-                project.description = _this2.description;
-                project.allowOvertime = _this2.allowOvertime;
-                project.billOvertime = _this2.billOvertime;
-                project.organization = _this2.organization;
-
-                var updated = yield _this2.api.updateProject(_this2.organization.id, _this2.projectId, JSON.stringify(project));
-                _this2.router.navigate('projecten/');
-            })();
-        }
-    }) || _class);
-});
-define('projecten/lijst',['exports', '../rest-api', 'aurelia-framework', 'aurelia-router'], function (exports, _restApi, _aureliaFramework, _aureliaRouter) {
-    'use strict';
-
-    Object.defineProperty(exports, "__esModule", {
-        value: true
-    });
-    exports.Lijst = undefined;
-
-    var _restApi2 = _interopRequireDefault(_restApi);
-
-    function _interopRequireDefault(obj) {
-        return obj && obj.__esModule ? obj : {
-            default: obj
-        };
-    }
-
-    function _asyncToGenerator(fn) {
-        return function () {
-            var gen = fn.apply(this, arguments);
-            return new Promise(function (resolve, reject) {
-                function step(key, arg) {
-                    try {
-                        var info = gen[key](arg);
-                        var value = info.value;
-                    } catch (error) {
-                        reject(error);
-                        return;
-                    }
-
-                    if (info.done) {
-                        resolve(value);
-                    } else {
-                        return Promise.resolve(value).then(function (value) {
-                            step("next", value);
-                        }, function (err) {
-                            step("throw", err);
-                        });
-                    }
-                }
-
-                return step("next");
-            });
-        };
-    }
-
-    var _dec, _class;
-
-    let Lijst = exports.Lijst = (_dec = (0, _aureliaFramework.inject)(_aureliaRouter.Router), _dec(_class = class Lijst {
-        constructor(router) {
-            this.router = router;
-            this.title = 'Projecten';
-            this.api = new _restApi2.default();
-            this.organizations = [];
-            this.organization;
-            this.projects = [];
-            this.project;
-        }
-
-        activate(params, routeConfig) {
-            var _this = this;
-
-            return _asyncToGenerator(function* () {
-                _this.routeConfig = routeConfig;
-                _this.routeConfig.navModel.setTitle('Projecten');
-                yield _this.getOrganizations();
-            })();
-        }
-
-        getOrganizations() {
-            var _this2 = this;
-
-            return _asyncToGenerator(function* () {
-                var orgs = yield _this2.api.getOrganizations();
-                _this2.organizations = JSON.parse(orgs);
-            })();
-        }
-
-        getProjects(id) {
-            var _this3 = this;
-
-            return _asyncToGenerator(function* () {
-                var projects = yield _this3.api.getProjects(id);
-                _this3.projects = JSON.parse(projects);
-            })();
-        }
-
-        changeOrganization() {
-            var _this4 = this;
-
-            return _asyncToGenerator(function* () {
-                yield _this4.getProjects(_this4.organization.id);
-            })();
-        }
-
-        editProject(orgId, id) {
-            this.router.navigate('projecten/'.concat(orgId).concat('/').concat(id));
-        }
-
-        makeProject() {
-            this.router.navigate('projecten/aanmaken');
-        }
-
-        allowed(project) {
-            var string = null;
-            if (project.allowOvertime) {
-                string = "&check;";
-            } else {
-                string = "&chi;";
-            }
-            return string;
-        }
-
-        allowedColor(project) {
-            var string = "";
-            if (project.allowOvertime) {
-                string += "confirmed";
-            } else {
-                string += "notConfirmed";
-            }
-            return string;
-        }
-        billable(project) {
-            var string = null;
-            if (project.billOvertime) {
-                string = "&check;";
-            } else {
-                string = "&chi;";
-            }
-            return string;
-        }
-
-        billableColor(project) {
-            var string = "";
-            if (project.billOvertime) {
-                string += "confirmed";
-            } else {
-                string += "notConfirmed";
-            }
-            return string;
-        }
-    }) || _class);
-});
 define('resources/index',["exports"], function (exports) {
   "use strict";
 
@@ -3299,8 +3301,8 @@ define('timesheet/timesheet',['exports', '../rest-api', 'aurelia-framework', 'au
         }
     }) || _class);
 });
-define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"./styles.css\"></require><require from=\"./sidebar\"></require><nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\"><div class=\"navbar-header\"><a class=\"navbar-brand\" href=\"#\"><img class=\"header-logo\" src=\"src/logo/Canguru-Logo.png\" alt=\"logo\"> <i class=\"fa fa-user\"></i></a></div><div class=\"navbar-header float-right\"><span>Welkom ${userName}</span> <button type=\"button\" click.delegate=\"logout()\">Logout</button></div></nav><div><div class=\"row\"><sidebar class=\"col-md-2\"></sidebar><router-view class=\"col-md-8\"></router-view></div></div></template>"; });
 define('text!styles.css', ['module'], function(module) { module.exports = "body {\n    padding-top: 3.5%;\n}\n\nsection {\n    margin: 0 20px;\n}\n\na:focus {\n    outline: none;\n}\n\n.navbar {\n    height: 4%;\n    position: fixed !important;\n}\n\n.navbar-brand {\n    padding: 0;\n}\n\n.no-selection {\n    margin: 20px;\n}\n\n.contact-list {\n    overflow-y: auto;\n    border: 1px solid #ddd;\n    padding: 10px;\n}\n\n.panel {\n    margin: 20px;\n}\n\n.button-bar {\n    right: 0;\n    left: 0;\n    bottom: 0;\n    border-top: 1px solid #ddd;\n    background: white;\n}\n\n    .button-bar > button {\n        float: right;\n        margin: 20px;\n    }\n\nli.list-group-item {\n    list-style: none;\n}\n\n    li.list-group-item > a {\n        text-decoration: none;\n    }\n\n    li.list-group-item.active > a {\n        color: white;\n    }\n\n.main-view {\n    height: 88%;\n    width: 80%;\n    margin-top: 1%;\n    padding: 0 10px;\n    position: fixed !important;\n    border: thin solid lightgrey;\n    overflow-y: auto;\n}\n\n.sidebar {\n    height: 100%;\n    z-index: 1;\n    position: fixed !important;\n    padding-top: 3%;\n    overflow: auto;\n    border-right: thin solid lightgrey;\n    border-bottom: thin solid lightgrey;\n}\n\n    .sidebar ul {\n        padding: 0;\n    }\n\n    .sidebar li {\n        list-style: none;\n        border-bottom: thin solid lightgrey;\n        width: auto;\n    }\n\n.sidebar-item {\n    color: gray;\n    font-size: 1.5em;\n    font-weight: bold;\n}\n\n.sidebar li ul li:first-child {\n    list-style: none;\n    border-top: thin solid lightgrey;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n.sidebar li ul li {\n    list-style: none;\n    border-bottom: thin solid lightgrey;\n    width: auto;\n}\n\n    .sidebar li ul li:last-child {\n        list-style: none;\n        width: auto;\n    }\n\n.sidebar-subItem {\n    padding-left: 10%;\n    color: gray;\n    font-size: 1em;\n    font-weight: bold;\n}\n\n.col-md-2 {\n    margin-right: 1%;\n}\n\n.base-shadow {\n    box-shadow: 0 3px 10px 2px lightgrey;\n}\n\n.table-border{\n    border: thin solid black;\n}\n\n.nested-border{\n    border-left: thin solid black;\n    margin-bottom: 0;\n}\n\n.no-padding{\n    padding:0!important;\n}\n.center {\n    text-align: center;\n}\n\n.center-div {\n    margin: 0 auto;\n    float: none;\n}\n\n.header-logo {\n    height: 100%;\n    width: auto;\n    float: left;\n}\n\n.float-right{\n    float: right!important;\n}\n\n.form-width{\n    width: 70%;\n    margin-left: 15%;\n    margin-right: 15%;\n}\n\n.form-height {\n    margin-top: 3%;\n    margin-bottom: 3%;\n}\n\n.row-seperated {\n    margin-bottom: 0.8em;\n}\n\n.table-striped > tbody > tr.outsideRegularDays {\n    background-color: #faffc4;\n}\n\n.vert-scroll {\n    overflow-x: hidden;\n    overflow-y: scroll;\n}\n\n.group:after {\n  content: \"\";\n  display: table;\n  clear: both;\n}\n\n.timesheet-div {\n   width: 70%;\n   margin: 0 15%;\n}\n\n.table-div {\n   overflow-y: auto;   \n   max-height: 20vh;\n   margin: 3vh 0 3vh;\n}\n\n.confirmed {\n    font-weight: bold;\n    color: green;\n}\n.button.confirmed{\n    font-weight:normal;\n    color: lightgrey;\n}\n.notConfirmed {\n    font-weight: bold;\n    color: red;\n}\n.button.notConfirmed{\n    font-weight:normal;\n    color: initial;\n}"; });
+define('text!app.html', ['module'], function(module) { module.exports = "<template><require from=\"bootstrap/css/bootstrap.css\"></require><require from=\"./styles.css\"></require><require from=\"./sidebar\"></require><nav class=\"navbar navbar-default navbar-fixed-top\" role=\"navigation\"><div class=\"navbar-header\"><a class=\"navbar-brand\" href=\"#\"><img class=\"header-logo\" src=\"src/logo/Canguru-Logo.png\" alt=\"logo\"> <i class=\"fa fa-user\"></i></a></div><div class=\"navbar-header float-right\"><span>Welkom ${userName}</span> <button type=\"button\" click.delegate=\"logout()\">Logout</button></div></nav><div><div class=\"row\"><sidebar class=\"col-md-2\"></sidebar><router-view class=\"col-md-8\"></router-view></div></div></template>"; });
 define('text!notfound.html', ['module'], function(module) { module.exports = "<template><h1>404 suck it</h1></template>"; });
 define('text!sidebar.html', ['module'], function(module) { module.exports = "<template><div class=\"sidebar col-md-2 base-shadow\"><ul><li repeat.for=\"item of items\" class=\"${item.isActive ? 'active' : ''}\"><a if.bind=\"item.showForRole(role)\" class=\"sidebar-item\" route-href=\"route.bind: item.route\">${item.value}</a></li></ul></div></template>"; });
 define('text!activiteiten/detail.html', ['module'], function(module) { module.exports = "<template><div class=\"main-view base-shadow\"><h2 if.bind=\"!name\" class=\"center\">${title}</h2><h2 if.bind=\"name\" class=\"center\">${name}</h2><button type=\"button\" click.delegate=\"backToList()\">Terug</button><form class=\"form-horizontal form-height center form-width\" submit.trigger=\"updateActivity()\"><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"naam\">Naam</label><div class=\"col-sm-6\"><input type=\"text\" id=\"naam\" class=\"form-control\" value.two-way=\"name\"></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"beschrijving\">Beschrijving</label><div class=\"col-sm-6\"><textarea id=\"beschrijving\" class=\"form-control\" cols=\"50\" rows=\"7\" value.two-way=\"description\">\n                    </textarea></div></div><div class=\"form-group\"><label class=\"col-sm-offset-2 col-sm-2 control-label\" for=\"factureerbaar\">Factureerbaar</label><div class=\"col-sm-6\"><input id=\"factureerbaar\" type=\"checkbox\" class=\"form-control\" cols=\"50\" rows=\"7\" value.two-way=\"billable\"></div></div><div class=\"form-group\"><input type=\"submit\" value=\"Opslaan\"></div></form></div></template>"; });

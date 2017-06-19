@@ -47,7 +47,7 @@ export class AanmaakDetail{
     async getOrganizations(){
         var orgs = await this.api.getOrganizations();
         this.organizations = JSON.parse(orgs);    
-        this.organization = this.organizations[0];
+        this.organization = this.organizations[1];
         await this.changeOrganization();
     }
     async getProjects(){
